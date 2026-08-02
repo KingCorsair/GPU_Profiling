@@ -31,7 +31,7 @@ for row in range(GRID_SIZE):
 
 scores = np.array(scores)
 
-k = NUM_PATCHES//2
+k = int(NUM_PATCHES*0.25)
 
 top_idx = np.argsort(scores)[:-k]
 top_idx = top_idx[np.argsort(scores[top_idx])[::-1]]
