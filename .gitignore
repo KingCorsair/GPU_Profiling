@@ -1,2 +1,11 @@
+# Large model artifacts
 checkpoints
 vis_pruner_copy/checkpoints/
+
+# Python-generated files and local environments
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+venvs/
