@@ -5,8 +5,8 @@ IFS=',' read -ra GPULIST <<< "$gpu_list"
 
 CHUNKS=${#GPULIST[@]}
 
-CKPT_DIR="${CKPT_DIR:-./checkpoints}"
-DATA_DIR="${DATA_DIR:-/workspace/vispruner_eval}"
+CKPT_DIR="${CKPT_DIR:-/workspace/GPU_Profiling/checkpoints}"
+DATA_DIR="${DATA_DIR:-/workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval}"
 
 CKPT="llava-v1.5-7b"
 SPLIT="llava_vqav2_mscoco_test-dev2015"
