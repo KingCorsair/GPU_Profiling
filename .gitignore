@@ -1,6 +1,5 @@
 # Large model artifacts
-checkpoints
-vis_pruner_copy/checkpoints/
+checkpoints/
 
 # Python-generated files and local environments
 __pycache__/
@@ -9,3 +8,10 @@ __pycache__/
 .venv/
 venv/
 venvs/
+*.swp
+
+# Local ScienceQA image data (keep source and metadata in Git)
+ScienceQA/train/
+ScienceQA/val/
+ScienceQA/test/
+ScienceQA/data/scienceqa/images/
