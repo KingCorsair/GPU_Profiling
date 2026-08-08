@@ -14,7 +14,7 @@ if [ -f "$CKPT_DIR/$CKPT/pytorch_model-00001-of-00002.bin" ] && [ -f "$CKPT_DIR/
     exit 0
 fi
 
-"$VENV_PYTHON" -m pip install -q -U huggingface_hub
+"$VENV_PYTHON" -m pip install -q huggingface_hub
 
 "$VENV_PYTHON" -c "
 from huggingface_hub import snapshot_download

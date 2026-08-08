@@ -116,8 +116,10 @@ results are committed. A lost pod costs a `git clone` and twenty minutes.
 cd /workspace
 git clone https://github.com/KingCorsair/GPU_Profiling.git   # first time only
 cd GPU_Profiling && git pull
-pip install -r requirements.txt
+uv pip install --system -r requirements.txt
 bash scripts/download_checkpoint.sh   # re-fetches LLaVA weights; never committed to git
+uv pip sync --system requirements.txt # catches anything download_checkpoint.sh or other
+                                       # setup steps pulled outside the pin (see Gotchas)
 ```
 
 **Session end:** `git add . && git commit && git push`, then **Stop the pod in the console**
