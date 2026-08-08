@@ -79,9 +79,13 @@ and prunes outside the language model, making real removal tractable.
 
 **Control:** FastV, run as released (masked), to demonstrate the FLOP-vs-time gap.
 
-**Reference repos** (read-only, kept outside the tracked tree):
-- https://github.com/Theia-4869/VisPruner
-- https://github.com/chenllliang/FastV
+**Reference repos:**
+- https://github.com/Theia-4869/VisPruner — vendored as plain files at `vis_pruner_copy/`
+  (nested `.git` removed, tracked directly in this repo so it's freely editable and
+  version-controlled — not a submodule/gitlink). Model weights under it are still
+  git-ignored; see `scripts/download_checkpoint.sh`.
+- https://github.com/chenllliang/FastV — not yet vendored; if/when cloned in, strip its
+  `.git` the same way before tracking (see Gotchas below).
 
 ---
 
@@ -113,6 +117,7 @@ cd /workspace
 git clone https://github.com/KingCorsair/GPU_Profiling.git   # first time only
 cd GPU_Profiling && git pull
 pip install -r requirements.txt
+bash scripts/download_checkpoint.sh   # re-fetches LLaVA weights; never committed to git
 ```
 
 **Session end:** `git add . && git commit && git push`, then **Stop the pod in the console**

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CKPT_DIR="/path/to/checkpoint"
-DATA_DIR="/path/to/dataset"
+CKPT_DIR="/workspace/GPU_Profiling/vis_pruner_copy/checkpoints"
+DATA_DIR="/workspace/GPU_Profiling/ScienceQA/data"
 
 CKPT="llava-v1.5-7b"
 SPLIT="llava_test_CQM-I"
