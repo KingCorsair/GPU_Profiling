@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && apt-get install -y --no-install-recommends \
     python3.12 python3.12-dev python3.12-venv \
-    git wget build-essential openssh-server && \
+    git wget build-essential openssh-server cmake pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf /usr/bin/python3.12 /usr/bin/python && \
