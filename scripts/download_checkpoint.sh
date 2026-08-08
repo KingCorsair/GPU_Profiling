@@ -4,8 +4,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VENV_PYTHON="${VENV_PYTHON:-$REPO_ROOT/venvs/vispruner/bin/python}"
-CKPT_DIR="${CKPT_DIR:-$REPO_ROOT/checkpoints}"
+VENV_PYTHON="${VENV_PYTHON:-$(which python)}"
+CKPT_DIR="${CKPT_DIR:-$REPO_ROOT/vis_pruner_copy/checkpoints}"
 CKPT="llava-v1.5-7b"
 HF_REPO="liuhaotian/llava-v1.5-7b"
 
