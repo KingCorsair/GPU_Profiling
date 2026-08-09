@@ -4,8 +4,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VENV_PYTHON="${VENV_PYTHON:-$REPO_ROOT/venvs/vispruner/bin/python}"
-CKPT_DIR="${CKPT_DIR:-$REPO_ROOT/checkpoints}"
+VENV_PYTHON="${VENV_PYTHON:-$(which python)}"
+CKPT_DIR="${CKPT_DIR:-$REPO_ROOT/vis_pruner_copy/checkpoints}"
 CKPT="llava-v1.5-7b"
 HF_REPO="liuhaotian/llava-v1.5-7b"
 
@@ -14,7 +14,7 @@ if [ -f "$CKPT_DIR/$CKPT/pytorch_model-00001-of-00002.bin" ] && [ -f "$CKPT_DIR/
     exit 0
 fi
 
-"$VENV_PYTHON" -m pip install -q -U huggingface_hub
+"$VENV_PYTHON" -m pip install -q huggingface_hub
 
 "$VENV_PYTHON" -c "
 from huggingface_hub import snapshot_download

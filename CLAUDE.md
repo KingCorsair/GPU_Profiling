@@ -107,11 +107,24 @@ container image — no pip installs on the pod.
 **To change the environment, edit the Dockerfile and rebuild.** Not `pip install` on a
 running pod — that disappears when the container stops.
 
+<<<<<<< HEAD
 **GPU:** RunPod, A40 (48GB) or RTX 4090 (24GB), ~100GB disk. No network volume — it locks
 you to one datacenter and causes availability waits. **The pod is disposable.**
 
 **Everything of value lives in git.** Model weights and datasets re-download. A lost pod
 costs a `git clone` and twenty minutes.
+=======
+**Session start:**
+```bash
+cd /workspace
+git clone https://github.com/KingCorsair/GPU_Profiling.git   # first time only
+cd GPU_Profiling && git pull
+uv pip install --system -r requirements.txt
+bash scripts/download_checkpoint.sh   # re-fetches LLaVA weights; never committed to git
+uv pip sync --system requirements.txt # catches anything download_checkpoint.sh or other
+                                       # setup steps pulled outside the pin (see Gotchas)
+```
+>>>>>>> 06241b3f0b1c6e836a092ade8d4587faafaf0f1a
 
 **Session end:** `git add . && git commit && git push`, then **Stop the pod in the console**
 (square icon, wait for "Exited"). Closing the browser does not stop billing.

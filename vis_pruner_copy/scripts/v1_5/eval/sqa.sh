@@ -4,7 +4,7 @@ CKPT_DIR="/workspace/GPU_Profiling/vis_pruner_copy/checkpoints"
 DATA_DIR="/workspace/GPU_Profiling/ScienceQA/data"
 
 CKPT="llava-v1.5-7b"
-SPLIT="llava_test_CQM-I"
+SPLIT="llava_test_CQM-A"
 
 TOKEN=${1}
 RATIO=${2}
