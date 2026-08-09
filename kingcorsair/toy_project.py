@@ -23,7 +23,7 @@ def greet_and_write_to_file(cwd="/workspace/GPU_Profiling/kingcorsair"):
                 timeout=10,
                 text=True,
                 stdout=output_file,
-                stderr=output_file
+                stderr=output_file,
                 )
     end_within_function_call = time.perf_counter()
     execution_time_within_function_call = end_within_function_call - start_within_function_call
