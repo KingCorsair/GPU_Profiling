@@ -1,0 +1,29 @@
+{
+  "name": "measure",
+  "version": "1.0.0",
+  "description": "Open-loop load generator for GPU serving benchmarks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx src/loadgen.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "start": "node dist/loadgen.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsx": "^4.23.11",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

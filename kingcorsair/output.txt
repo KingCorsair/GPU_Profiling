@@ -1,0 +1,224 @@
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
+  File "/workspace/GPU_Profiling/kingcorsair/greet.py", line 2
+    print("Hello, World!"
+         ^
+SyntaxError: '(' was never closed
