@@ -56,6 +56,7 @@ pydantic_core==2.46.4
 pydub==0.25.1
 Pygments==2.20.0
 pyparsing==3.3.2
+pytest==8.3.4
 python-dateutil==2.9.0.post0
 python-multipart==0.0.32
 pytz==2026.3.post1
