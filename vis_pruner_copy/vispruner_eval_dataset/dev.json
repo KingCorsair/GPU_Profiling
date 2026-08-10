@@ -1,0 +1,1127 @@
+[
+  {
+    "question_id": "textvqa_34628",
+    "image": "images/textvqa_71e2433bfd38a9dc.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what is the name of the runner on the left?",
+    "answers": [
+      "willis ",
+      "willis",
+      "willis",
+      "willis",
+      "willis",
+      "willis",
+      "willis",
+      "willis",
+      "willis",
+      "willis"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34620",
+    "image": "images/textvqa_40c6b4dd3caa006f.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "how many items can you get for $5?",
+    "answers": [
+      "3",
+      "3",
+      "3",
+      "3",
+      "3 for $5",
+      "3",
+      "3",
+      "3",
+      "3",
+      "3"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34614",
+    "image": "images/textvqa_fa9ffd5aca1e4e51.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what does the light sign read on the farthest right window?",
+    "answers": [
+      "bud light",
+      "bud light",
+      "bud light",
+      "bud light",
+      "all 2 liters",
+      "bud light",
+      "bud light",
+      "bud light",
+      "bud light",
+      "bud light"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34638",
+    "image": "images/textvqa_97b1112b17015396.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "whats the lowest number yard line that you can see?",
+    "answers": [
+      "30",
+      "30",
+      "30",
+      "30",
+      "30",
+      "30",
+      "30",
+      "30",
+      "30",
+      "30"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34633",
+    "image": "images/textvqa_fe32ee8991d2e59f.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "are these bottles of pepsi?",
+    "answers": [
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34610",
+    "image": "images/textvqa_30f9b48158fc56e6.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "who is at the center of all of this?",
+    "answers": [
+      "bryan owens",
+      "alexa curtis",
+      "bryan owens",
+      "bryan owens",
+      "bryan owens",
+      "bryan owens",
+      "bryan owens",
+      "bryan owens",
+      "mahou",
+      "agile experience design makeup"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34608",
+    "image": "images/textvqa_181f00d3ee2b2076.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what is the time?",
+    "answers": [
+      "5:41",
+      "5:41",
+      "8:00",
+      "5:41",
+      "5:40",
+      "5:41",
+      "5:42",
+      "5:41",
+      "8:00",
+      "5:41"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34618",
+    "image": "images/textvqa_270ee71a340f50e8.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what brand is the bottle with red label?",
+    "answers": [
+      "red label",
+      "johnnie walker",
+      "jonnie walker",
+      "black label",
+      "red label",
+      "johnny walker",
+      "answering does not require reading text in the image",
+      "red label",
+      "johnnie walker",
+      "jonnie walker"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34616",
+    "image": "images/textvqa_5ce862cbefd8458f.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "is this denny's?",
+    "answers": [
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "pet center",
+      "yes",
+      "yes",
+      "one man show",
+      "yes"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34622",
+    "image": "images/textvqa_cc9c3bff02242301.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what is one of the brands being advertised?",
+    "answers": [
+      "yamaha",
+      "yamaha",
+      "yamaha",
+      "yamaha",
+      "yahama",
+      "yamaha",
+      "yamaha",
+      "yamaha",
+      "yamaha",
+      "peugeot"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34613",
+    "image": "images/textvqa_45dc5b66e3f3f31b.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what candy bar is down there on the bottom?",
+    "answers": [
+      "hersheys",
+      "hershey's",
+      "hersheys",
+      "hershey's",
+      "hershey's",
+      "hershey's",
+      "hershey's",
+      "hershey's",
+      "hershey's",
+      "hershey's"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34637",
+    "image": "images/textvqa_012372cab6855b83.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what does the picture say the other ride is?",
+    "answers": [
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom",
+      "your mom"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34643",
+    "image": "images/textvqa_bdbfae49210475d4.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "was the ruler made in 2002?",
+    "answers": [
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "yes",
+      "2002",
+      "yes",
+      "yes",
+      "yes",
+      "yes"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34632",
+    "image": "images/textvqa_c8616652f54577f4.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "who is the author of the book?",
+    "answers": [
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli",
+      "gioconda belli"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "textvqa_34623",
+    "image": "images/textvqa_fb39f5b120097669.jpg",
+    "category": "ocr",
+    "source_dataset": "TEXT_VQA",
+    "question": "what year was this taken?",
+    "answers": [
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012",
+      "2012"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "mme_count/000000427034.jpg",
+    "image": "images/mme_count_000000427034.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there a dog in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000434479.jpg",
+    "image": "images/mme_count_000000434479.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there two pieces of pizza in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000438304.jpg",
+    "image": "images/mme_count_000000438304.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there two tennis rackets in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000565045.jpg",
+    "image": "images/mme_count_000000565045.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there two bath towels in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000357816.jpg",
+    "image": "images/mme_count_000000357816.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there four people in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000006040.jpg",
+    "image": "images/mme_count_000000006040.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there a train in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000195918.jpg",
+    "image": "images/mme_count_000000195918.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there a total of two display devices in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000372819.jpg",
+    "image": "images/mme_count_000000372819.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there four dogs appear in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000289059.jpg",
+    "image": "images/mme_count_000000289059.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there a total of two person appear in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000044279.jpg",
+    "image": "images/mme_count_000000044279.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there a total of two people in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000410612.jpg",
+    "image": "images/mme_count_000000410612.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there only one ship in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000335954.jpg",
+    "image": "images/mme_count_000000335954.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there two bowls in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000290081.jpg",
+    "image": "images/mme_count_000000290081.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Is there only one bowl in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000430286.jpg",
+    "image": "images/mme_count_000000430286.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there three remotes in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_count/000000556000.jpg",
+    "image": "images/mme_count_000000556000.jpg",
+    "category": "counting",
+    "source_dataset": "MME",
+    "question": "Are there four people in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000211825.jpg",
+    "image": "images/mme_position_000000211825.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the cake on the left side of the camera? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000395801.jpg",
+    "image": "images/mme_position_000000395801.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the clock above people? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000204871.jpg",
+    "image": "images/mme_position_000000204871.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the car on the right side of the fire hydrant in the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000007281.jpg",
+    "image": "images/mme_position_000000007281.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the sea behind people in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000472046.jpg",
+    "image": "images/mme_position_000000472046.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the pineapple on the left of the pot in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000048504.jpg",
+    "image": "images/mme_position_000000048504.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the gray elephant in front of the brown elephant? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000395701.jpg",
+    "image": "images/mme_position_000000395701.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the TV on the left of the bookshelf? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000062808.jpg",
+    "image": "images/mme_position_000000062808.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the phone above the pizza in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "gqa_n414992_6",
+    "image": "images/gqa_n414992_6.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "GQA",
+    "question": "What is the airplane flying above?",
+    "answers": [
+      "ocean"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "gqa_n578564_13",
+    "image": "images/gqa_n578564_13.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "GQA",
+    "question": "What is hanging above the chalkboard?",
+    "answers": [
+      "picture"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "mme_position/000000056127.jpg",
+    "image": "images/mme_position_000000056127.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the light above the fire hydrant in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000014038.jpg",
+    "image": "images/mme_position_000000014038.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the refrigerator on the left side of the picture? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000477955.jpg",
+    "image": "images/mme_position_000000477955.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the person under the kite? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000458410.jpg",
+    "image": "images/mme_position_000000458410.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the TV on the left of the lamp? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_position/000000426241.jpg",
+    "image": "images/mme_position_000000426241.jpg",
+    "category": "spatial_reasoning",
+    "source_dataset": "MME",
+    "question": "Is the white mouse on the right of the black keyboard? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "gqa_n309148_109",
+    "image": "images/gqa_n309148_109.jpg",
+    "category": "object_presence",
+    "source_dataset": "GQA",
+    "question": "Are there any red fire trucks?",
+    "answers": [
+      "no"
+    ],
+    "question_type": "binary"
+  },
+  {
+    "question_id": "gqa_n207708_55",
+    "image": "images/gqa_n207708_55.jpg",
+    "category": "object_presence",
+    "source_dataset": "GQA",
+    "question": "Is there a pear beneath the appliance that looks silver and black?",
+    "answers": [
+      "no"
+    ],
+    "question_type": "binary"
+  },
+  {
+    "question_id": "mme_existence/000000494427.jpg",
+    "image": "images/mme_existence_000000494427.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a laptop in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000009590.jpg",
+    "image": "images/mme_existence_000000009590.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a bottle in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000537812.jpg",
+    "image": "images/mme_existence_000000537812.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a chair in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000015746.jpg",
+    "image": "images/mme_existence_000000015746.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a fire hydrant in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000037751.jpg",
+    "image": "images/mme_existence_000000037751.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a backpack in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000050145.jpg",
+    "image": "images/mme_existence_000000050145.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a bicycle in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000007816.jpg",
+    "image": "images/mme_existence_000000007816.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a motorcycle in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000572956.jpg",
+    "image": "images/mme_existence_000000572956.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a motorcycle in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "gqa_n473688_116",
+    "image": "images/gqa_n473688_116.jpg",
+    "category": "object_presence",
+    "source_dataset": "GQA",
+    "question": "Are there both toothbrushes and mats in this picture?",
+    "answers": [
+      "no"
+    ],
+    "question_type": "binary"
+  },
+  {
+    "question_id": "mme_existence/000000007108.jpg",
+    "image": "images/mme_existence_000000007108.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a elephant in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000061418.jpg",
+    "image": "images/mme_existence_000000061418.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a chair in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000541952.jpg",
+    "image": "images/mme_existence_000000541952.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a clock in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_existence/000000424521.jpg",
+    "image": "images/mme_existence_000000424521.jpg",
+    "category": "object_presence",
+    "source_dataset": "MME",
+    "question": "Is there a skateboard in this image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000144.jpg",
+    "image": "images/mme_scene_Places365_val_00000144.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of vineyard? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000193.jpg",
+    "image": "images/mme_scene_Places365_val_00000193.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of ice floe? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000089.jpg",
+    "image": "images/mme_scene_Places365_val_00000089.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this photo taken in a place of martial arts gym? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000165.jpg",
+    "image": "images/mme_scene_Places365_val_00000165.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of playground? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000162.jpg",
+    "image": "images/mme_scene_Places365_val_00000162.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Does this image describe a place of train station platform? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000164.jpg",
+    "image": "images/mme_scene_Places365_val_00000164.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Does this image describe a place of lake natural? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000011.jpg",
+    "image": "images/mme_scene_Places365_val_00000011.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this photo taken in a place of baseball field? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000009.jpg",
+    "image": "images/mme_scene_Places365_val_00000009.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of forest broadleaf? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000072.jpg",
+    "image": "images/mme_scene_Places365_val_00000072.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Does this image describe a place of fire escape? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000127.jpg",
+    "image": "images/mme_scene_Places365_val_00000127.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of temple asia? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000106.jpg",
+    "image": "images/mme_scene_Places365_val_00000106.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this picture captured in a place of desert sand? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000052.jpg",
+    "image": "images/mme_scene_Places365_val_00000052.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this photo taken in a place of ice skating rink indoor? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000163.jpg",
+    "image": "images/mme_scene_Places365_val_00000163.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this photo taken in a place of chalet? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000022.jpg",
+    "image": "images/mme_scene_Places365_val_00000022.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Is this photo taken in a place of recreation room? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_scene/Places365_val_00000108.jpg",
+    "image": "images/mme_scene_Places365_val_00000108.jpg",
+    "category": "coarse_description",
+    "source_dataset": "MME",
+    "question": "Does this image describe a place of burial chamber? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000492992.jpg",
+    "image": "images/mme_color_000000492992.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a white bird in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000006723.jpg",
+    "image": "images/mme_color_000000006723.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a red brick building in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000377723.jpg",
+    "image": "images/mme_color_000000377723.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a blue bus in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000370208.jpg",
+    "image": "images/mme_color_000000370208.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a red bicycle with white handlebars in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000012120.jpg",
+    "image": "images/mme_color_000000012120.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a blue court in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000053994.jpg",
+    "image": "images/mme_color_000000053994.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a gray wall in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000492362.jpg",
+    "image": "images/mme_color_000000492362.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a skateboard with red wheels in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000047112.jpg",
+    "image": "images/mme_color_000000047112.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a white plate in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000512929.jpg",
+    "image": "images/mme_color_000000512929.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Are there any green beans in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000047121.jpg",
+    "image": "images/mme_color_000000047121.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a black cat in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000014831.jpg",
+    "image": "images/mme_color_000000014831.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a brown and white animal in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000057597.jpg",
+    "image": "images/mme_color_000000057597.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Are there any red shoes in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "mme_color/000000563758.jpg",
+    "image": "images/mme_color_000000563758.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a red scarf in the image?  Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  },
+  {
+    "question_id": "gqa_n235859_1",
+    "image": "images/gqa_n235859_1.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "GQA",
+    "question": "Who is wearing the dress?",
+    "answers": [
+      "women"
+    ],
+    "question_type": "short_answer"
+  },
+  {
+    "question_id": "mme_color/000000008277.jpg",
+    "image": "images/mme_color_000000008277.jpg",
+    "category": "fine_attributes",
+    "source_dataset": "MME",
+    "question": "Is there a white plate in the image? Please answer yes or no.",
+    "answers": [
+      "Yes"
+    ],
+    "question_type": "short answer"
+  }
+]
