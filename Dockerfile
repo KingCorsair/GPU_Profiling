@@ -12,6 +12,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git wget unzip build-essential openssh-server cmake pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
+# Node.js 20 for the measurement service and TypeScript load generator.
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    node --version && npm --version && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN ln -sf /usr/bin/python3.12 /usr/bin/python && \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
 
