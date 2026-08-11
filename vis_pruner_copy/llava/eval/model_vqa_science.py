@@ -1,4 +1,5 @@
 import argparse
+import time
 import torch
 import os
 import json
@@ -32,11 +33,15 @@ def eval_model(args):
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
 
+    t_start = time.perf_counter()
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path, args.model_base, model_name,
         visual_token_num=args.visual_token_num,
         important_ratio=args.important_ratio,
     )
+    # Checkpoint: model finished loading, question loop hasn't started yet.
+    # Everything before this point is load cost; everything after is generation.
+    t_after_load = time.perf_counter()
 
     # Data
     questions = json.load(open(os.path.expanduser(args.question_file), "r"))
@@ -101,6 +106,17 @@ def eval_model(args):
                                    "metadata": {}}) + "\n")
         ans_file.flush()
     ans_file.close()
+    t_end = time.perf_counter()
+
+    if args.timing_file:
+        timing_file = os.path.expanduser(args.timing_file)
+        os.makedirs(os.path.dirname(timing_file), exist_ok=True)
+        with open(timing_file, "w") as tf:
+            json.dump({
+                "question_count": len(questions),
+                "model_load_s": t_after_load - t_start,
+                "generation_s": t_end - t_after_load,
+            }, tf)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -117,6 +133,9 @@ if __name__ == "__main__":
     parser.add_argument("--single-pred-prompt", action="store_true")
     parser.add_argument("--visual_token_num", type=int, default=576)
     parser.add_argument("--important_ratio", type=float, default=0.5)
+    parser.add_argument("--timing-file", type=str, default=None,
+                         help="Optional path to write a JSON sidecar with "
+                              "question_count/model_load_s/generation_s")
     args = parser.parse_args()
 
     eval_model(args)

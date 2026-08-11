@@ -1,20 +1,10 @@
-
-// expected types for Server.py
-type LoadConfig = {
+/* Expected types for server.py. */ type LoadConfig = {
   endpoint: string;
   requestsPerSecond: number;
   durationSeconds: number;
 };
-
-type InferRequest = {
-  image_b64: string;
-  question: string;
-};
-
-type InferResponse = {
-  answer: string;
-}
-
+type InferRequest = { image_b64: string; question: string };
+type InferResponse = { answer: string };
 type RequestResult = {
   sequence: number;
   scheduledAtMs: number;
@@ -23,25 +13,45 @@ type RequestResult = {
   status: number | null;
   error: string | null;
 };
-
-// checks if config paramrs are valid
-function validateConfig(config: LoadConfig): void {
+type LoadRun = {
+  plannedStartMs: number;
+  plannedEndMs: number;
+  results: RequestResult[];
+};
+type PercentileSummary = {
+  p50: number | null;
+  p95: number | null;
+  p99: number | null;
+};
+type LoadSummary = {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  achievedArrivalRateRps: number | null;
+  completionRateRps: number;
+  successfulThroughputRps: number;
+  successfulRequestLatencyMs: PercentileSummary;
+  dispatchLatenessMs: PercentileSummary;
+  plannedToCompleteMs: PercentileSummary;
+};
+/* Checks whether the requested load can be scheduled. */ function validateConfig(
+  config: LoadConfig,
+): void {
   if (config.requestsPerSecond <= 0) {
-    throw new Error("RequestsPerSecond must be greater than 0");
+    throw new Error("requestsPerSecond must be greater than 0");
   } else if (config.durationSeconds <= 0) {
-    throw new Error("Duration seconds must be greater than 0");
-  } else if (config.endpoint.trim() == "") {
+    throw new Error("durationSeconds must be greater than 0");
+  } else if (config.endpoint.trim() === "") {
     throw new Error("endpoint must be nonempty");
+  } else if (config.requestsPerSecond * config.durationSeconds < 1) {
+    throw new Error("Configuration must schedule at least one request");
   }
 }
-
 const payload: InferRequest = {
   image_b64: Buffer.from("fake image bytes").toString("base64"),
   question: "What is in this image?",
 };
-
-//sends a single request to the server and returns the result
-async function sendOne(
+/* Sends one request and turns both successes and failures into a result record. */ async function sendOne(
   sequence: number,
   scheduledAtMs: number,
   config: LoadConfig,
@@ -49,42 +59,33 @@ async function sendOne(
 ): Promise<RequestResult> {
   const sentAtMs = performance.now();
   let status: number | null = null;
-
   try {
     const response = await fetch(config.endpoint, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
     });
     status = response.status;
-
     if (!response.ok) {
       await response.text();
-      const completedAtMs = performance.now();
-
       return {
         sequence,
         scheduledAtMs,
         sentAtMs,
-        completedAtMs,
+        completedAtMs: performance.now(),
         status,
-        error: `Request failed with status ${status}`,
+        error: "Request failed with status " + status,
       };
     }
-
     const responseBody = (await response.json()) as InferResponse;
     if (typeof responseBody.answer !== "string") {
       throw new Error("Response body is missing a string answer");
     }
-    const completedAtMs = performance.now();
-
     return {
       sequence,
       scheduledAtMs,
       sentAtMs,
-      completedAtMs,
+      completedAtMs: performance.now(),
       status,
       error: null,
     };
@@ -99,26 +100,108 @@ async function sendOne(
     };
   }
 }
-
-function sleep(ms:number): Promise<void> {
+function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
+/* Launches requests according to the clock, not according to prior completions. */ async function runLoad(
+  config: LoadConfig,
+  payload: InferRequest,
+): Promise<LoadRun> {
+  validateConfig(config);
+  const intervalMs = 1000 / config.requestsPerSecond;
+  const totalRequests = Math.floor(
+    config.requestsPerSecond * config.durationSeconds,
+  );
+  const plannedStartMs = performance.now();
+  const plannedEndMs = plannedStartMs + config.durationSeconds * 1000;
+  const inFlight: Promise<RequestResult>[] = [];
+  for (let sequence = 0; sequence < totalRequests; sequence++) {
+    const scheduledAtMs = plannedStartMs + sequence * intervalMs;
+    const delayMs = scheduledAtMs - performance.now();
+    if (delayMs > 0) {
+      await sleep(delayMs);
+    }
+    /* Do not await here: responses must not control future arrival times. */ inFlight.push(
+      sendOne(sequence, scheduledAtMs, config, payload),
+    );
+  }
+  const results = await Promise.all(inFlight);
+  return { plannedStartMs, plannedEndMs, results };
+}
+/* Uses the nearest-rank definition, such as ceil(0.95 * sampleCount) - 1. */ function percentile(
+  values: readonly number[],
+  fraction: number,
+): number | null {
+  if (values.length === 0) {
+    return null;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = Math.ceil(fraction * sorted.length) - 1;
+  return sorted[index] ?? null;
+}
+function summarizePercentiles(values: readonly number[]): PercentileSummary {
+  return {
+    p50: percentile(values, 0.5),
+    p95: percentile(values, 0.95),
+    p99: percentile(values, 0.99),
+  };
+}
+function summarizeRun(run: LoadRun): LoadSummary {
+  const successfulResults = run.results.filter(
+    (result) => result.error === null,
+  );
+  const failedResults = run.results.filter((result) => result.error !== null);
+  const successfulRequestLatencies = successfulResults.map(
+    (result) => result.completedAtMs - result.sentAtMs,
+  );
+  const dispatchLateness = run.results.map(
+    (result) => result.sentAtMs - result.scheduledAtMs,
+  );
+  const plannedToComplete = run.results.map(
+    (result) => result.completedAtMs - result.scheduledAtMs,
+  );
+  const firstSentAtMs = run.results.reduce(
+    (earliest, result) => Math.min(earliest, result.sentAtMs),
+    Number.POSITIVE_INFINITY,
+  );
+  const lastSentAtMs = run.results.reduce(
+    (latest, result) => Math.max(latest, result.sentAtMs),
+    Number.NEGATIVE_INFINITY,
+  );
+  const lastCompletedAtMs = run.results.reduce(
+    (latest, result) => Math.max(latest, result.completedAtMs),
+    run.plannedStartMs,
+  );
+  const arrivalSpanMs = lastSentAtMs - firstSentAtMs;
+  const achievedArrivalRateRps =
+    run.results.length >= 2 && arrivalSpanMs > 0
+      ? ((run.results.length - 1) * 1000) / arrivalSpanMs
+      : null;
+  /* Include the configured window and any extra time spent draining requests. */ const measurementEndMs =
+    Math.max(run.plannedEndMs, lastCompletedAtMs);
+  const elapsedSeconds = (measurementEndMs - run.plannedStartMs) / 1000;
+  return {
+    totalRequests: run.results.length,
+    successfulRequests: successfulResults.length,
+    failedRequests: failedResults.length,
+    achievedArrivalRateRps,
+    completionRateRps: run.results.length / elapsedSeconds,
+    successfulThroughputRps: successfulResults.length / elapsedSeconds,
+    successfulRequestLatencyMs: summarizePercentiles(
+      successfulRequestLatencies,
+    ),
+    dispatchLatenessMs: summarizePercentiles(dispatchLateness),
+    plannedToCompleteMs: summarizePercentiles(plannedToComplete),
+  };
+}
 async function main(): Promise<void> {
   const config: LoadConfig = {
     endpoint: "http://127.0.0.1:8000/infer",
     requestsPerSecond: 5,
     durationSeconds: 10,
   };
-
-  const scheduledAtMs = performance.now();
-  const result = await sendOne(
-    0,
-    scheduledAtMs,
-    config,
-    payload,
-  );
-  console.log(result);
+  const run = await runLoad(config, payload);
+  const summary = summarizeRun(run);
+  console.log(JSON.stringify(summary, null, 2));
 }
-
 await main();

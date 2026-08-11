@@ -23,13 +23,28 @@ confound that drift with the setting being tested.
 
 import argparse
 import csv
+import json
 import random
+import subprocess
+import sys
 import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
+import torch
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VIS_PRUNER_DIR = REPO_ROOT / "vis_pruner_copy"
+
+CKPT_DIR = VIS_PRUNER_DIR / "checkpoints"
+CKPT = "llava-v1.5-7b"
+MODEL_PATH = CKPT_DIR / CKPT
+DATA_DIR = REPO_ROOT / "ScienceQA" / "data"
+IMAGE_FOLDER = DATA_DIR / "scienceqa" / "images" / "test"
+DEFAULT_QUESTION_FILE = (
+    VIS_PRUNER_DIR / "playground/data/eval/scienceqa/llava_test_CQM-A.json"
+)
+# Per-run answer/timing files, scratch only -- not a results artifact.
+RUN_TMP_DIR = REPO_ROOT / "results" / "tmp_runs"
 
 # (n_tokens, important_ratio, repeat_count)
 # n=576 is the unpruned baseline (see llava_arch.py -- visual_token_num == N
@@ -65,22 +80,62 @@ def build_run_plan(settings=SETTINGS, seed=0) -> list[tuple[int, float, int]]:
         for repeat_idx in range(repeats):
             plan.append((n_tokens, ratio, repeat_idx))
     random.Random(seed).shuffle(plan)
+    print(plan)
     return plan
 
 
 def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> dict:
-    """
-    TODO (yours): launch model_vqa_science.py for this (n_tokens, ratio),
-    time the whole subprocess with a monotonic clock, and recover the
-    model-load / generation split from whatever checkpoint you add to the
-    eval script. Return a dict with at least:
-        question_count, total_wall_s, model_load_s, generation_s
-    """
-    
-    raise NotImplementedError(
-        "fill in: subprocess launch + perf_counter timing + load/gen split"
-    )
+    """Launch model_vqa_science.py as a subprocess for one (n_tokens, ratio)
+    setting, time the whole thing wall-clock, and return the load/gen split
+    the subprocess reports via its timing sidecar.
 
+    Whole-subprocess wall time is exempt from the "CUDA events, not
+    time.time()" rule (see CLAUDE.md) -- by the time the process exits, all
+    its kernels have completed. perf_counter is still used because it's
+    monotonic. Only this process's perf_counter clock is used for
+    total_wall_s; model_load_s/generation_s come entirely from perf_counter
+    deltas taken inside the child, so no cross-process clock comparison
+    happens anywhere.
+    """
+    question_file = question_subset if question_subset is not None else DEFAULT_QUESTION_FILE
+
+    RUN_TMP_DIR.mkdir(parents=True, exist_ok=True)
+    run_id = f"n{n_tokens}_r{ratio}_{time.perf_counter_ns()}"
+    answers_file = RUN_TMP_DIR / f"{run_id}.jsonl"
+    timing_file = RUN_TMP_DIR / f"{run_id}.timing.json"
+
+    cmd = [
+        sys.executable, "-m", "llava.eval.model_vqa_science",
+        "--model-path", str(MODEL_PATH),
+        "--question-file", str(question_file),
+        "--image-folder", str(IMAGE_FOLDER),
+        "--answers-file", str(answers_file),
+        "--visual_token_num", str(n_tokens),
+        "--important_ratio", str(ratio),
+        "--single-pred-prompt",
+        "--temperature", "0",
+        "--conv-mode", "vicuna_v1",
+        "--timing-file", str(timing_file),
+    ]
+
+    t_start = time.perf_counter()
+    # cwd=VIS_PRUNER_DIR: the eval scripts use relative paths internally.
+    subprocess.run(cmd, cwd=VIS_PRUNER_DIR, check=True)
+    total_wall_s = time.perf_counter() - t_start
+
+    timing = json.loads(timing_file.read_text())
+
+    final_dict = {
+        "question_count": timing["question_count"],
+        "total_wall_s": total_wall_s,
+        "model_load_s": timing["model_load_s"],
+        "generation_s": timing["generation_s"],
+    }
+
+    with open("output.json","a") as f:
+        json.dump(final_dict+"\n",f)
+
+    return final_dict
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
