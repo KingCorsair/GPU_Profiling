@@ -69,6 +69,7 @@ class RunResult:
     total_wall_s: float
     model_load_s: float
     generation_s: float
+    time_to_make_questions: float
 
 
 def build_run_plan(settings=SETTINGS, seed=0) -> list[tuple[int, float, int]]:
@@ -118,24 +119,52 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
         "--timing-file", str(timing_file),
     ]
 
-    t_start = time.perf_counter()
+    #start the timing for the subprocess
+    torch.cuda.synchronize()
+    start_time = time.perf_counter()
+
     # cwd=VIS_PRUNER_DIR: the eval scripts use relative paths internally.
     subprocess.run(cmd, cwd=VIS_PRUNER_DIR, check=True)
-    total_wall_s = time.perf_counter() - t_start
 
-    timing = json.loads(timing_file.read_text())
+    #end the timing for the subprocess
+    torch.cuda.synchronize()
+    end_time = time.perf_counter()
+
+    #time the subprocess
+    total_wall_s = end_time - start_time
+
+    #open the questions subset file if it exists
+    if question_subset is not None:
+        with open(question_subset,"r") as f:
+            data = json.load(f)
+        #count the number of 
+        question_count = len(data)
+    else:
+        question_count = 4241
+
+    with open(timing_file,"r+") as tf:
+        tf_dict = json.load(tf)
+    
+    print(json.dumps(tf_dict, indent = 4))
+
+    model_load_s = tf_dict["model_load_s"]
+    generation_s = tf_dict["generation_s"]
+    time_to_make_questions = tf_dict["time_to_make_questions"]
 
     final_dict = {
-        "question_count": timing["question_count"],
+        "question_count": question_count,
         "total_wall_s": total_wall_s,
-        "model_load_s": timing["model_load_s"],
-        "generation_s": timing["generation_s"],
+        "model_load_s": model_load_s,
+        "generation_s": generation_s,
+        "time_to_make_questions": time_to_make_questions,
     }
 
-    with open("output.json","a") as f:
+    with open("timings_time_sqa_sweep.json","a") as f:
         json.dump(final_dict,f)
         f.write("\n")
+
     return final_dict
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

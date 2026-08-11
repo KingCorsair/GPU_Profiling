@@ -1,0 +1,443 @@
+Script started on 2026-08-11 16:43:38+00:00 [TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="163" LINES="9"]
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profilingroot@d636a0b03293:/workspace/GPU_Profiling# cd scripts/
+[?2004l[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# ls
+[?2004l[0m[34;42m__pycache__[0m  construct_eval_set.py  [01;32mdownload_checkpoint.sh[0m  output.json  plot_accuracies.py  plot_sqa_sweep.py  [01;32mrun_basics.sh[0m  time_sqa_sweep.py
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# oy[K[Klscd scripts/python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json[A]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# [C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:23<00:23, 23.51s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:31<00:00, 14.42s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:31<00:00, 15.78s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.94it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.94it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.008084534667432308,
+    "generation_s": 0.34445542097091675
+}
+  total=37.9s  load=0.0s  gen=0.3s
+
+=== run 2/8: n=576 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.08s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.23s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.36s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.09it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.09it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.006175787188112736,
+    "generation_s": 0.33990494115278125
+}
+  total=8.7s  load=0.0s  gen=0.3s
+
+=== run 3/8: n=128 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.99s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.22s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.33s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.12it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.12it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.0052650729194283485,
+    "generation_s": 0.32779514277353883
+}
+  total=8.8s  load=0.0s  gen=0.3s
+
+=== run 4/8: n=576 r=0.5 repeat=2 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.29s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:03<00:00,  1.41s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:03<00:00,  1.54s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.38it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.38it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.005095695145428181,
+    "generation_s": 0.42375808767974377
+}
+  total=9.4s  load=0.0s  gen=0.4s
+
+=== run 5/8: n=576 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.52s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:03<00:00,  1.58s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:03<00:00,  1.72s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.70it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.70it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.004186761565506458,
+    "generation_s": 0.37852614000439644
+}
+  total=10.4s  load=0.0s  gen=0.4s
+
+=== run 6/8: n=64 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.94s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.23s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.34s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.80it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.80it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.004876597784459591,
+    "generation_s": 0.3617872488684952
+}
+  total=8.9s  load=0.0s  gen=0.4s
+
+=== run 7/8: n=288 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.16s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.34s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.47s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.86it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.86it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.004745000042021275,
+    "generation_s": 0.3539402587339282
+}
+  total=9.0s  load=0.0s  gen=0.4s
+
+=== run 8/8: n=144 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.09s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.27s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.40s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.00it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.99it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 0.0029557449743151665,
+    "generation_s": 0.34142081532627344
+}
+  total=8.5s  load=0.0s  gen=0.3s
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+Traceback (most recent call last):
+  File "<frozen runpy>", line 189, in _run_module_as_main
+  File "<frozen runpy>", line 159, in _get_module_details
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/workspace/GPU_Profiling/vis_pruner_copy/llava/eval/model_vqa_science.py", line 127
+    "generation_s": t_end - t_start,
+    ^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 219, in <module>
+    main()
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 205, in main
+    timing = run_and_time(n_tokens, ratio, args.question_subset)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 126, in run_and_time
+    subprocess.run(cmd, cwd=VIS_PRUNER_DIR, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/python3.12', '-m', 'llava.eval.model_vqa_science', '--model-path', '/workspace/GPU_Profiling/vis_pruner_copy/checkpoints/llava-v1.5-7b', '--question-file', '/workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json', '--image-folder', '/workspace/GPU_Profiling/ScienceQA/data/scienceqa/images/test', '--answers-file', '/workspace/GPU_Profiling/results/tmp_runs/n64_r0.5_2152275962875086.jsonl', '--visual_token_num', '64', '--important_ratio', '0.5', '--single-pred-prompt', '--temperature', '0', '--conv-mode', 'vicuna_v1', '--timing-file', '/workspace/GPU_Profiling/results/tmp_runs/n64_r0.5_2152275962875086.timing.json']' returned non-zero exit status 1.
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:24<00:24, 24.44s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:32<00:00, 14.73s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:32<00:00, 16.18s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.92it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.92it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 34.93915566895157,
+    "time_to_make_questions": 0.01073740003630519,
+    "generation_s": 0.3500390057452023
+}
+Traceback (most recent call last):
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 219, in <module>
+    main()
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 205, in main
+    timing = run_and_time(n_tokens, ratio, args.question_subset)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 151, in run_and_time
+    time_to_make_questions = tf_dict["elapsed_model_data_time"]
+                             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'elapsed_model_data_time'
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.75s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.11s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.21s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.35it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.35it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.327058211900294,
+    "time_to_make_questions": 0.007076885085552931,
+    "generation_s": 0.3038054588250816
+}
+Traceback (most recent call last):
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 220, in <module>
+    main()
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 206, in main
+    timing = run_and_time(n_tokens, ratio, args.question_subset)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 161, in run_and_time
+    with open("GPU_Profiling/scripts/timings_time_sqa_sweep.json","a") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'GPU_Profiling/scripts/timings_time_sqa_sweep.json'
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.76s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.12s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.21s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.43it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.43it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.294176196213812,
+    "time_to_make_questions": 0.021168380975723267,
+    "generation_s": 0.29764851788058877
+}
+Traceback (most recent call last):
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 220, in <module>
+    main()
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 206, in main
+    timing = run_and_time(n_tokens, ratio, args.question_subset)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 161, in run_and_time
+    with open(timings_time_sqa_sweep.json,"a") as f:
+              ^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'timings_time_sqa_sweep' is not defined
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.92s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.21s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.32s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.34it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.34it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.53663862682879,
+    "time_to_make_questions": 0.003966921009123325,
+    "generation_s": 0.30429617734625936
+}
+Traceback (most recent call last):
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 220, in <module>
+    main()
+  File "/workspace/GPU_Profiling/scripts/time_sqa_sweep.py", line 207, in main
+    result = RunResult(
+             ^^^^^^^^^^
+TypeError: RunResult.__init__() got an unexpected keyword argument 'time_to_make_questions'
+[?2004h]0;root@d636a0b03293: /workspace/GPU_Profiling/scriptsroot@d636a0b03293:/workspace/GPU_Profiling/scripts# python3.12 time_sqa_sweep.py --question-subset /workspace/GPU_Profiling/vis_pruner_copy/playground/data/eval/scienceqa/llava_test_CQM-A_subset.json
+[?2004l[(64, 0.5, 1), (576, 0.5, 1), (128, 0.5, 0), (576, 0.5, 2), (576, 0.5, 0), (64, 0.5, 0), (288, 0.5, 0), (144, 0.5, 0)]
+Run plan (8 runs, order seed=0):
+  [0] n=64 r=0.5 repeat=1
+  [1] n=576 r=0.5 repeat=1
+  [2] n=128 r=0.5 repeat=0
+  [3] n=576 r=0.5 repeat=2
+  [4] n=576 r=0.5 repeat=0
+  [5] n=64 r=0.5 repeat=0
+  [6] n=288 r=0.5 repeat=0
+  [7] n=144 r=0.5 repeat=0
+
+=== run 1/8: n=64 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.91s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.19s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.30s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.13it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.12it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.419311819132417,
+    "time_to_make_questions": 0.00474500423297286,
+    "generation_s": 0.32404394121840596
+}
+  total=8.2s  load=4.4s  gen=0.3s
+
+=== run 2/8: n=576 r=0.5 repeat=1 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.93s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.17s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.28s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.98it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.98it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 5.132649472914636,
+    "time_to_make_questions": 0.005034205038100481,
+    "generation_s": 0.3396586198359728
+}
+  total=9.2s  load=5.1s  gen=0.3s
+
+=== run 3/8: n=128 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.05s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.22s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.35s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.48it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.48it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.618112400174141,
+    "time_to_make_questions": 0.005019727628678083,
+    "generation_s": 0.41247684182599187
+}
+  total=8.7s  load=4.6s  gen=0.4s
+
+=== run 4/8: n=576 r=0.5 repeat=2 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:02<00:02,  2.03s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.27s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.38s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.95it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.95it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 5.07631896995008,
+    "time_to_make_questions": 0.006234311033040285,
+    "generation_s": 0.344337300863117
+}
+  total=9.0s  load=5.1s  gen=0.3s
+
+=== run 5/8: n=576 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.96s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.23s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.34s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.02it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.02it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.576482051052153,
+    "time_to_make_questions": 0.004220214206725359,
+    "generation_s": 0.3540956098586321
+}
+  total=9.0s  load=4.6s  gen=0.4s
+
+=== run 6/8: n=64 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  2.00s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.27s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.38s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.21it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.21it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.5866514360532165,
+    "time_to_make_questions": 0.005060502327978611,
+    "generation_s": 0.3179991291835904
+}
+  total=8.6s  load=4.6s  gen=0.3s
+
+=== run 7/8: n=288 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.89s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.18s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.29s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.03it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.03it/s, visual_token_num=0]
+{
+    "question_count": 1,
+    "model_load_s": 4.324153372086585,
+    "time_to_make_questions": 0.004956022836267948,
+    "generation_s": 0.3342086193151772
+}
+  total=8.5s  load=4.3s  gen=0.3s
+
+=== run 8/8: n=144 r=0.5 repeat=0 ===
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|                                                                                                            | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|██████████████████████████████████████████████████                                                  | 1/2 [00:01<00:01,  1.95s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.18s/it]Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:02<00:00,  1.30s/it]
+  0%|                                                                                                                                       | 0/1 [00:00<?, ?it/s]/usr/local/lib/python3.12/dist-packages/transformers/generation/configuration_utils.py:392: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+  0%|                                                                                                                   | 0/1 [00:00<?, ?it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.89it/s, visual_token_num=0]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.89it/

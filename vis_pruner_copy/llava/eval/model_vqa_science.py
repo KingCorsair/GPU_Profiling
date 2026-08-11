@@ -33,7 +33,8 @@ def eval_model(args):
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
 
-    t_start = time.perf_counter()
+    torch.cuda.synchronize()
+    t_start_load = time.perf_counter()
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path, args.model_base, model_name,
         visual_token_num=args.visual_token_num,
@@ -41,15 +42,22 @@ def eval_model(args):
     )
     # Checkpoint: model finished loading, question loop hasn't started yet.
     # Everything before this point is load cost; everything after is generation.
-    t_after_load = time.perf_counter()
+    t_end_load = time.perf_counter()
+    torch.cuda.synchronize()
+    elapsed_model_load_time =  t_end_load - t_start_load
 
     # Data
+    t_start_data = time.perf_counter()
     questions = json.load(open(os.path.expanduser(args.question_file), "r"))
     questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
+    t_end_data = time.perf_counter()
+    elapsed_model_data_time = t_end_data - t_start_data
+
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
 
+    t_start = time.perf_counter()
     data_bar = tqdm(questions)
     for i, line in enumerate(data_bar):
         idx = line["id"]
@@ -111,11 +119,12 @@ def eval_model(args):
     if args.timing_file:
         timing_file = os.path.expanduser(args.timing_file)
         os.makedirs(os.path.dirname(timing_file), exist_ok=True)
-        with open(timing_file, "w") as tf:
+        with open(timing_file, "w+") as tf:
             json.dump({
                 "question_count": len(questions),
-                "model_load_s": t_after_load - t_start,
-                "generation_s": t_end - t_after_load,
+                "model_load_s": elapsed_model_load_time,
+                "time_to_make_questions": elapsed_model_data_time,
+                "generation_s": t_end - t_start,
             }, tf)
 
 if __name__ == "__main__":
