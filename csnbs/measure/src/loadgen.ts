@@ -2,6 +2,7 @@
   endpoint: string;
   requestsPerSecond: number;
   durationSeconds: number;
+  timeoutMs: number; // If the server has a timeout, this is the configured value. Otherwise, null.
 };
 type InferRequest = { image_b64: string; question: string };
 type InferResponse = { answer: string };
@@ -26,13 +27,13 @@ type PercentileSummary = {
 type LoadSummary = {
   totalRequests: number;
   successfulRequests: number;
-  failedRequests: number;
-  achievedArrivalRateRps: number | null;
-  completionRateRps: number;
-  successfulThroughputRps: number;
-  successfulRequestLatencyMs: PercentileSummary;
-  dispatchLatenessMs: PercentileSummary;
-  plannedToCompleteMs: PercentileSummary;
+  failedRequests: number; 
+  achievedArrivalRateRps: number | null; // Includes failed requests, reports actual arrival rate of requests per second
+  completionRateRps: number; // Includes failed requests
+  successfulThroughputRps: number; // Excludes failed requests, reports successful completions per second
+  successfulRequestLatencyMs: PercentileSummary; // latency of successful requests only
+  dispatchLatenessMs: PercentileSummary; // Intended - scheduled dispatch time 
+  plannedToCompleteMs: PercentileSummary; // request completion time relative to the scheduled dispatch time, includes failed requests
 };
 /* Checks whether the requested load can be scheduled. */ function validateConfig(
   config: LoadConfig,
@@ -45,13 +46,16 @@ type LoadSummary = {
     throw new Error("endpoint must be nonempty");
   } else if (config.requestsPerSecond * config.durationSeconds < 1) {
     throw new Error("Configuration must schedule at least one request");
+  } else if (!Number.isFinite(config.timeoutMs) || config.timeoutMs <= 0) {
+    throw new Error("timeoutMs must be greater than 0 or null");
   }
 }
 const payload: InferRequest = {
   image_b64: Buffer.from("fake image bytes").toString("base64"),
   question: "What is in this image?",
 };
-/* Sends one request and turns both successes and failures into a result record. */ async function sendOne(
+/* Sends one request and turns both successes and failures into a result record. */ 
+async function sendOne(
   sequence: number,
   scheduledAtMs: number,
   config: LoadConfig,
@@ -64,6 +68,7 @@ const payload: InferRequest = {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(config.timeoutMs),
     });
     status = response.status;
     if (!response.ok) {
@@ -103,7 +108,8 @@ const payload: InferRequest = {
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-/* Launches requests according to the clock, not according to prior completions. */ async function runLoad(
+/* Launches requests according to the clock, not according to prior completions. */ 
+async function runLoad(
   config: LoadConfig,
   payload: InferRequest,
 ): Promise<LoadRun> {
@@ -118,17 +124,19 @@ function sleep(ms: number): Promise<void> {
   for (let sequence = 0; sequence < totalRequests; sequence++) {
     const scheduledAtMs = plannedStartMs + sequence * intervalMs;
     const delayMs = scheduledAtMs - performance.now();
+    //Checks for delay interval and sleeps if necessary to maintain the request schedule 
     if (delayMs > 0) {
       await sleep(delayMs);
     }
-    /* Do not await here: responses must not control future arrival times. */ inFlight.push(
+    inFlight.push(
       sendOne(sequence, scheduledAtMs, config, payload),
     );
   }
   const results = await Promise.all(inFlight);
   return { plannedStartMs, plannedEndMs, results };
 }
-/* Uses the nearest-rank definition, such as ceil(0.95 * sampleCount) - 1. */ function percentile(
+/* Uses the nearest-rank definition, such as ceil(0.95 * sampleCount) - 1. */ 
+function percentile(
   values: readonly number[],
   fraction: number,
 ): number | null {
@@ -199,9 +207,11 @@ async function main(): Promise<void> {
     endpoint: "http://127.0.0.1:8000/infer",
     requestsPerSecond: 5,
     durationSeconds: 10,
+    timeoutMs: 5000,
   };
   const run = await runLoad(config, payload);
   const summary = summarizeRun(run);
   console.log(JSON.stringify(summary, null, 2));
 }
+
 await main();

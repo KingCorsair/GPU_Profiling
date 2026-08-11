@@ -17,4 +17,15 @@ Random baseline — once scoring works, run a random-answer baseline through it 
 
 Validate the scorer itself — once you've got a working scoring approach, run it alongside a second scoring method on a sample and check agreement (rule 13), same idea as the ScienceQA hand-check but now against your own new scorer.
 
-Want me to start on the inference runner (step 2) while you do the hand-check?
+Inference runner — model_vqa_heterogeneous.py is scaffolded: loops over dev.json only, runs the model with VisPruner's visual_token_num/important_ratio knobs, writes raw generations to jsonl tagged with category/source_dataset/question_type/answers/visual_token_num. Not yet smoke-tested (no GPU in this sandbox) — worth running on the pod before trusting the output shape. You've since edited the file yourself (comment on line 19 now flags the scorer as still needed).
+
+Open flag from the dev.json sanity check: category counts are balanced (15/15/15/15/15/15), but source_dataset is skewed — MME:69, TEXT_VQA:15, GQA:6, VizWiz:0. Looks like MME's scene→coarse_description mapping fills that category before the VizWiz loop ever runs. Eval-set composition is your call, not something I've touched.
+
+Scorer design (yours, per project rules) — landed on:
+
+Not multiple-choice prompting for this set (unlike ScienceQA), so per-dataset official scorers (convert_gqa_for_eval.py etc.) don't apply — you need one scorer keyed by question_type (binary vs free-text), not one dispatching by source_dataset.
+Ruled out sentiment analysis (wrong tool — measures emotional polarity, not factual agreement).
+Landed on BERTScore as the primary candidate for free-text, with a known blind spot: it's similarity-based, so it doesn't reliably catch negation ("yes there's a dog" vs "no there's no dog" can score deceptively high) — a real risk for your binary category (MME/GQA).
+Discussed entailment/NLI (a separately fine-tuned model, e.g. roberta-large-mnli, not the same checkpoint as BERTScore) as the structural fix for negation, since it's explicitly trained to output contradiction/entailment/neutral.
+Current lean: keep BERTScore and entailment as two independent scorers rather than fusing into a weighted average right away — a blend collapses the diagnostic signal you need for the rule-13 hand-check (where they disagree tells you something; averaged, it doesn't), and the weight itself would be an unvalidated free parameter.
+Not yet started: the actual scorer implementation (yours to write — I'll review, not author), the random baseline (rule 17), and the second scoring-method agreement check (rule 13) once a working scorer exists.
