@@ -133,8 +133,8 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
     }
 
     with open("output.json","a") as f:
-        json.dump(final_dict+"\n",f)
-
+        json.dump(final_dict,f)
+        f.write("\n")
     return final_dict
 
 def main():
