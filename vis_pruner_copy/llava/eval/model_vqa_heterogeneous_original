@@ -68,37 +68,26 @@ def eval_model(args):
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
 
-    #Loading the pretrained model and then timing it.
-    torch.cuda.synchronize()
-    loading_model_start_time = time.perf_counter()
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path, args.model_base, model_name,
         visual_token_num=args.visual_token_num,
         important_ratio=args.important_ratio,
     )
-    torch.cuda.synchronize()
-    loading_model_end_time = time.perf_counter()
-    loading_model_elapsed_time = loading_model_end_time - loading_model_start_time
 
     questions = json.load(open(os.path.expanduser(args.question_file), "r"))
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
 
-    torch.cuda.synchronize()
-    loading_data_start_time = time.perf_counter()
     data_loader = create_data_loader(
         questions, args.image_folder, tokenizer, image_processor, model.config, args.conv_mode
     )
 
-    generation_list = []
     data_bar = tqdm(zip(data_loader, questions), total=len(questions))
     for (input_ids, image_tensors, image_sizes), line in data_bar:
-        counter=1
         input_ids = input_ids.to(device='cuda', non_blocking=True)
         image_tensors = image_tensors.to(dtype=torch.float16, device='cuda', non_blocking=True)
 
-        answer_generation_start_time = time.perf_counter()
         with torch.inference_mode():
             output_ids, visual_token_num = model.generate(
                 input_ids,
@@ -111,9 +100,8 @@ def eval_model(args):
                 max_new_tokens=args.max_new_tokens,
                 use_cache=True)
             data_bar.set_postfix({"visual_token_num": visual_token_num})
+
         outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        answer_generation_end_time = time.perf_counter()
-        answer_generation_elapsed_time = answer_generation_end_time - answer_generation_start_time
 
         ans_file.write(json.dumps({
             "question_id": line["question_id"],
@@ -129,43 +117,16 @@ def eval_model(args):
             "visual_token_num": visual_token_num,
         }) + "\n")
         ans_file.flush()
-
-        #Creating a dictionary key to 
-        dictionary_key = "time to generate response for " + str(counter) + "th question" 
-
-        generation_dictionary = {
-            dictionary_key : answer_generation_elapsed_time,
-        }
-
-        generation_list.append(generation_dictionary)
-
-        counter += 1
-
-        
     ans_file.close()
 
-    torch.cuda.synchronize()
-    loading_data_end_time = time.perf_counter()
-
-    loading_data_elapsed_time =  loading_data_end_time - loading_data_start_time
-
-    output_dictionary = {
-        "time to load the data" : loading_data_elapsed_time,
-        "time to load the model" : loading_model_elapsed_time, 
-        "time to generate each responses" : generation_list,
-    }
-
-    with open("/workspace/GPU_Profiling/results/timing/model_vqa_heterogeneous_timing.json","a+") as f:
-        json.dump(output_dictionary,f)
-        f.write("\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="/workspace/GPU_Profiling/vis_pruner_copy/checkpoints/llava-v1.5-7b")
+    parser.add_argument("--model-path", type=str, default="./checkpoints/llava-v1.5-7b")
     parser.add_argument("--model-base", type=str, default=None)
-    parser.add_argument("--image-folder", type=str, default="/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset")
-    parser.add_argument("--question-file", type=str, default="/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json")
-    parser.add_argument("--answers-file", type=str, default="/workspace/GPU_Profiling/vis_pruner_copy/eval/heterogeneous/answers/llava-v1.5-7b.jsonl")
+    parser.add_argument("--image-folder", type=str, default="./vispruner_eval_dataset")
+    parser.add_argument("--question-file", type=str, default="./vispruner_eval_dataset/dev.json")
+    parser.add_argument("--answers-file", type=str, default="./eval/heterogeneous/answers/llava-v1.5-7b.jsonl")
     parser.add_argument("--conv-mode", type=str, default="llava_v1")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top_p", type=float, default=None)
