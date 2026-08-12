@@ -93,8 +93,10 @@ def eval_model(args):
 
     generation_list = []
     data_bar = tqdm(zip(data_loader, questions), total=len(questions))
+
+    #generate the response for each question
+    counter=1
     for (input_ids, image_tensors, image_sizes), line in data_bar:
-        counter=1
         input_ids = input_ids.to(device='cuda', non_blocking=True)
         image_tensors = image_tensors.to(dtype=torch.float16, device='cuda', non_blocking=True)
 
