@@ -29,3 +29,34 @@ Landed on BERTScore as the primary candidate for free-text, with a known blind s
 Discussed entailment/NLI (a separately fine-tuned model, e.g. roberta-large-mnli, not the same checkpoint as BERTScore) as the structural fix for negation, since it's explicitly trained to output contradiction/entailment/neutral.
 Current lean: keep BERTScore and entailment as two independent scorers rather than fusing into a weighted average right away — a blend collapses the diagnostic signal you need for the rule-13 hand-check (where they disagree tells you something; averaged, it doesn't), and the weight itself would be an unvalidated free parameter.
 Not yet started: the actual scorer implementation (yours to write — I'll review, not author), the random baseline (rule 17), and the second scoring-method agreement check (rule 13) once a working scorer exists.
+
+_______
+AUG 14
+_______
+
+Here's the sequence I'd follow, in order — each one unblocks the next:
+
+1. Decouple the backbones (revisit, before anything else)
+Swap BERTScorer(model_type="roberta-large-mnli") → BERTScorer(model_type="roberta-large") (or whatever bert-score's standard default is), keep roberta-large-mnli for the entailment classifier only. This is a one-line change but it changes what every downstream number means, so do it before you generate any results you'll look at seriously.
+
+2. Build the hand-labeled validation sample (rule 13)
+Pull a sample of pred/target pairs — deliberately over-weighted toward your binary category (MME/GQA), since that's where negation is most likely to bite. Label each yourself as correct/incorrect. This is the part that's actually yours to design (not a scorer to hand off) — how many pairs, how you sample across categories, is a judgment call worth thinking through rather than defaulting to "grab 50 at random."
+
+3. Look at score distributions before picking any threshold
+For BERTScore F1 and each entailment strategy separately, plot or just eyeball where your hand-labeled correct vs incorrect pairs land. Only pick a threshold once you can see it separates the two groups — not a round number like 0.75 chosen in advance. Different strategies (net_entailment vs weighted vs relative) will likely need different thresholds since their distributions aren't shaped the same.
+
+4. Check where BERTScore and entailment disagree
+This is the actual payoff of keeping them separate. Pull the pairs where one says correct and the other says incorrect, read them. That tells you whether entailment is catching the negation cases BERTScore misses (the hypothesis), or whether the disagreement is noise. This will also retroactively validate whether step 1's fix mattered — if disagreement was suspiciously rare before, it should widen after decoupling the backbones.
+
+5. Random baseline (rule 17)
+Not started yet per your earlier note — score random pred/target pairings (shuffle targets against unrelated preds) through the same pipeline. If random scores land close to real scores for either metric, that metric isn't discriminating and no threshold will save it.
+
+6. Only then: decide on the composite
+Once BERTScore and entailment are each individually validated (thresholds set, disagreement understood), revisit whether harmonic-meaning them adds anything over reporting them separately, or whether the disagreement itself is more useful to keep visible in your final eval output than a fused number.
+
+7. Per-category breakdown (rule 14)
+Once the scorer is trustworthy, don't just report one accuracy number — break it out by category (OCR, counting, spatial, binary, free-text) so a collapse in one category isn't hidden by the average.
+
+Not yet relevant but keep in mind: none of this should touch your test set (rule 11) — steps 2–6 should all run against dev. Test set stays locked until the scorer itself is validated and finalized.
+
+I'd start with #1 and #2 today — #1 is quick, and #2 is the long pole since it's genuinely your judgment call on what "correct" means for free-form answers.
