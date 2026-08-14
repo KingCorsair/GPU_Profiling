@@ -25,7 +25,13 @@ from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.generation.utils import GenerateOutput
 
 from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
+import time
 
+output_dictionary = {
+        "forward time" : 0,
+        "generate time" : 0, 
+        "input_preparation_time" : 0,
+    }
 
 class LlavaLlamaConfig(LlamaConfig):
     model_type = "llava_llama"
@@ -66,6 +72,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
     def get_important_ratio(self):
         return self.important_ratio
 
+    
     def forward(
         self,
         input_ids: torch.LongTensor = None,
@@ -81,6 +88,9 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         image_sizes: Optional[List[List[int]]] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
+
+        torch.cuda.synchronize()
+        start_time_forward = time.perf_counter()
 
         if inputs_embeds is None:
             (
@@ -112,7 +122,11 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict
         )
+        end_time_forward = time.perf_counter()
+        torch.cuda.synchronize()
+        elapsed_time_forward = end_time_forward - start_time_forward
 
+    
     @torch.no_grad()
     def generate(
         self,
@@ -123,6 +137,10 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
     ) -> Union[GenerateOutput, torch.LongTensor]:
         position_ids = kwargs.pop("position_ids", None)
         attention_mask = kwargs.pop("attention_mask", None)
+        
+        torch.cuda.synchronize()
+        start_time_generate = time.perf_counter()
+
         if "inputs_embeds" in kwargs:
             raise NotImplementedError("`inputs_embeds` is not supported")
 
@@ -155,6 +173,10 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             **kwargs
         ), visual_token_num
 
+        end_time_generate = time.perf_counter()
+        elapsed_time_generate = end_time_generate - start_time_generate
+        torch.cuda.synchronize()
+
     def prepare_inputs_for_generation(self, input_ids, past_key_values=None,
                                       inputs_embeds=None, **kwargs):
         images = kwargs.pop("images", None)
@@ -162,11 +184,27 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         inputs = super().prepare_inputs_for_generation(
             input_ids, past_key_values=past_key_values, inputs_embeds=inputs_embeds, **kwargs
         )
+        torch.cuda.synchronize()
+        start_time_prepare_inputs = time.perf_counter()
+
         if images is not None:
             inputs['images'] = images
         if image_sizes is not None:
             inputs['image_sizes'] = image_sizes
         return inputs
+        end_time_prepare_inputs = time.perf_counter()
+        elapsed_time_prepare_inputs = end_time_prepare_inputs - start_time_prepare_inputs
+        torch.cuda.synchronize()
+
+    output_dictionary = {
+            "forward time" : elapsed_time_forward,
+            "generate time" : elapsed_time_generate, 
+            "input_preparation_time" : elapsed_time_prepare_inputs,   
+    }
+
+    with open("/workspace/GPU_Profiling/results/timing/llava_llama_timing.json","a+") as f:
+        json.dump(output_dictionary,f)
+        f.write("\n")
 
 AutoConfig.register("llava_llama", LlavaLlamaConfig)
 AutoModelForCausalLM.register(LlavaLlamaConfig, LlavaLlamaForCausalLM)

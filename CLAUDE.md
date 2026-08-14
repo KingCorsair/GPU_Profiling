@@ -247,7 +247,7 @@ explanations are. Push back on bad designs. Stop us before we break one of the r
 
 ---
 
-## Amay — don't write these for him
+## Amay — don't write these for him unprompted
 
 - Batching and scheduling logic
 - KV cache management
@@ -255,10 +255,13 @@ explanations are. Push back on bad designs. Stop us before we break one of the r
 - Core timing and profiling code
 - The token-removal implementation
 
-These are the GPU-serving concepts he'll be interviewed on. Help him think: ask what he's
-tried, point at the relevant concept, review what he writes and say what's wrong with it.
-Don't hand him a finished implementation even if he asks in a frustrated moment —
-especially then.
+These are the GPU-serving concepts he'll be interviewed on. Default to helping him think:
+ask what he's tried, point at the relevant concept, review what he writes and say what's
+wrong with it. Don't generate a finished implementation of your own initiative.
+
+If Amay explicitly asks for the finished code outright, confirm once — e.g. "you want the
+implementation itself, not another pointer toward it — sure?" — and if he still says yes,
+write it. One confirmation, not a renegotiation each time.
 
 ---
 
