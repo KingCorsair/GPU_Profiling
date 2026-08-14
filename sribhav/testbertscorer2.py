@@ -110,12 +110,12 @@ def eval(answers_file, strategy="net_normalized"):
     composite_scores = compute_composite_score(bert_f1, nli_norm)
 
     bert_f1_acc = calculate_accuracy(bert_f1)
-    nli_norm_acc = calculate_accuracy(nli_norm)
+    nli_score_acc = calculate_accuracy(nli_scores)
     comp_score_acc = calculate_accuracy(composite_scores)
 
     return {
         "bert_accuracy": bert_f1_acc,
-        "entailment_accuracy": nli_norm_acc,
+        "entailment_accuracy": nli_score_acc,
         "composite_score_accuracy": comp_score_acc,
         "bert_f1": bert_f1,
         "nli_score": nli_scores,
@@ -123,7 +123,7 @@ def eval(answers_file, strategy="net_normalized"):
     }
 
 if __name__ == "__main__":
-    output_data = eval("testfile.jsonl")
-    output_filename = "evaluation_results.json"
+    output_data = eval("testfile.jsonl", "weighted")
+    output_filename = "evaluation_results_weighted.json"
     with open(output_filename, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=4)
