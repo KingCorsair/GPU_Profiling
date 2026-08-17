@@ -10,7 +10,7 @@ model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
-bertscore = BERTScorer(model_type="roberta-large-mnli", device=device)
+bertscore = BERTScorer(model_type="roberta-large", device=device)
 
 
 def compute_nli_scores(preds, targets, strategy="net_entailment", batch_size=16):
@@ -123,7 +123,7 @@ def eval(answers_file, strategy="net_normalized"):
     }
 
 if __name__ == "__main__":
-    output_data = eval("testfile.jsonl", "weighted")
-    output_filename = "evaluation_results_weighted.json"
+    output_data = eval("testfile.jsonl")
+    output_filename = "evaluation_results_normalized.json"
     with open(output_filename, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=4)

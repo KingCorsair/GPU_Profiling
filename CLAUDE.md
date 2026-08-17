@@ -277,6 +277,10 @@ the concept, review his implementation, but let him write it.
 Everything else is fair game: the FastAPI server, React dashboard, job queue, database
 schema, Docker Compose, CI. Those are standard engineering and he learns them by shipping.
 
+If Rithvik explicitly asks for the finished code outright, confirm once — e.g. "you want the
+implementation itself, not another pointer toward it — sure?" — and if he still says yes,
+write it. One confirmation, not a renegotiation each time.
+
 ---
 
 ## Sribhav — don't write these for him
@@ -291,6 +295,10 @@ think about it; don't hand him a scorer.
 
 Everything else is fair game: the Spring Boot service, JPA entities, REST endpoints,
 frontend, tests, deployment.
+
+If Sribhav explicitly asks for the finished code outright, confirm once — e.g. "you want the
+implementation itself, not another pointer toward it — sure?" — and if he still says yes,
+write it. One confirmation, not a renegotiation each time.
 
 ---
 

@@ -1,3 +1,9 @@
+import { execFileSync } from "node:child_process";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 /* Expected types for server.py. */
 type LoadConfig = {
   endpoint: string;
@@ -43,6 +49,71 @@ type LoadSummary = {
   dispatchLatenessMs: PercentileSummary; // scheduled dispatch time delta
   plannedToCompleteMs: PercentileSummary; // time from scheduled dispatch to completion; includes failures
 };
+
+type WorkloadMetadata = {
+  id: string;
+  question: string;
+  imageSha256: string;
+  imageByteLength: number;
+};
+
+type SourceMetadata = {
+  gitCommit: string | null;
+  gitDirty: boolean | null;
+};
+
+type HardwareMetadata = {
+  gpuModels: string[] | null;
+  source: "local-nvidia-smi";
+};
+
+type BenchmarkMetadata = {
+  modelId: string | null;
+  checkpoint: string | null;
+  pruningMethod: string | null;
+  pruningRatio: number | null;
+  tokenRemovalMode: string | null;
+  batchSize: number;
+  maxOutputTokens: number | null;
+};
+
+type RunManifest = {
+  schema: "loadgen-run";
+  schemaVersion: 1;
+  runId: string;
+  runKind: "open-loop";
+  recordedAtUtc: string;
+  timing: {
+    clock: "performance.now";
+    performanceTimeOriginUnixMs: number;
+    plannedStartMs: number;
+    plannedEndMs: number;
+    finishedMs: number;
+    plannedStartAtUtc: string;
+    plannedEndAtUtc: string;
+    finishedAtUtc: string;
+  };
+  config: LoadConfig;
+  workload: WorkloadMetadata;
+  source: SourceMetadata;
+  hardware: HardwareMetadata;
+  benchmark: BenchmarkMetadata;
+  summary: LoadSummary;
+  requests: {
+    file: "requests.jsonl";
+    schemaVersion: 1;
+    count: number;
+  };
+};
+
+const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
+const outputRoot = join(repoRoot, "results", "loadgen");
+
+const payload: InferRequest = {
+  image_b64: Buffer.from("fake image bytes").toString("base64"),
+  question: "What is in this image?",
+};
+
 /* Checks whether the requested load can be scheduled. */
 function validateConfig(config: LoadConfig): void {
   if (!Number.isFinite(config.requestsPerSecond) || config.requestsPerSecond <= 0) {
@@ -57,10 +128,7 @@ function validateConfig(config: LoadConfig): void {
     throw new Error("timeoutMs must be a finite number greater than 0");
   }
 }
-const payload: InferRequest = {
-  image_b64: Buffer.from("fake image bytes").toString("base64"),
-  question: "What is in this image?",
-};
+
 /* Sends one request and turns both successes and failures into a result record. */
 async function sendOne(
   sequence: number,
@@ -112,9 +180,11 @@ async function sendOne(
     };
   }
 }
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
 /* Launches requests according to the clock, not according to prior completions. */
 async function runLoad(
   config: LoadConfig,
@@ -139,6 +209,7 @@ async function runLoad(
   const results = await Promise.all(inFlight);
   return { plannedStartMs, plannedEndMs, results };
 }
+
 /* Uses the nearest-rank definition, such as ceil(0.95 * sampleCount) - 1. */
 function percentile(
   values: readonly number[],
@@ -156,6 +227,7 @@ function percentile(
   const index = Math.ceil(fraction * sorted.length) - 1;
   return sorted[index] ?? null;
 }
+
 function summarizePercentiles(values: readonly number[]): PercentileSummary {
   return {
     p50: percentile(values, 0.5),
@@ -163,6 +235,7 @@ function summarizePercentiles(values: readonly number[]): PercentileSummary {
     p99: percentile(values, 0.99),
   };
 }
+
 function summarizeRun(run: LoadRun): LoadSummary {
   const successfulResults = run.results.filter(
     (result) => result.error === null,
@@ -209,6 +282,97 @@ function summarizeRun(run: LoadRun): LoadSummary {
     plannedToCompleteMs: summarizePercentiles(plannedToComplete),
   };
 }
+
+function runCommand(command: string, args: readonly string[]): string | null {
+  try {
+    return execFileSync(command, args, {
+      cwd: repoRoot,
+      encoding: "utf8",
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function collectSourceMetadata(): SourceMetadata {
+  const gitCommit = runCommand("git", ["rev-parse", "HEAD"]);
+  const gitStatus = runCommand("git", [
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=normal",
+  ]);
+  return {
+    gitCommit: gitCommit === "" ? null : gitCommit,
+    gitDirty: gitStatus === null ? null : gitStatus !== "",
+  };
+}
+
+function collectHardwareMetadata(): HardwareMetadata {
+  const gpuOutput = runCommand("nvidia-smi", [
+    "--query-gpu=name",
+    "--format=csv,noheader",
+  ]);
+  return {
+    gpuModels: gpuOutput === null
+      ? null
+      : gpuOutput.split("\n").filter((name) => name !== ""),
+    source: "local-nvidia-smi",
+  };
+}
+
+function describeWorkload(payload: InferRequest): WorkloadMetadata {
+  const image = Buffer.from(payload.image_b64, "base64");
+  const imageHash = createHash("sha256").update(image).digest("hex");
+  const workloadHash = createHash("sha256")
+    .update(image)
+    .update("\0")
+    .update(payload.question, "utf8")
+    .digest("hex");
+  return {
+    id: "sha256:" + workloadHash,
+    question: payload.question,
+    imageSha256: "sha256:" + imageHash,
+    imageByteLength: image.length,
+  };
+}
+
+function makeRunId(startedAtUtc: string): string {
+  return (
+    startedAtUtc.replace(/[:.]/g, "-") +
+    "-" +
+    randomUUID().slice(0, 8)
+  );
+}
+
+function toUtc(performanceTimeOriginUnixMs: number, offsetMs: number): string {
+  return new Date(performanceTimeOriginUnixMs + offsetMs).toISOString();
+}
+
+async function persistRun(
+  manifest: RunManifest,
+  results: readonly RequestResult[],
+): Promise<string> {
+  await mkdir(outputRoot, { recursive: true });
+  const runDirectory = join(outputRoot, manifest.runId);
+  await mkdir(runDirectory);
+
+  const requestsJsonl = results.length === 0
+    ? ""
+    : results.map((result) => JSON.stringify(result)).join("\n") + "\n";
+
+  await writeFile(join(runDirectory, "requests.jsonl"), requestsJsonl, {
+    encoding: "utf8",
+    flag: "wx",
+  });
+  await writeFile(
+    join(runDirectory, "run.json"),
+    JSON.stringify(manifest, null, 2) + "\n",
+    { encoding: "utf8", flag: "wx" },
+  );
+
+  return runDirectory;
+}
+
 async function main(): Promise<void> {
   const config: LoadConfig = {
     endpoint: "http://127.0.0.1:8000/infer",
@@ -216,9 +380,64 @@ async function main(): Promise<void> {
     durationSeconds: 10,
     timeoutMs: 5000,
   };
+
+  /* Collect metadata before timing so these commands cannot disturb arrivals. */
+  const source = collectSourceMetadata();
+  const hardware = collectHardwareMetadata();
+  const workload = describeWorkload(payload);
+  const benchmark: BenchmarkMetadata = {
+    modelId: null,
+    checkpoint: null,
+    pruningMethod: null,
+    pruningRatio: null,
+    tokenRemovalMode: null,
+    batchSize: 1,
+    maxOutputTokens: null,
+  };
+  const runId = makeRunId(new Date().toISOString());
+
   const run = await runLoad(config, payload);
+  const finishedMs = performance.now();
   const summary = summarizeRun(run);
-  console.log(JSON.stringify(summary, null, 2));
+  const performanceTimeOriginUnixMs = performance.timeOrigin;
+
+  const manifest: RunManifest = {
+    schema: "loadgen-run",
+    schemaVersion: 1,
+    runId,
+    runKind: "open-loop",
+    recordedAtUtc: new Date().toISOString(),
+    timing: {
+      clock: "performance.now",
+      performanceTimeOriginUnixMs,
+      plannedStartMs: run.plannedStartMs,
+      plannedEndMs: run.plannedEndMs,
+      finishedMs,
+      plannedStartAtUtc: toUtc(
+        performanceTimeOriginUnixMs,
+        run.plannedStartMs,
+      ),
+      plannedEndAtUtc: toUtc(
+        performanceTimeOriginUnixMs,
+        run.plannedEndMs,
+      ),
+      finishedAtUtc: toUtc(performanceTimeOriginUnixMs, finishedMs),
+    },
+    config,
+    workload,
+    source,
+    hardware,
+    benchmark,
+    summary,
+    requests: {
+      file: "requests.jsonl",
+      schemaVersion: 1,
+      count: run.results.length,
+    },
+  };
+
+  const outputDirectory = await persistRun(manifest, run.results);
+  console.log(JSON.stringify({ runId, outputDirectory, summary }, null, 2));
 }
 
 await main();

@@ -27,15 +27,6 @@ from transformers.generation.utils import GenerateOutput
 from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
 import time
 import json
-import os
-
-# Where per-question timing lines get written. Overridable via the
-# LLAVA_TIMING_FILE env var (e.g. by scripts/time_sqa_sweep.py, so each
-# subprocess run writes to its own scratch file that the sweep script reads
-# back and folds into its single combined output). Looked up at write time,
-# not import time, since the env var may be set after this module is
-# imported (imports happen before argparse runs in the eval scripts).
-DEFAULT_TIMING_FILE = "/workspace/GPU_Profiling/results/timing/llava_llama_timing.json"
 
 class LlavaLlamaConfig(LlamaConfig):
     model_type = "llava_llama"
@@ -61,13 +52,6 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # [VisPruner] Visual token pruning config
         self.visual_token_num = visual_token_num
         self.important_ratio = important_ratio
-
-        # Timing: set (to a list) by generate() for the duration of one
-        # question, so forward()/prepare_inputs_for_generation() have
-        # somewhere to record into. None outside of a generate() call, so
-        # calls made outside that path are silently not recorded.
-        self._timing_forward_calls = None
-        self._timing_prepare_inputs_calls = None
 
         # Initialize weights and apply final processing
         self.post_init()
@@ -141,11 +125,14 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         end_time_forward = time.perf_counter()
         elapsed_time_forward = end_time_forward - start_time_forward
 
-        if self._timing_forward_calls is not None:
-            self._timing_forward_calls.append({
-                "multimodal_prep_time": elapsed_time_prep,
-                "lm_forward_time": elapsed_time_forward,
-            })
+        output_dictionary = {
+            "multimodal_prep_time": elapsed_time_prep,
+            "lm_forward_time": elapsed_time_forward,
+        }
+
+        with open("/workspace/GPU_Profiling/results/timing/llava_llama_timing.json", "a+") as f:
+            json.dump(output_dictionary, f)
+            f.write("\n")
 
         return result
         
@@ -160,14 +147,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
     ) -> Union[GenerateOutput, torch.LongTensor]:
         position_ids = kwargs.pop("position_ids", None)
         attention_mask = kwargs.pop("attention_mask", None)
-
-        # Open the recording lists for this one question. forward() and
-        # prepare_inputs_for_generation() append into these for every step
-        # of the generation loop below; we fold it all into one JSON line
-        # once generate() finishes.
-        self._timing_forward_calls = []
-        self._timing_prepare_inputs_calls = []
-
+        
         torch.cuda.synchronize()
         start_time_prep = time.perf_counter()
 
@@ -214,18 +194,11 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         output_dictionary = {
             "multimodal_prep_time_generate": elapsed_time_prep,
             "generate_time": elapsed_time_generate,
-            "forward_calls": self._timing_forward_calls,
-            "prepare_inputs_calls": self._timing_prepare_inputs_calls,
         }
 
-        timing_file_path = os.environ.get("LLAVA_TIMING_FILE", DEFAULT_TIMING_FILE)
-        os.makedirs(os.path.dirname(timing_file_path), exist_ok=True)
-        with open(timing_file_path, "a+") as f:
+        with open("/workspace/GPU_Profiling/results/timing/llava_llama_timing.json", "a+") as f:
             json.dump(output_dictionary, f)
             f.write("\n")
-
-        self._timing_forward_calls = None
-        self._timing_prepare_inputs_calls = None
 
         return result, visual_token_num
 
@@ -250,10 +223,13 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         end_time_prepare_inputs = time.perf_counter()
         elapsed_time_prepare_inputs = end_time_prepare_inputs - start_time_prepare_inputs
 
-        if self._timing_prepare_inputs_calls is not None:
-            self._timing_prepare_inputs_calls.append({
-                "input_preparation_time": elapsed_time_prepare_inputs,
-            })
+        output_dictionary = {
+            "input_preparation_time": elapsed_time_prepare_inputs,
+        }
+
+        with open("/workspace/GPU_Profiling/results/timing/llava_llama_timing.json", "a+") as f:
+            json.dump(output_dictionary, f)
+            f.write("\n")
 
         return inputs
 

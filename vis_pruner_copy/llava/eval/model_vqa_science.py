@@ -28,6 +28,15 @@ def get_chunk(lst, n, k):
 
 
 def eval_model(args):
+    # Give llava_llama.py's per-question timing its own file when this
+    # script is run directly. setdefault, not direct assignment: if
+    # scripts/time_sqa_sweep.py launched this as a subprocess, it already
+    # set LLAVA_TIMING_FILE to a per-run scratch path -- don't override that.
+    os.environ.setdefault(
+        "LLAVA_TIMING_FILE",
+        "/workspace/GPU_Profiling/results/timing/model_vqa_science_llava_timing.json",
+    )
+
     # Model
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
@@ -50,6 +59,8 @@ def eval_model(args):
     t_start_data = time.perf_counter()
     questions = json.load(open(os.path.expanduser(args.question_file), "r"))
     questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
+    if args.limit is not None:
+        questions = questions[:args.limit]
     t_end_data = time.perf_counter()
     elapsed_model_data_time = t_end_data - t_start_data
 
@@ -142,6 +153,8 @@ if __name__ == "__main__":
     parser.add_argument("--single-pred-prompt", action="store_true")
     parser.add_argument("--visual_token_num", type=int, default=576)
     parser.add_argument("--important_ratio", type=float, default=0.5)
+    parser.add_argument("--limit", type=int, default=None,
+                         help="Only run the first N questions (after chunking) -- for quick smoke tests.")
     parser.add_argument("--timing-file", type=str, default=None,
                          help="Optional path to write a JSON sidecar with "
                               "question_count/model_load_s/generation_s")

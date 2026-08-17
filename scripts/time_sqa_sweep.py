@@ -22,8 +22,8 @@ confound that drift with the setting being tested.
 """
 
 import argparse
-import csv
 import json
+import os
 import random
 import subprocess
 import sys
@@ -70,6 +70,10 @@ class RunResult:
     model_load_s: float
     generation_s: float
     time_to_make_questions: float
+    # Per-question detail from llava_llama.py (multimodal_prep_time_generate,
+    # generate_time, and the nested per-forward-call/per-decode-step timings)
+    # -- one dict per question, read back from the subprocess's scratch file.
+    questions: list
 
 
 def build_run_plan(settings=SETTINGS, seed=0) -> list[tuple[int, float, int]]:
@@ -85,10 +89,14 @@ def build_run_plan(settings=SETTINGS, seed=0) -> list[tuple[int, float, int]]:
     return plan
 
 
-def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> dict:
+def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None, limit: int) -> dict:
     """Launch model_vqa_science.py as a subprocess for one (n_tokens, ratio)
     setting, time the whole thing wall-clock, and return the load/gen split
     the subprocess reports via its timing sidecar.
+
+    `limit` is passed straight through to model_vqa_science.py's own
+    `--limit` flag, which slices the question list in-memory after loading
+    it -- no separate subset file needed. 0 means no limit (full file).
 
     Whole-subprocess wall time is exempt from the "CUDA events, not
     time.time()" rule (see CLAUDE.md) -- by the time the process exits, all
@@ -104,6 +112,10 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
     run_id = f"n{n_tokens}_r{ratio}_{time.perf_counter_ns()}"
     answers_file = RUN_TMP_DIR / f"{run_id}.jsonl"
     timing_file = RUN_TMP_DIR / f"{run_id}.timing.json"
+    # Per-question detail from inside llava_llama.py -- llava_llama.py picks
+    # this path up via LLAVA_TIMING_FILE instead of its own hardcoded default,
+    # so this one run's questions don't get mixed in with any other run's.
+    llava_timing_file = RUN_TMP_DIR / f"{run_id}.llava_timing.jsonl"
 
     cmd = [
         sys.executable, "-m", "llava.eval.model_vqa_science",
@@ -118,13 +130,17 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
         "--conv-mode", "vicuna_v1",
         "--timing-file", str(timing_file),
     ]
+    if limit > 0:
+        cmd += ["--limit", str(limit)]
+
+    subprocess_env = {**os.environ, "LLAVA_TIMING_FILE": str(llava_timing_file)}
 
     #start the timing for the subprocess
     torch.cuda.synchronize()
     start_time = time.perf_counter()
 
     # cwd=VIS_PRUNER_DIR: the eval scripts use relative paths internally.
-    subprocess.run(cmd, cwd=VIS_PRUNER_DIR, check=True)
+    subprocess.run(cmd, cwd=VIS_PRUNER_DIR, check=True, env=subprocess_env)
 
     #end the timing for the subprocess
     torch.cuda.synchronize()
@@ -137,10 +153,12 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
     if question_subset is not None:
         with open(question_subset,"r") as f:
             data = json.load(f)
-        #count the number of 
+        #count the number of
         question_count = len(data)
     else:
         question_count = 4241
+    if limit > 0:
+        question_count = min(question_count, limit)
 
     with open(timing_file,"r+") as tf:
         tf_dict = json.load(tf)
@@ -151,17 +169,24 @@ def run_and_time(n_tokens: int, ratio: float, question_subset: Path | None) -> d
     generation_s = tf_dict["generation_s"]
     time_to_make_questions = tf_dict["time_to_make_questions"]
 
+    # Read back the per-question detail llava_llama.py wrote for this run
+    # (one JSON object per line, one line per question) and fold it in.
+    questions = []
+    if llava_timing_file.exists():
+        with open(llava_timing_file, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    questions.append(json.loads(line))
+
     final_dict = {
         "question_count": question_count,
         "total_wall_s": total_wall_s,
         "model_load_s": model_load_s,
         "generation_s": generation_s,
         "time_to_make_questions": time_to_make_questions,
+        "questions": questions,
     }
-
-    with open("timings_time_sqa_sweep.json","a") as f:
-        json.dump(final_dict,f)
-        f.write("\n")
 
     return final_dict
 
@@ -172,11 +197,17 @@ def main():
         "--question-subset",
         type=Path,
         default=None,
+        help="Path to a reduced question-file JSON to use instead of the full 4241-question set.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=5,
         help=(
-            "Path to a reduced question-file JSON to use instead of the full "
-            "4241-question set. Undecided as of last discussion -- full set "
-            "lets you cross-check accuracy reproduces; a subset is much "
-            "cheaper for 7 full runs. Pass explicitly once you've picked."
+            "Only run the first N questions per setting (sliced in-memory by "
+            "model_vqa_science.py, no file needed) -- for fast dev/sanity "
+            "sweeps. These numbers are not reportable. Pass --limit 0 for a "
+            "real, unlimited run."
         ),
     )
     parser.add_argument("--seed", type=int, default=0, help="Run-order shuffle seed")
@@ -184,8 +215,13 @@ def main():
         "-o",
         "--output",
         type=Path,
-        default=REPO_ROOT / "results/scienceqa_timing_sweep.csv",
-        help="Where to append timing results",
+        default=REPO_ROOT / "results/scienceqa_timing_sweep.jsonl",
+        help=(
+            "Where to append timing results -- one JSON object per line, "
+            "one line per (n_tokens, ratio, repeat) run, each with a nested "
+            "'questions' list holding that run's per-question detail. This "
+            "is the only file this script writes."
+        ),
     )
     args = parser.parse_args()
 
@@ -195,16 +231,11 @@ def main():
         print(f"  [{i}] n={n_tokens} r={ratio} repeat={repeat_idx}")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not args.output.exists()
 
-    with args.output.open("a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=list(RunResult.__dataclass_fields__))
-        if write_header:
-            writer.writeheader()
-
+    with args.output.open("a") as f:
         for order_index, (n_tokens, ratio, repeat_idx) in enumerate(plan):
             print(f"\n=== run {order_index + 1}/{len(plan)}: n={n_tokens} r={ratio} repeat={repeat_idx} ===")
-            timing = run_and_time(n_tokens, ratio, args.question_subset)
+            timing = run_and_time(n_tokens, ratio, args.question_subset, args.limit)
             result = RunResult(
                 order_index=order_index,
                 n_tokens=n_tokens,
@@ -212,7 +243,8 @@ def main():
                 repeat_idx=repeat_idx,
                 **timing,
             )
-            writer.writerow(asdict(result))
+            json.dump(asdict(result), f)
+            f.write("\n")
             f.flush()
             print(f"  total={result.total_wall_s:.1f}s  load={result.model_load_s:.1f}s  gen={result.generation_s:.1f}s")
 

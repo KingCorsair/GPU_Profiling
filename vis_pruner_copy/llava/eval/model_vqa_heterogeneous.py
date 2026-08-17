@@ -64,6 +64,14 @@ def create_data_loader(questions, image_folder, tokenizer, image_processor, mode
 
 
 def eval_model(args):
+    # Give llava_llama.py's per-question timing its own file, separate from
+    # model_vqa_science.py's, so direct runs of the two scripts never mix
+    # their per-question lines into the same fallback file.
+    os.environ.setdefault(
+        "LLAVA_TIMING_FILE",
+        "/workspace/GPU_Profiling/results/timing/model_vqa_heterogeneous_llava_timing.json",
+    )
+
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
