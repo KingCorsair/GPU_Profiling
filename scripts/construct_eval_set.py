@@ -14,7 +14,7 @@ import hashlib
 
 OUTPUT_DIR = "./vis_pruner_copy/vispruner_eval_dataset"
 IMAGES_DIR = os.path.join(OUTPUT_DIR, 'images')
-TARGET_PER_CATEGORY = 30
+TARGET_PER_CATEGORY = 50
 
 os.makedirs(IMAGES_DIR, exist_ok=True)
 
