@@ -232,7 +232,6 @@ def main():
         print(f"  [{i}] n={n_tokens} r={ratio} repeat={repeat_idx}")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-
     with args.output.open("a") as f:
         for order_index, (n_tokens, ratio, repeat_idx) in enumerate(plan):
             print(f"\n=== run {order_index + 1}/{len(plan)}: n={n_tokens} r={ratio} repeat={repeat_idx} ===")

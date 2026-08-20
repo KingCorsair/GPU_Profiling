@@ -60,3 +60,21 @@ Once the scorer is trustworthy, don't just report one accuracy number — break 
 Not yet relevant but keep in mind: none of this should touch your test set (rule 11) — steps 2–6 should all run against dev. Test set stays locked until the scorer itself is validated and finalized.
 
 I'd start with #1 and #2 today — #1 is quick, and #2 is the long pole since it's genuinely your judgment call on what "correct" means for free-form answers.
+
+---
+AUG 20
+----
+
+Confirm the swap's scope before rerunning anything. Check whether answers/text are shaped the same way for MME and GQA as they are for TextVQA — a list of crowd answers vs. a single string. If GQA/MME already had single-string fields in the right positions, applying this same fix there could break what was already correct. Grep a few lines per source_dataset in testfile.jsonl to check before you touch the loader further.
+
+Decide how to handle the list-of-answers case, since that's now your actual ground truth, not garbage to discard. Standard VQA eval doesn't join 10 crowd answers into one string — it scores the pred against each reference and aggregates (e.g. take the max BERTScore/NLI across references, or the classic VQA-accuracy soft vote: agreement fraction capped at 1). That's a design call, not a mechanical fix — how you aggregate across references will shift every score, so decide it deliberately rather than let " ".join() make the choice by default.
+
+Throw out or re-derive your hand-labeled sample from step 2 of the original plan. Whatever you labeled correct/incorrect was judged against the old (swapped) pairs — so "correct" may have meant "does the model's babble resemble a garbled ground-truth blob," which isn't the judgment you meant to make. Don't reuse those labels; relabel against the corrected pred/target.
+
+Regenerate all four evaluation_results_*.json files (normalized/weighted/relative/entailment) once 1-2 are settled — they're all scored on the swapped data and aren't safe to look at until then.
+
+Then redo score-distribution eyeballing (step 3) and the BERTScore/NLI disagreement pass (step 4) on the corrected data — the earlier version of both was built on the wrong pairing, so conclusions from it (including the "NLI catches this better" observation) need to be re-checked, not assumed to carry over.
+
+Random baseline (step 5) is still outstanding — do it after the above, on the corrected fields, so the shuffle is meaningful (shuffling real ground-truth answers against unrelated preds, not the swapped version).
+
+Composite decision and per-category breakdown come last, same as the original plan.

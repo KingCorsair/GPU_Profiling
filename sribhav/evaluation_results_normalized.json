@@ -1,281 +1,637 @@
 {
     "bert_accuracy": 1.0,
-    "entailment_accuracy": 0.8,
-    "composite_score_accuracy": 0.8111111111111111,
-    "bert_f1": [
-        0.7881629467010498,
-        0.7972559332847595,
-        0.7866643667221069,
-        0.8012858629226685,
-        0.7861835956573486,
-        0.7712103128433228,
-        0.803992509841919,
-        0.8266873955726624,
-        0.7965489625930786,
-        0.7622132301330566,
-        0.7777465581893921,
-        0.8054822087287903,
-        0.7936093807220459,
-        0.7703030109405518,
-        0.8295398950576782,
-        0.9999997615814209,
-        0.8359432816505432,
-        0.8362206220626831,
-        0.8414449691772461,
-        0.8355425596237183,
-        0.9999997615814209,
-        0.8360937237739563,
-        0.8350263237953186,
-        0.8371191620826721,
-        0.8371191620826721,
-        0.9999997615814209,
-        0.8336750864982605,
-        0.9999997615814209,
-        0.8347198367118835,
-        0.8355425596237183,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.8129074573516846,
-        0.829185962677002,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.8391743302345276,
-        0.830674946308136,
-        0.9999997615814209,
-        0.9992688894271851,
-        0.9999997615814209,
-        0.8320395946502686,
-        0.8361253142356873,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.8331555128097534,
-        0.8185652494430542,
-        0.9999997615814209,
-        0.9999997615814209,
-        0.8379279971122742,
-        0.9999997615814209,
-        0.9992688894271851,
-        0.9992688894271851,
-        0.9992688894271851,
-        0.9999997615814209,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9999999403953552,
-        0.9541515707969666,
-        0.837512195110321,
-        0.8328981995582581,
-        0.8387242555618286,
-        0.8237444758415222,
-        0.8346521258354187,
-        0.9999999403953552,
-        0.8320573568344116,
-        0.8382761478424072,
-        0.8341636061668396,
-        0.8360415101051331,
-        0.8328856229782104,
-        0.8368204832077026,
-        0.8344268798828125,
-        0.8217477798461914,
-        0.8382761478424072
-    ],
-    "nli_score": [
-        0.8458485007286072,
-        0.5969737768173218,
-        0.6328184604644775,
-        0.7131227254867554,
-        0.8623226284980774,
-        0.5267987251281738,
-        0.625679612159729,
-        0.23468193411827087,
-        0.5761189460754395,
-        0.3252822756767273,
-        0.8742791414260864,
-        0.7751814126968384,
-        0.8408058881759644,
-        0.7903751134872437,
-        0.5853810906410217,
-        0.9683166742324829,
-        0.007929414510726929,
-        0.9706160426139832,
-        0.9682680368423462,
-        0.9707844257354736,
-        0.9683166742324829,
-        0.9703086614608765,
-        0.9709117412567139,
-        0.9743289947509766,
-        0.9743289947509766,
-        0.9683166742324829,
-        0.9655165672302246,
-        0.9683166742324829,
-        0.9660130143165588,
-        0.9707844257354736,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.42620018124580383,
-        0.9135372042655945,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.003385186195373535,
-        0.002132803201675415,
-        0.9683166742324829,
-        0.0041429996490478516,
-        0.9683166742324829,
-        0.9740463495254517,
-        0.9708684682846069,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9773256182670593,
-        0.9414373636245728,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9698954224586487,
-        0.9683166742324829,
-        0.0041429996490478516,
-        0.0041429996490478516,
-        0.0041429996490478516,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.9683166742324829,
-        0.0018200576305389404,
-        0.9721044301986694,
-        0.9777499437332153,
-        0.96961909532547,
-        0.976599931716919,
-        0.9647637605667114,
-        0.9683166742324829,
-        0.9739015102386475,
-        0.9650059938430786,
-        0.9696205854415894,
-        0.9752307534217834,
-        0.9780436754226685,
-        0.9681129455566406,
-        0.9642646908760071,
-        0.888020932674408,
-        0.9650059938430786
-    ],
-    "composite_score": [
-        0.8159874863124221,
-        0.6827295131276103,
-        0.7014043761811728,
-        0.7546380320803313,
-        0.8224948074268187,
-        0.6259934988534094,
-        0.7037162073677745,
-        0.36558169051423983,
-        0.6686350659596126,
-        0.4559732940946175,
-        0.8231925124399494,
-        0.7900413826205482,
-        0.8165261949280229,
-        0.7802099871361033,
-        0.6863944678286195,
-        0.9839032238405264,
-        0.01570981219754441,
-        0.8984200584438876,
-        0.9004126794757643,
-        0.8981006323841902,
-        0.9839032238405264,
-        0.8982151358989511,
-        0.8978567734081695,
-        0.9005275349469377,
-        0.9005275349469377,
-        0.9839032238405264,
-        0.8947652753202824,
-        0.9839032238405264,
-        0.8955800690939205,
-        0.8981006323841902,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.5592109916318545,
-        0.8693202001659911,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.006743170785747334,
-        0.004254682274703481,
-        0.9839032238405264,
-        0.008251787134020564,
-        0.9839032238405264,
-        0.8974602038660012,
-        0.8984731557778567,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.8995003733456248,
-        0.8757122343667212,
-        0.9839032238405264,
-        0.9839032238405264,
-        0.8990950332328685,
-        0.9839032238405264,
-        0.008251787134020564,
-        0.008251787134020564,
-        0.008251787134020564,
-        0.9839032238405264,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.983903310392365,
-        0.0036331849094231317,
-        0.8998030895888129,
-        0.8995300061702697,
-        0.8994343397301792,
-        0.8936832258112323,
-        0.8950039062909825,
-        0.983903310392365,
-        0.8974090508933266,
-        0.8971879535251327,
-        0.8968059570855137,
-        0.9002880552083253,
-        0.8996469565362161,
-        0.897691549161411,
-        0.8946596408959526,
-        0.8535999337668861,
-        0.8971879535251327
+    "entailment_accuracy": 0.4111111111111111,
+    "composite_score_accuracy": 0.4111111111111111,
+    "results": [
+        {
+            "pred": "The name of the runner on the left is Willis.",
+            "target": "willis  willis willis willis willis willis willis willis willis willis",
+            "bert_f1": 0.7881629467010498,
+            "nli_score": 0.5145198106765747,
+            "composite_score": 0.6226004724822819
+        },
+        {
+            "pred": "In the image, there are four items available for $5 each. These items are colorful cakes or frosting, which are displayed in a store. The four items are placed in a row, and each one is priced at $5.",
+            "target": "3 3 3 3 3 for $5 3 3 3 3 3",
+            "bert_f1": 0.7972559332847595,
+            "nli_score": 0.5038338303565979,
+            "composite_score": 0.6174585672201294
+        },
+        {
+            "pred": "The light sign on the farthest right window reads \"all lit.\"",
+            "target": "bud light bud light bud light bud light all 2 liters bud light bud light bud light bud light bud light",
+            "bert_f1": 0.7866643667221069,
+            "nli_score": 0.4930610954761505,
+            "composite_score": 0.6061825069289184
+        },
+        {
+            "pred": "The lowest number yard line that I can see in the image is the 30-yard line.",
+            "target": "30 30 30 30 30 30 30 30 30 30",
+            "bert_f1": 0.8012858629226685,
+            "nli_score": 0.5476597547531128,
+            "composite_score": 0.650629667238132
+        },
+        {
+            "pred": "Yes, these are bottles of Pepsi.",
+            "target": "yes yes yes yes yes yes yes yes yes yes",
+            "bert_f1": 0.7861835956573486,
+            "nli_score": 0.5153829455375671,
+            "composite_score": 0.6226122206417743
+        },
+        {
+            "pred": "The center of all of this is a man who is writing on a large whiteboard.",
+            "target": "bryan owens alexa curtis bryan owens bryan owens bryan owens bryan owens bryan owens bryan owens mahou agile experience design makeup",
+            "bert_f1": 0.7712103128433228,
+            "nli_score": 0.4986259639263153,
+            "composite_score": 0.6056615213571783
+        },
+        {
+            "pred": "The time on the watch is 10:10.",
+            "target": "5:41 5:41 8:00 5:41 5:40 5:41 5:42 5:41 8:00 5:41",
+            "bert_f1": 0.803992509841919,
+            "nli_score": 0.2872205972671509,
+            "composite_score": 0.42324126675291157
+        },
+        {
+            "pred": "The bottle with a red label is a bottle of Jack Daniel's whiskey.",
+            "target": "red label johnnie walker jonnie walker black label red label johnny walker answering does not require reading text in the image red label johnnie walker jonnie walker",
+            "bert_f1": 0.8266873955726624,
+            "nli_score": 0.4078565537929535,
+            "composite_score": 0.546225790334312
+        },
+        {
+            "pred": "Yes, this is a Denny's restaurant sign.",
+            "target": "yes yes yes yes yes pet center yes yes one man show yes",
+            "bert_f1": 0.7965489625930786,
+            "nli_score": 0.4906840920448303,
+            "composite_score": 0.607277606911953
+        },
+        {
+            "pred": "One of the brands being advertised in the image is Yamaha.",
+            "target": "yamaha yamaha yamaha yamaha yahama yamaha yamaha yamaha yamaha peugeot",
+            "bert_f1": 0.7622132301330566,
+            "nli_score": 0.8132750391960144,
+            "composite_score": 0.7869166742525667
+        },
+        {
+            "pred": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+            "target": "hersheys hershey's hersheys hershey's hershey's hershey's hershey's hershey's hershey's hershey's",
+            "bert_f1": 0.7777465581893921,
+            "nli_score": 0.45965760946273804,
+            "composite_score": 0.5778178755992537
+        },
+        {
+            "pred": "The picture says \"your other ride is a bicycle.\"",
+            "target": "your mom your mom your mom your mom your mom your mom your mom your mom your mom your mom",
+            "bert_f1": 0.8054822087287903,
+            "nli_score": 0.45537835359573364,
+            "composite_score": 0.5818235148624845
+        },
+        {
+            "pred": "Yes, the ruler in the image was made in 2002.",
+            "target": "yes yes yes yes yes 2002 yes yes yes yes",
+            "bert_f1": 0.7936093807220459,
+            "nli_score": 0.5011167526245117,
+            "composite_score": 0.6143244435668342
+        },
+        {
+            "pred": "The author of the book is Jorge Luis Borges.",
+            "target": "gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli gioconda belli",
+            "bert_f1": 0.7703030109405518,
+            "nli_score": 0.48190850019454956,
+            "composite_score": 0.5928959531145158
+        },
+        {
+            "pred": "This image was taken on January 14, 2012.",
+            "target": "2012 2012 2012 2012 2012 2012 2012 2012 2012 2012",
+            "bert_f1": 0.8295398950576782,
+            "nli_score": 0.4942893087863922,
+            "composite_score": 0.6194646562383777
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "No, there is only one piece of pizza in the image.",
+            "target": "Yes",
+            "bert_f1": 0.835943341255188,
+            "nli_score": 0.02145320177078247,
+            "composite_score": 0.04183282826309787
+        },
+        {
+            "pred": "Yes, there are two tennis rackets in the picture.",
+            "target": "Yes",
+            "bert_f1": 0.8362205028533936,
+            "nli_score": 0.5088100433349609,
+            "composite_score": 0.6326657658447488
+        },
+        {
+            "pred": "Yes, there are two bath towels in the picture.",
+            "target": "Yes",
+            "bert_f1": 0.8414449691772461,
+            "nli_score": 0.5090780854225159,
+            "composite_score": 0.6343633934099829
+        },
+        {
+            "pred": "Yes, there are four people in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8355425000190735,
+            "nli_score": 0.5016099214553833,
+            "composite_score": 0.6268790320030219
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there are two display devices in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8360936045646667,
+            "nli_score": 0.5142251253128052,
+            "composite_score": 0.6367983040856044
+        },
+        {
+            "pred": "Yes, there are four dogs in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8350262641906738,
+            "nli_score": 0.5051082968711853,
+            "composite_score": 0.629457229748425
+        },
+        {
+            "pred": "Yes, there are two people in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8371191620826721,
+            "nli_score": 0.5034275650978088,
+            "composite_score": 0.6287417706809405
+        },
+        {
+            "pred": "Yes, there are two people in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8371191620826721,
+            "nli_score": 0.5034275650978088,
+            "composite_score": 0.6287417706809405
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there are two bowls in this image.",
+            "target": "Yes",
+            "bert_f1": 0.8336750864982605,
+            "nli_score": 0.5035804510116577,
+            "composite_score": 0.6278866892377524
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there are three remotes in this image.",
+            "target": "Yes",
+            "bert_f1": 0.834719717502594,
+            "nli_score": 0.5034151077270508,
+            "composite_score": 0.6280540773405955
+        },
+        {
+            "pred": "Yes, there are four people in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8355425000190735,
+            "nli_score": 0.5016099214553833,
+            "composite_score": 0.6268790320030219
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "The airplane is flying above a beach with people on it.",
+            "target": "ocean",
+            "bert_f1": 0.8129074573516846,
+            "nli_score": 0.4985737204551697,
+            "composite_score": 0.6180710821566521
+        },
+        {
+            "pred": "A painting is hanging above the chalkboard.",
+            "target": "picture",
+            "bert_f1": 0.829185962677002,
+            "nli_score": 0.5083098411560059,
+            "composite_score": 0.6302575062579572
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there is a red fire truck in the image.",
+            "target": "no",
+            "bert_f1": 0.8391743302345276,
+            "nli_score": 0.04927101731300354,
+            "composite_score": 0.09307713314667682
+        },
+        {
+            "pred": "Yes, there is a pear beneath the silver and black appliance.",
+            "target": "no",
+            "bert_f1": 0.830674946308136,
+            "nli_score": 0.011603772640228271,
+            "composite_score": 0.022887823230125684
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "No",
+            "target": "Yes",
+            "bert_f1": 0.9992688894271851,
+            "nli_score": 0.0035216808319091797,
+            "composite_score": 0.007018626218053982
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there is a fire hydrant in this image.",
+            "target": "Yes",
+            "bert_f1": 0.8320393562316895,
+            "nli_score": 0.5078164935112,
+            "composite_score": 0.6306996509004644
+        },
+        {
+            "pred": "Yes, there is a backpack in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8361251950263977,
+            "nli_score": 0.5044246315956116,
+            "composite_score": 0.6292375487926157
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there is a motorcycle in this image.",
+            "target": "Yes",
+            "bert_f1": 0.8331555128097534,
+            "nli_score": 0.5027726888656616,
+            "composite_score": 0.6271113026782024
+        },
+        {
+            "pred": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a mirror.",
+            "target": "no",
+            "bert_f1": 0.8185652494430542,
+            "nli_score": 0.512010395526886,
+            "composite_score": 0.6299738293216253
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there is a clock in this image.",
+            "target": "Yes",
+            "bert_f1": 0.8379279971122742,
+            "nli_score": 0.5068752765655518,
+            "composite_score": 0.6316537051798612
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "No",
+            "target": "Yes",
+            "bert_f1": 0.9992688894271851,
+            "nli_score": 0.0035216808319091797,
+            "composite_score": 0.007018626218053982
+        },
+        {
+            "pred": "No",
+            "target": "Yes",
+            "bert_f1": 0.9992688894271851,
+            "nli_score": 0.0035216808319091797,
+            "composite_score": 0.007018626218053982
+        },
+        {
+            "pred": "No",
+            "target": "Yes",
+            "bert_f1": 0.9992688894271851,
+            "nli_score": 0.0035216808319091797,
+            "composite_score": 0.007018626218053982
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "No.",
+            "target": "Yes",
+            "bert_f1": 0.9541511535644531,
+            "nli_score": 0.0016912221908569336,
+            "composite_score": 0.0033764596449593646
+        },
+        {
+            "pred": "Yes, there is a white bird in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8375123143196106,
+            "nli_score": 0.5014464855194092,
+            "composite_score": 0.6273047485035198
+        },
+        {
+            "pred": "Yes, there is a red brick building in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8328977823257446,
+            "nli_score": 0.5024470090866089,
+            "composite_score": 0.6267849356896339
+        },
+        {
+            "pred": "Yes, there is a blue bus in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8387242555618286,
+            "nli_score": 0.5067211985588074,
+            "composite_score": 0.6317600743114581
+        },
+        {
+            "pred": "Yes, there is a red bicycle with white handlebars in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8237447142601013,
+            "nli_score": 0.5048208832740784,
+            "composite_score": 0.6260037667947206
+        },
+        {
+            "pred": "Yes, there is a blue court in the image.",
+            "target": "Yes",
+            "bert_f1": 0.834651529788971,
+            "nli_score": 0.503017008304596,
+            "composite_score": 0.6277248863005483
+        },
+        {
+            "pred": "Yes",
+            "target": "Yes",
+            "bert_f1": 0.9999996423721313,
+            "nli_score": 0.9683166742324829,
+            "composite_score": 0.983903166139292
+        },
+        {
+            "pred": "Yes, there is a skateboard with red wheels in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8320571184158325,
+            "nli_score": 0.5061510801315308,
+            "composite_score": 0.6294186654579772
+        },
+        {
+            "pred": "Yes, there is a white plate in the image.",
+            "target": "Yes",
+            "bert_f1": 0.838276207447052,
+            "nli_score": 0.5022960901260376,
+            "composite_score": 0.6281837424338997
+        },
+        {
+            "pred": "Yes, there are green beans in the image.",
+            "target": "Yes",
+            "bert_f1": 0.83416348695755,
+            "nli_score": 0.5080903172492981,
+            "composite_score": 0.6315204909797043
+        },
+        {
+            "pred": "Yes, there is a black cat in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8360415101051331,
+            "nli_score": 0.5069113969802856,
+            "composite_score": 0.6311449457161714
+        },
+        {
+            "pred": "Yes, there is a brown and white animal in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8328860402107239,
+            "nli_score": 0.5012251138687134,
+            "composite_score": 0.6258300128407812
+        },
+        {
+            "pred": "Yes, there are red shoes in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8368200659751892,
+            "nli_score": 0.5072880983352661,
+            "composite_score": 0.6316587774543042
+        },
+        {
+            "pred": "Yes, there is a red scarf in the image.",
+            "target": "Yes",
+            "bert_f1": 0.8344268798828125,
+            "nli_score": 0.5033373832702637,
+            "composite_score": 0.6279106922181645
+        },
+        {
+            "pred": "The woman is wearing the dress.",
+            "target": "women",
+            "bert_f1": 0.8217477798461914,
+            "nli_score": 0.5026574730873108,
+            "composite_score": 0.6237632501346381
+        },
+        {
+            "pred": "Yes, there is a white plate in the image.",
+            "target": "Yes",
+            "bert_f1": 0.838276207447052,
+            "nli_score": 0.5022960901260376,
+            "composite_score": 0.6281837424338997
+        }
     ]
 }

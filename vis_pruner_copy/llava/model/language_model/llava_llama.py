@@ -66,7 +66,13 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # question, so forward()/prepare_inputs_for_generation() have
         # somewhere to record into. None outside of a generate() call, so
         # calls made outside that path are silently not recorded.
-        self._timing_forward_calls = None
+        # forward() is called once per decode step, so its timing uses CUDA
+        # events (record on the stream, no sync) rather than perf_counter +
+        # torch.cuda.synchronize() per call -- syncing inside that loop would
+        # drain the pipeline every step and inflate exactly the fast kernels
+        # we're trying to measure. Events get read out with a single sync
+        # after generate() returns.
+        self._timing_forward_events = None
         self._timing_prepare_inputs_calls = None
 
         # Initialize weights and apply final processing
@@ -100,8 +106,13 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
 
-        torch.cuda.synchronize()
-        start_time_prep = time.perf_counter()
+        timing_active = self._timing_forward_events is not None
+        if timing_active:
+            prep_start_evt = torch.cuda.Event(enable_timing=True)
+            prep_end_evt = torch.cuda.Event(enable_timing=True)
+            fwd_start_evt = torch.cuda.Event(enable_timing=True)
+            fwd_end_evt = torch.cuda.Event(enable_timing=True)
+            prep_start_evt.record()
 
         if inputs_embeds is None:
             (
@@ -120,11 +131,11 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 images,
                 image_sizes
             )
-        torch.cuda.synchronize()
-        end_time_prep = time.perf_counter()
-        elapsed_time_prep = end_time_prep - start_time_prep
 
-        start_time_forward = time.perf_counter()
+        if timing_active:
+            prep_end_evt.record()
+            fwd_start_evt.record()
+
         result = super().forward(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -137,15 +148,12 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict
         )
-        torch.cuda.synchronize()
-        end_time_forward = time.perf_counter()
-        elapsed_time_forward = end_time_forward - start_time_forward
 
-        if self._timing_forward_calls is not None:
-            self._timing_forward_calls.append({
-                "multimodal_prep_time": elapsed_time_prep,
-                "lm_forward_time": elapsed_time_forward,
-            })
+        if timing_active:
+            fwd_end_evt.record()
+            self._timing_forward_events.append(
+                (prep_start_evt, prep_end_evt, fwd_start_evt, fwd_end_evt)
+            )
 
         return result
         
@@ -165,7 +173,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # prepare_inputs_for_generation() append into these for every step
         # of the generation loop below; we fold it all into one JSON line
         # once generate() finishes.
-        self._timing_forward_calls = []
+        self._timing_forward_events = []
         self._timing_prepare_inputs_calls = []
 
         torch.cuda.synchronize()
@@ -207,14 +215,29 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             inputs_embeds=inputs_embeds,
             **kwargs
         )
+        # Single sync for the whole question: forward()'s CUDA events were
+        # recorded on the stream without syncing per call (see forward()),
+        # so nothing is safe to read off them until now. elapsed_time() on
+        # an event pair errors out if the corresponding work hasn't actually
+        # completed on the GPU yet.
         torch.cuda.synchronize()
         end_time_generate = time.perf_counter()
         elapsed_time_generate = end_time_generate - start_time_generate
 
+        # elapsed_time() returns milliseconds; convert to seconds to match
+        # every other duration in this file.
+        forward_calls = [
+            {
+                "multimodal_prep_time": prep_start_evt.elapsed_time(prep_end_evt) / 1000.0,
+                "lm_forward_time": fwd_start_evt.elapsed_time(fwd_end_evt) / 1000.0,
+            }
+            for prep_start_evt, prep_end_evt, fwd_start_evt, fwd_end_evt in self._timing_forward_events
+        ]
+
         output_dictionary = {
             "multimodal_prep_time_generate": elapsed_time_prep,
             "generate_time": elapsed_time_generate,
-            "forward_calls": self._timing_forward_calls,
+            "forward_calls": forward_calls,
             "prepare_inputs_calls": self._timing_prepare_inputs_calls,
         }
 
@@ -224,7 +247,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             json.dump(output_dictionary, f)
             f.write("\n")
 
-        self._timing_forward_calls = None
+        self._timing_forward_events = None
         self._timing_prepare_inputs_calls = None
 
         return result, visual_token_num
@@ -238,7 +261,9 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         inputs = super().prepare_inputs_for_generation(
             input_ids, past_key_values=past_key_values, inputs_embeds=inputs_embeds, **kwargs
         )
-        torch.cuda.synchronize()
+        # Plain dict assignment below, no GPU kernels involved -- no sync
+        # needed for correctness, and syncing here (once per decode step)
+        # would just drain the pipeline for no timing benefit.
         start_time_prepare_inputs = time.perf_counter()
 
         if images is not None:
@@ -246,7 +271,6 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         if image_sizes is not None:
             inputs['image_sizes'] = image_sizes
 
-        torch.cuda.synchronize()
         end_time_prepare_inputs = time.perf_counter()
         elapsed_time_prepare_inputs = end_time_prepare_inputs - start_time_prepare_inputs
 

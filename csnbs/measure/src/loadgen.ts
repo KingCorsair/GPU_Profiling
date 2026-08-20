@@ -129,6 +129,15 @@ function validateConfig(config: LoadConfig): void {
   }
 }
 
+
+function parseLoadConfig() {
+const args = process.argv.slice(2);
+const rpsIndex = args.indexOf("--rps");
+const rpsText = rpsIndex >= 0  ? args[rpsIndex + 1] ?? null : null;
+
+}
+
+
 /* Sends one request and turns both successes and failures into a result record. */
 async function sendOne(
   sequence: number,

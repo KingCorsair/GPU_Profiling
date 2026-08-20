@@ -88,17 +88,28 @@ def eval_model(args):
     loading_model_end_time = time.perf_counter()
     loading_model_elapsed_time = loading_model_end_time - loading_model_start_time
 
+    # Checkpoint: model finished loading, data prep hasn't started yet.
+    # Mirrors model_vqa_science.py's load/data/generation three-way split --
+    # everything from here to the DataLoader existing is data-prep cost, not
+    # generation cost.
+    torch.cuda.synchronize()
+    t_start_data = time.perf_counter()
     questions = json.load(open(os.path.expanduser(args.question_file), "r"))
+    if args.limit is not None:
+        questions = questions[:args.limit]
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
-
-    torch.cuda.synchronize()
-    loading_data_start_time = time.perf_counter()
     data_loader = create_data_loader(
         questions, args.image_folder, tokenizer, image_processor, model.config, args.conv_mode
     )
+    torch.cuda.synchronize()
+    t_end_data = time.perf_counter()
+    elapsed_data_time = t_end_data - t_start_data
 
+    # Checkpoint: data prep done, question loop starts now. Everything from
+    # here to the loop ending is generation cost.
+    t_start_generate = time.perf_counter()
     generation_list = []
     data_bar = tqdm(zip(data_loader, questions), total=len(questions))
 
@@ -155,19 +166,34 @@ def eval_model(args):
     ans_file.close()
 
     torch.cuda.synchronize()
-    loading_data_end_time = time.perf_counter()
-
-    loading_data_elapsed_time =  loading_data_end_time - loading_data_start_time
+    t_end_generate = time.perf_counter()
+    elapsed_generate_time = t_end_generate - t_start_generate
 
     output_dictionary = {
-        "time to load the data" : loading_data_elapsed_time,
-        "time to load the model" : loading_model_elapsed_time, 
+        "time to load the data" : elapsed_data_time,
+        "time to load the model" : loading_model_elapsed_time,
         "time to generate each responses" : generation_list,
     }
 
-    with open("/workspace/GPU_Profiling/results/timing/model_vqa_heterogeneous_timing.json","a+") as f:
-        json.dump(output_dictionary,f)
+    default_timing_file = "/workspace/GPU_Profiling/results/timing/model_vqa_heterogeneous_timing.json"
+    with open(default_timing_file, "a+") as f:
+        json.dump(output_dictionary, f)
         f.write("\n")
+
+    # Sidecar in the same shape scripts/time_sqa_sweep.py's run_and_time()
+    # already knows how to read back (question_count/model_load_s/
+    # time_to_make_questions/generation_s) -- lets a heterogeneous sweep
+    # harness reuse that same reader instead of a bespoke one.
+    if args.timing_file:
+        timing_file = os.path.expanduser(args.timing_file)
+        os.makedirs(os.path.dirname(timing_file), exist_ok=True)
+        with open(timing_file, "w+") as tf:
+            json.dump({
+                "question_count": len(questions),
+                "model_load_s": loading_model_elapsed_time,
+                "time_to_make_questions": elapsed_data_time,
+                "generation_s": elapsed_generate_time,
+            }, tf)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -183,6 +209,12 @@ if __name__ == "__main__":
     parser.add_argument("--max_new_tokens", type=int, default=128)
     parser.add_argument("--visual_token_num", type=int, default=576)
     parser.add_argument("--important_ratio", type=float, default=0.5)
+    parser.add_argument("--limit", type=int, default=None,
+                         help="Only run the first N questions -- for quick smoke tests.")
+    parser.add_argument("--timing-file", type=str, default=None,
+                         help="Optional path to write a JSON sidecar with "
+                              "question_count/model_load_s/generation_s, "
+                              "same shape as model_vqa_science.py's.")
     args = parser.parse_args()
 
     eval_model(args)

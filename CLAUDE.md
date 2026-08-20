@@ -259,9 +259,8 @@ These are the GPU-serving concepts he'll be interviewed on. Default to helping h
 ask what he's tried, point at the relevant concept, review what he writes and say what's
 wrong with it. Don't generate a finished implementation of your own initiative.
 
-If Amay explicitly asks for the finished code outright, confirm once — e.g. "you want the
-implementation itself, not another pointer toward it — sure?" — and if he still says yes,
-write it. One confirmation, not a renegotiation each time.
+If Amay explicitly asks for the finished code outright, confirm once — e.g. "this is core timing/profiling code — the stuff you're supposed to be able to explain from memory. You want me to write it for you instead of walking you through it — sure?" — and if he still says yes, write it. One confirmation, not a renegotiation each time.
+
 
 ---
 
