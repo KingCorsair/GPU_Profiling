@@ -38,11 +38,25 @@ RUN mkdir -p /var/run/sshd /root/.ssh && \
 
 WORKDIR /workspace
 
-# Write the injected key, start sshd, then stay alive.
+# Write the injected key, stage the persistent git deploy key (if present on the
+# /workspace volume) into /root with correct permissions, start sshd, then stay alive.
+#
+# /root is wiped on every pod restart, so it's rebuilt here each boot. The git deploy
+# key itself lives on /workspace so it survives restarts, but /workspace is a MooseFS
+# network mount that does not honor chmod -- ssh refuses a key left there directly, so
+# it has to be copied into /root and locked down to 600 here instead.
 CMD ["/bin/bash", "-c", "\
     if [ -n \"$PUBLIC_KEY\" ]; then \
         echo \"$PUBLIC_KEY\" >> /root/.ssh/authorized_keys; \
         chmod 600 /root/.ssh/authorized_keys; \
+    fi; \
+    if [ -f /workspace/.ssh_git/id_ed25519 ]; then \
+        cp /workspace/.ssh_git/id_ed25519 /root/.ssh/id_ed25519_git; \
+        chmod 600 /root/.ssh/id_ed25519_git; \
+        echo 'Host github.com' > /root/.ssh/config; \
+        echo '    IdentityFile /root/.ssh/id_ed25519_git' >> /root/.ssh/config; \
+        echo '    IdentitiesOnly yes' >> /root/.ssh/config; \
+        chmod 600 /root/.ssh/config; \
     fi; \
     service ssh start; \
     sleep infinity"]

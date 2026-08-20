@@ -107,13 +107,15 @@ container image — no pip installs on the pod.
 **To change the environment, edit the Dockerfile and rebuild.** Not `pip install` on a
 running pod — that disappears when the container stops.
 
-<<<<<<< HEAD
-**GPU:** RunPod, A40 (48GB) or RTX 4090 (24GB), ~100GB disk. No network volume — it locks
-you to one datacenter and causes availability waits. **The pod is disposable.**
+**GPU:** RunPod, A40 (48GB) or RTX 4090 (24GB), ~100GB disk. `/workspace` is a MooseFS
+network mount shared across RunPod's cluster (`mfs#...:9421`) — it persists across pod
+stop/restart, but it does **not** honor `chmod`; anything needing real Unix permissions
+(private keys, etc.) must be staged into `/root` at boot instead. **The pod itself is
+disposable** — only `/workspace`'s contents survive a restart, not `/root`.
 
 **Everything of value lives in git.** Model weights and datasets re-download. A lost pod
 costs a `git clone` and twenty minutes.
-=======
+
 **Session start:**
 ```bash
 cd /workspace
@@ -124,7 +126,6 @@ bash scripts/download_checkpoint.sh   # re-fetches LLaVA weights; never committe
 uv pip sync --system requirements.txt # catches anything download_checkpoint.sh or other
                                        # setup steps pulled outside the pin (see Gotchas)
 ```
->>>>>>> 06241b3f0b1c6e836a092ade8d4587faafaf0f1a
 
 **Session end:** `git add . && git commit && git push`, then **Stop the pod in the console**
 (square icon, wait for "Exited"). Closing the browser does not stop billing.
@@ -330,3 +331,7 @@ it isn't yours yet.
 - `df -h /workspace` reports RunPod's shared cluster, not your quota. Use `du -sh /workspace`
   against the disk size you configured.
 - The eval scripts use relative paths — run them from `vis_pruner_copy`, or pass `cwd`.
+- `/workspace` doesn't honor `chmod` (MooseFS mount) — `chmod 600` on a file there silently
+  reverts to `666`. SSH refuses to load a private key left there directly. Keep the key's
+  bytes on `/workspace` for persistence, but stage a copy into `/root` (chmod'd correctly)
+  at container boot — see the `CMD` in the Dockerfile for the pattern.
