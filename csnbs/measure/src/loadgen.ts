@@ -1,8 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+type DatasetRecord = {
+  image: string; // path relative to dev.json
+  question: string;
+};
 
 /* Expected types for server.py. */
 type LoadConfig = {
@@ -10,6 +15,7 @@ type LoadConfig = {
   requestsPerSecond: number;
   durationSeconds: number;
   timeoutMs: number; // Maximum client wait time for each request.
+  datasetPath: string;
 };
 
 type InferRequest = { image_b64: string; question: string };
@@ -52,11 +58,9 @@ type LoadSummary = {
 
 type WorkloadMetadata = {
   id: string;
-  question: string;
-  imageSha256: string;
-  imageByteLength: number;
+  recordCount: number;
+  totalImageByteLength: number;
 };
-
 type SourceMetadata = {
   gitCommit: string | null;
   gitDirty: boolean | null;
@@ -109,11 +113,6 @@ type RunManifest = {
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const outputRoot = join(repoRoot, "results", "loadgen");
 
-const payload: InferRequest = {
-  image_b64: Buffer.from("fake image bytes").toString("base64"),
-  question: "What is in this image?",
-};
-
 /* Checks whether the requested load can be scheduled. */
 function validateConfig(config: LoadConfig): void {
   if (!Number.isFinite(config.requestsPerSecond) || config.requestsPerSecond <= 0) {
@@ -130,11 +129,50 @@ function validateConfig(config: LoadConfig): void {
 }
 
 
-function parseLoadConfig() {
+function parseLoadConfig() : LoadConfig {
 const args = process.argv.slice(2);
+/* Parse requests per second from command line arguments. */
 const rpsIndex = args.indexOf("--rps");
 const rpsText = rpsIndex >= 0  ? args[rpsIndex + 1] ?? null : null;
+ if(rpsText === null) {
+    throw new Error("Missing --rps argument");
+  }
+  const requestsPerSecond = Number(rpsText);
 
+/* Parse endpoint from command line arguments. */
+const endpointIndex = args.indexOf("--endpoint");
+const endpoint = endpointIndex >= 0 ? args[endpointIndex + 1] ?? null : null;
+if (endpoint === null) {
+    throw new Error("Missing --endpoint argument");
+  }
+
+  /* Parse duration from command line arguments. */
+  const durationIndex = args.indexOf("--duration");
+  const durationText = durationIndex >= 0 ? args[durationIndex + 1] ?? null : null;
+  if (durationText === null) {
+    throw new Error("Missing --duration argument");
+  }
+  const durationSeconds = Number(durationText);
+  /* Parse timeout from command line arguments. */
+  const timeoutIndex = args.indexOf("--timeout");
+  const timeoutText = timeoutIndex >= 0 ? args[timeoutIndex + 1] ?? null : null;
+  if (timeoutText === null) {
+    throw new Error("Missing --timeout argument");
+  }
+  const timeoutMs = Number(timeoutText);
+
+  const datasetIndex = args.indexOf("--dataset");
+  const datasetpath = datasetIndex >= 0 ? args[datasetIndex + 1] ?? null : null;
+  if (datasetpath === null) {
+    throw new Error("Missing --dataset argument");
+  }
+return {
+  endpoint,
+  requestsPerSecond,
+  durationSeconds,
+  timeoutMs,
+  datasetPath: datasetpath,
+};
 }
 
 
@@ -197,7 +235,7 @@ function sleep(ms: number): Promise<void> {
 /* Launches requests according to the clock, not according to prior completions. */
 async function runLoad(
   config: LoadConfig,
-  payload: InferRequest,
+  payloads: readonly InferRequest[],
 ): Promise<LoadRun> {
   validateConfig(config);
   const intervalMs = 1000 / config.requestsPerSecond;
@@ -213,7 +251,8 @@ async function runLoad(
     if (delayMs > 0) {
       await sleep(delayMs);
     }
-    inFlight.push(sendOne(sequence, scheduledAtMs, config, payload));
+    const currentPayload = payloads[sequence % payloads.length]!;
+    inFlight.push(sendOne(sequence, scheduledAtMs, config, currentPayload));
   }
   const results = await Promise.all(inFlight);
   return { plannedStartMs, plannedEndMs, results };
@@ -329,19 +368,26 @@ function collectHardwareMetadata(): HardwareMetadata {
   };
 }
 
-function describeWorkload(payload: InferRequest): WorkloadMetadata {
-  const image = Buffer.from(payload.image_b64, "base64");
-  const imageHash = createHash("sha256").update(image).digest("hex");
-  const workloadHash = createHash("sha256")
-    .update(image)
-    .update("\0")
-    .update(payload.question, "utf8")
-    .digest("hex");
+function describeWorkload(
+  payloads: readonly InferRequest[],
+): WorkloadMetadata {
+  const workloadHash = createHash("sha256");
+  let totalImageByteLength = 0;
+
+  for (const payload of payloads) {
+    const image = Buffer.from(payload.image_b64, "base64");
+
+    totalImageByteLength += image.length;
+    workloadHash.update(image);
+    workloadHash.update("\0");
+    workloadHash.update(payload.question, "utf8");
+    workloadHash.update("\0");
+  }
+
   return {
-    id: "sha256:" + workloadHash,
-    question: payload.question,
-    imageSha256: "sha256:" + imageHash,
-    imageByteLength: image.length,
+    id: "sha256:" + workloadHash.digest("hex"),
+    recordCount: payloads.length,
+    totalImageByteLength,
   };
 }
 
@@ -383,17 +429,27 @@ async function persistRun(
 }
 
 async function main(): Promise<void> {
-  const config: LoadConfig = {
-    endpoint: "http://127.0.0.1:8000/infer",
-    requestsPerSecond: 5,
-    durationSeconds: 10,
-    timeoutMs: 5000,
-  };
+  const config = parseLoadConfig();
+  const datasetText = await readFile(config.datasetPath, { encoding: "utf8" });
+  const records = JSON.parse(datasetText) as DatasetRecord[];
+  if (records.length === 0) {
+    throw new Error("Dataset is empty");
+  }
+  const payloads: InferRequest[] = await Promise.all(
+    records.map(async (record) => {
+      const imagePath = join(dirname(config.datasetPath), record.image);
+      const imageBytes = await readFile(imagePath);
 
-  /* Collect metadata before timing so these commands cannot disturb arrivals. */
+      return {
+        image_b64: imageBytes.toString("base64"),
+        question: record.question,
+      };
+    }),
+  );
+
   const source = collectSourceMetadata();
   const hardware = collectHardwareMetadata();
-  const workload = describeWorkload(payload);
+  const workload = describeWorkload(payloads);
   const benchmark: BenchmarkMetadata = {
     modelId: null,
     checkpoint: null,
@@ -405,7 +461,7 @@ async function main(): Promise<void> {
   };
   const runId = makeRunId(new Date().toISOString());
 
-  const run = await runLoad(config, payload);
+  const run = await runLoad(config, payloads);
   const finishedMs = performance.now();
   const summary = summarizeRun(run);
   const performanceTimeOriginUnixMs = performance.timeOrigin;
