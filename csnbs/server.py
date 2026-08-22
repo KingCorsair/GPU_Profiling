@@ -12,11 +12,42 @@ import base64
 import binascii
 import os
 import random
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 MODE = os.environ.get("SERVER_MODE", "fake")
+
+DEFAULT_MODEL_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "vis_pruner_copy"
+    / "checkpoints"
+    / "llava-v1.5-7b"
+)
+MODEL_PATH = Path(
+    os.environ.get("MODEL_PATH", str(DEFAULT_MODEL_PATH))
+)
+
+tokenizer = None
+model = None
+image_processor = None
+
+if MODE == "model":
+    from llava.mm_utils import get_model_name_from_path
+    from llava.model.builder import load_pretrained_model
+    from llava.utils import disable_torch_init
+
+    disable_torch_init()
+
+    tokenizer, model, image_processor, _ = load_pretrained_model(
+        str(MODEL_PATH),
+        None,
+        get_model_name_from_path(str(MODEL_PATH)),
+        visual_token_num=576,
+        important_ratio=0.5,
+    )
+    model.eval()
 
 app = FastAPI()
 
@@ -43,7 +74,66 @@ async def _infer_fake(image: bytes, question: str) -> str:
 
 
 async def _infer_model(image: bytes, question: str) -> str:
-    raise HTTPException(status_code=501, detail="model mode not implemented yet")
+    from io import BytesIO
+
+    import torch
+    from PIL import Image
+
+    from llava.constants import (
+        DEFAULT_IMAGE_TOKEN,
+        DEFAULT_IM_END_TOKEN,
+        DEFAULT_IM_START_TOKEN,
+        IMAGE_TOKEN_INDEX,
+    )
+    from llava.conversation import conv_templates
+    from llava.mm_utils import process_images, tokenizer_image_token
+
+    pil_image = Image.open(BytesIO(image)).convert("RGB")
+
+    if model.config.mm_use_im_start_end:
+        image_token = (
+            DEFAULT_IM_START_TOKEN
+            + DEFAULT_IMAGE_TOKEN
+            + DEFAULT_IM_END_TOKEN
+        )
+    else:
+        image_token = DEFAULT_IMAGE_TOKEN
+
+    conversation = conv_templates["llava_v1"].copy()
+    conversation.append_message(
+        conversation.roles[0],
+        image_token + "\n" + question,
+    )
+    conversation.append_message(conversation.roles[1], None)
+    prompt = conversation.get_prompt()
+
+    input_ids = tokenizer_image_token(
+        prompt,
+        tokenizer,
+        IMAGE_TOKEN_INDEX,
+        return_tensors="pt",
+    ).unsqueeze(0).to(model.device)
+
+    image_tensor = process_images(
+        [pil_image],
+        image_processor,
+        model.config,
+    ).to(model.device, dtype=torch.float16)
+
+    with torch.inference_mode():
+        output_ids, visual_token_count = model.generate(
+            input_ids,
+            images=image_tensor,
+            image_sizes=[pil_image.size],
+            do_sample=False,
+            max_new_tokens=64,
+            use_cache=True,
+        )
+
+    return tokenizer.batch_decode(
+        output_ids,
+        skip_special_tokens=True,
+    )[0].strip()
 
 
 @app.post("/infer", response_model=InferResponse)
