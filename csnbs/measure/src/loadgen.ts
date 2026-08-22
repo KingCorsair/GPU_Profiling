@@ -284,46 +284,49 @@ function summarizePercentiles(values: readonly number[]): PercentileSummary {
   };
 }
 
+const WARMUP_REQUESTS = 10;
+
 function summarizeRun(run: LoadRun): LoadSummary {
-  const successfulResults = run.results.filter(
+  const results = run.results.slice(WARMUP_REQUESTS);
+  const successfulResults = results.filter(
     (result) => result.error === null,
   );
-  const failedResults = run.results.filter((result) => result.error !== null);
+  const failedResults = results.filter((result) => result.error !== null);
   const successfulRequestLatencies = successfulResults.map(
     (result) => result.completedAtMs - result.sentAtMs,
   );
-  const dispatchLateness = run.results.map(
+  const dispatchLateness = results.map(
     (result) => result.sentAtMs - result.scheduledAtMs,
   );
-  const plannedToComplete = run.results.map(
+  const plannedToComplete = results.map(
     (result) => result.completedAtMs - result.scheduledAtMs,
   );
-  const firstSentAtMs = run.results.reduce(
+  const firstSentAtMs = results.reduce(
     (earliest, result) => Math.min(earliest, result.sentAtMs),
     Number.POSITIVE_INFINITY,
   );
-  const lastSentAtMs = run.results.reduce(
+  const lastSentAtMs = results.reduce(
     (latest, result) => Math.max(latest, result.sentAtMs),
     Number.NEGATIVE_INFINITY,
   );
-  const lastCompletedAtMs = run.results.reduce(
+  const lastCompletedAtMs = results.reduce(
     (latest, result) => Math.max(latest, result.completedAtMs),
     run.plannedStartMs,
   );
   const arrivalSpanMs = lastSentAtMs - firstSentAtMs;
   const achievedArrivalRateRps =
-    run.results.length >= 2 && arrivalSpanMs > 0
-      ? ((run.results.length - 1) * 1000) / arrivalSpanMs
+    results.length >= 2 && arrivalSpanMs > 0
+      ? ((results.length - 1) * 1000) / arrivalSpanMs
       : null;
   /* Include the configured window and any extra time spent draining requests. */
   const measurementEndMs = Math.max(run.plannedEndMs, lastCompletedAtMs);
   const elapsedSeconds = (measurementEndMs - run.plannedStartMs) / 1000;
   return {
-    totalRequests: run.results.length,
+    totalRequests: results.length,
     successfulRequests: successfulResults.length,
     failedRequests: failedResults.length,
     achievedArrivalRateRps,
-    completionRateRps: run.results.length / elapsedSeconds,
+    completionRateRps: results.length / elapsedSeconds,
     successfulThroughputRps: successfulResults.length / elapsedSeconds,
     successfulRequestLatencyMs: summarizePercentiles(successfulRequestLatencies),
     dispatchLatenessMs: summarizePercentiles(dispatchLateness),
