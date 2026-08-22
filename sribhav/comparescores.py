@@ -83,6 +83,30 @@ def calculate_accuracy(scores, threshold=0.75):
         return 0.0
     return sum(1 for score in scores if score > threshold) / len(scores)
 
+
+def expand_for_multiref(preds, ground_truths_lists):
+    """Repeats each pred once per reference answer, so a multi-reference
+    example turns into one (pred, reference) pair per reference. group_ids
+    maps each flattened pair back to its original example index."""
+    flat_preds, flat_targets, group_ids = [], [], []
+    for i, (pred, refs) in enumerate(zip(preds, ground_truths_lists)):
+        for ref in refs:
+            flat_preds.append(pred)
+            flat_targets.append(ref)
+            group_ids.append(i)
+    return flat_preds, flat_targets, group_ids
+
+
+def max_per_group(flat_scores, group_ids, num_groups):
+    """Reduces flattened per-reference scores back to one score per example
+    by taking the best-supporting reference (max across references)."""
+    best = [float("-inf")] * num_groups
+    for score, gid in zip(flat_scores, group_ids):
+        if score > best[gid]:
+            best[gid] = score
+    return best
+
+
 def eval(answers_file, strategy="net_normalized"):
     preds, ground_truths = [], []
 
@@ -95,18 +119,24 @@ def eval(answers_file, strategy="net_normalized"):
             pred = data["text"]
 
             preds.append(" ".join(pred) if isinstance(pred, list) else pred)
-            ground_truths.append(" ".join(gt) if isinstance(gt, list) else gt)
+            ground_truths.append(gt if isinstance(gt, list) else [gt])
 
-    # 1. Compute single-score NLI
-    nli_scores = compute_nli_scores(preds, ground_truths, strategy=strategy)
-    
-    # 2. Compute BERTScore
-    _, _, f1_tensor = bertscore.score(preds, ground_truths)
-    bert_f1 = f1_tensor.tolist()
+    num_examples = len(preds)
+    flat_preds, flat_targets, group_ids = expand_for_multiref(preds, ground_truths)
+
+    # 1. Compute single-score NLI per reference, then take the
+    # best-supporting reference per example (max across references).
+    flat_nli_scores = compute_nli_scores(flat_preds, flat_targets, strategy=strategy)
+    nli_scores = max_per_group(flat_nli_scores, group_ids, num_examples)
+
+    # 2. Compute BERTScore per reference, same max-across-references reduction.
+    _, _, flat_f1_tensor = bertscore.score(flat_preds, flat_targets)
+    bert_f1 = max_per_group(flat_f1_tensor.tolist(), group_ids, num_examples)
 
     # 3. Compute unified composite score
     # (Uses normalized NLI score in range [0, 1] for harmonic mean)
-    nli_norm = compute_nli_scores(preds, ground_truths, strategy="net_normalized")
+    flat_nli_norm = compute_nli_scores(flat_preds, flat_targets, strategy="net_normalized")
+    nli_norm = max_per_group(flat_nli_norm, group_ids, num_examples)
     composite_scores = compute_composite_score(bert_f1, nli_norm)
 
     bert_f1_acc = calculate_accuracy(bert_f1)

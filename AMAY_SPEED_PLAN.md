@@ -35,6 +35,44 @@ harness I already have.
    construction in one pass.
 3. Before/after comparison, same harness, same rules (CUDA events, warm-up, noise floor).
 
+**The metric — what number actually has to go down:**
+
+`multimodal_prep_time_generate`, already logged by `generate()` in
+`llava_llama.py` (~lines 179–209, `vis_pruner_copy/llava/model/language_model/llava_llama.py`).
+It's measured with `time.perf_counter()` bracketed by a `torch.cuda.synchronize()` call, not
+pure CUDA events yet — there's an unused event pair (`prep_start_evt`/`prep_end_evt`) in the
+same file, in `forward()`, not currently wired into the readout. Worth switching to those
+events for the before/after comparison in step 3, since that's the rule-1-compliant way to
+time GPU work and avoids relying on a sync I have to place by hand.
+
+There's also a per-decode-step version, `multimodal_prep_time`, inside the `forward_calls`
+list — same underlying cost, logged once per call instead of once per generation. Either
+works as the target; `multimodal_prep_time_generate` is simpler since it's one number per
+question.
+
+**Metrics in the same file that are NOT the target — don't accidentally optimize these:**
+- `generate_time` — the whole generate() call, prep + every decode step. Too broad: decode
+  time is in here and a kernel touching only the fixup step won't move it. If I benchmark
+  against this number I could convince myself the kernel did nothing when it actually worked.
+- `model_load_s` — one-time disk/GPU load cost, unrelated to per-request work entirely.
+- `lm_forward_time` — the LM's actual forward-pass math. This is what the fixup step feeds
+  *into*; the kernel doesn't touch it and it shouldn't move.
+
+**What "done" looks like:** `multimodal_prep_time_generate` (or the per-call
+`multimodal_prep_time`) drops after swapping in the fused kernel, at fixed `visual_token_num`,
+same harness, same warm-up/noise-floor rules as everything else — and `generate_time` /
+`lm_forward_time` stay flat, which is how I'd know the change was isolated to the right place.
+
+**Where the current (pre-kernel) implementation actually lives:** the gather/position-id/
+mask-rebuild logic rules 15/16 describe is in `llava/model/llava_arch.py`,
+`prepare_inputs_labels_for_multimodal()` (~lines 189–394) and `encode_images()` (~141–186).
+Confirmed multi-op, not fused: index selection via `argsort`/`topk`-style slicing into
+`index_masks`, then a **per-batch-item Python loop** filtering by `attention_mask`, then
+manual padding + `attention_mask`/`position_ids` rebuild via `torch.zeros` + slice assignment.
+That per-sample Python loop is itself worth noting in the profiling step — it's not just
+"three kernel launches," it's three kernel launches *repeated once per item in the batch*,
+which is additional overhead a fused kernel should also collapse.
+
 ---
 
 ### 2. Hand-rolled CUDA graph capture around the decode loop

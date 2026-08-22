@@ -78,3 +78,23 @@ Then redo score-distribution eyeballing (step 3) and the BERTScore/NLI disagreem
 Random baseline (step 5) is still outstanding — do it after the above, on the corrected fields, so the shuffle is meaningful (shuffling real ground-truth answers against unrelated preds, not the swapped version).
 
 Composite decision and per-category breakdown come last, same as the original plan.
+
+---
+AUG 22
+---
+
+The random baseline (rule 17) is a control on the metric itself, not on the model. The question it answers: is BERTScore/NLI actually detecting semantic agreement, or would they score almost anything that's the same shape of text just as highly?
+
+Mechanics: take your real predictions, but pair each one with the wrong ground truth — a reference list pulled from a different question — and run those mismatched pairs through the exact same scoring pipeline you just built (max-over-references BERTScore, max-over-references NLI, composite). You now have two score distributions: real pairs and random pairs.
+
+If random pairs score close to real pairs → the metric isn't discriminating correctness at all, it's rewarding something superficial (fluent English, similar length, same domain vocabulary). No threshold from step 3 will save it — the metric itself is broken.
+If real pairs score clearly higher than random pairs → that's evidence the metric is tracking actual agreement, and the threshold you picked in step 3 is measuring something real.
+Two design decisions that matter here, given your data:
+
+What counts as "wrong." Shuffle whole reference-lists between examples, not individual crowd answers within one example — a TextVQA question's 10 answers are still a coherent target, just for the wrong question. Scrambling those internally would test something else (reference-list coherence, not pred/target agreement).
+
+Shuffle within category, not across the whole set. If you randomly pair an MME binary yes/no answer with a TextVQA free-text answer, of course the score tanks — but that's not telling you the metric discriminates correctness, it's telling you it discriminates task type, which you already knew. Shuffle binary-vs-binary and free-text-vs-free-text separately so the comparison is apples-to-apples within each category. Otherwise the baseline looks reassuringly low for the wrong reason.
+
+One more thing worth deciding: with only 90 examples, a single shuffle is noisy — consider running it 3-5 times with different seeds and looking at the range, not one number.
+
+That's the concept — the actual shuffle-and-score harness is yours to write per the project rules, since it's the mechanism that validates your scorer. Happy to review it once you've got a draft, or scaffold just the file-I/O boilerplate around it if you want.
