@@ -123,3 +123,11 @@ In normal_evaluation (eval_random_baseline.py:110-114), you pick the "best" refe
 Small note: --threshold defaults to 0.75 — the exact round number your Aug 14 plan called out as the wrong way to pick a threshold. Fine as a CLI default since you're presumably supplying your own after eyeballing distributions, just flagging in case it gets used unthinkingly.
 
 Once the reference-list fix is in, I'm happy to look at the diff.
+
+How it fits
+This is the last unvalidated piece before the scorer can be called done:
+
+Steps 1-4 (decouple backbones, hand-label a validation sample, eyeball score distributions, check BERTScore/NLI disagreement) established that the metric looks reasonable and re-validated that after the Aug 20 answer-field swap fix.
+Step 5 (this one) checks whether that apparent signal is real or an artifact.
+Only after this can you move to the composite decision and per-category breakdown (rule 14) — those are downstream and would be built on an unvalidated scorer otherwise.
+Per CLAUDE.md, the shuffle-and-score harness itself is yours to write — that's the scoring-validation work that's explicitly your call, not something to hand off. I can review a draft or scaffold the file-I/O boilerplate around it if useful.
