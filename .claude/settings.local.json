@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json'\\)\\); print\\(len\\(d\\)\\); print\\(json.dumps\\(d[0], indent=2\\)\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python -m py_compile comparescores.py)"
+    ]
+  }
+}
