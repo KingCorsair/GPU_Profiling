@@ -413,12 +413,13 @@ function describeWorkload(
   };
 }
 
-function makeRunId(startedAtUtc: string): string {
-  return (
-    startedAtUtc.replace(/[:.]/g, "-") +
-    "-" +
-    randomUUID().slice(0, 8)
-  );
+function makeRunId(
+  startedAtUtc: string,
+  requestsPerSecond: number,
+): string {
+  const time = startedAtUtc.slice(11, 19).replaceAll(":", "-");
+
+  return `${time}Z_rps-${requestsPerSecond}_${randomUUID().slice(0, 8)}`;
 }
 
 function toUtc(performanceTimeOriginUnixMs: number, offsetMs: number): string {
@@ -430,7 +431,12 @@ async function persistRun(
   results: readonly RequestResult[],
 ): Promise<string> {
   await mkdir(outputRoot, { recursive: true });
-  const runDirectory = join(outputRoot, manifest.runId);
+
+  const runDate = manifest.timing.plannedStartAtUtc.slice(0, 10);
+  const dateDirectory = join(outputRoot, runDate);
+  await mkdir(dateDirectory, { recursive: true });
+
+  const runDirectory = join(dateDirectory, manifest.runId);
   await mkdir(runDirectory);
 
   const requestsJsonl = results.length === 0
@@ -481,7 +487,10 @@ async function main(): Promise<void> {
     batchSize: 1,
     maxOutputTokens: null,
   };
-  const runId = makeRunId(new Date().toISOString());
+  const runId = makeRunId(
+    new Date().toISOString(),
+    config.requestsPerSecond,
+  );
 
   const run = await runLoad(config, payloads);
   const finishedMs = performance.now();

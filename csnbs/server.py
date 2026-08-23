@@ -61,6 +61,9 @@ class InferResponse(BaseModel):
     answer: str
 
 
+_fake_slots = asyncio.Semaphore(16)
+
+
 def _fake_latency_s() -> float:
     """Mostly fast, with an occasional slow tail so p99 has something to show."""
     if random.random() < 0.05:
@@ -69,8 +72,9 @@ def _fake_latency_s() -> float:
 
 
 async def _infer_fake(image: bytes, question: str) -> str:
-    await asyncio.sleep(_fake_latency_s())
-    return f"fake-answer[{len(image)}b]: {question[:40]}"
+    async with _fake_slots:
+        await asyncio.sleep(_fake_latency_s())
+        return f"fake-answer[{len(image)}b]: {question[:40]}"
 
 
 async def _infer_model(image: bytes, question: str) -> str:

@@ -1,6 +1,5 @@
 import socket
 import subprocess
-import sys
 import time
 
 
@@ -18,7 +17,6 @@ def wait_for_server(process, timeout_seconds=300):
             ):
                 return
         except OSError:
-          
             time.sleep(1)
 
     raise TimeoutError("Server did not become ready within 300 seconds")
@@ -26,25 +24,15 @@ def wait_for_server(process, timeout_seconds=300):
 
 def main():
     server = subprocess.Popen(
-        [
-            sys.executable,
-            "-m",
-            "uvicorn",
-            "server:app",
-            "--host",
-            "127.0.0.1",
-            "--port",
-            "8000",
-        ],
-        cwd="/workspace/GPU_Profiling/csnbs",
+        ["bash", "/workspace/GPU_Profiling/scripts/start_model_server.sh"],
+        cwd="/workspace/GPU_Profiling",
     )
-
     try:
         print("Waiting for server...")
         wait_for_server(server)
         print("Server is ready.")
 
-        for rps in range(55, 101, 5):
+        for rps in range(5, 51, 5):
             print(f"--- RPS: {rps} ---")
 
             subprocess.run(
