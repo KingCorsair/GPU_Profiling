@@ -1,0 +1,76 @@
+{
+  "schema": "loadgen-run",
+  "schemaVersion": 1,
+  "runId": "2026-08-23T00-40-43-161Z-f4324794",
+  "runKind": "open-loop",
+  "recordedAtUtc": "2026-08-23T00:41:03.685Z",
+  "timing": {
+    "clock": "performance.now",
+    "performanceTimeOriginUnixMs": 1787445640672.564,
+    "plannedStartMs": 2492.994855,
+    "plannedEndMs": 22492.994855,
+    "finishedMs": 23004.739289,
+    "plannedStartAtUtc": "2026-08-23T00:40:43.165Z",
+    "plannedEndAtUtc": "2026-08-23T00:41:03.165Z",
+    "finishedAtUtc": "2026-08-23T00:41:03.677Z"
+  },
+  "config": {
+    "endpoint": "http://127.0.0.1:8000/infer",
+    "requestsPerSecond": 35,
+    "durationSeconds": 20,
+    "timeoutMs": 120000,
+    "datasetPath": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json"
+  },
+  "workload": {
+    "id": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "recordCount": 90,
+    "totalImageByteLength": 5530510
+  },
+  "source": {
+    "gitCommit": "fb2d3622c3073588109e5af46ae222bd3708d7ac",
+    "gitDirty": true
+  },
+  "hardware": {
+    "gpuModels": [
+      "NVIDIA A40"
+    ],
+    "source": "local-nvidia-smi"
+  },
+  "benchmark": {
+    "modelId": null,
+    "checkpoint": null,
+    "pruningMethod": null,
+    "pruningRatio": null,
+    "tokenRemovalMode": null,
+    "batchSize": 1,
+    "maxOutputTokens": null
+  },
+  "summary": {
+    "totalRequests": 690,
+    "successfulRequests": 690,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 35.00025670732548,
+    "completionRateRps": 34.11460673794887,
+    "successfulThroughputRps": 34.11460673794887,
+    "successfulRequestLatencyMs": {
+      "p50": 178.5263219999997,
+      "p95": 534.0878339999999,
+      "p99": 778.0869890000004
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.2874647142871254,
+      "p95": 0.6870177142859575,
+      "p99": 1.075234285714032
+    },
+    "plannedToCompleteMs": {
+      "p50": 178.39363400000002,
+      "p95": 533.0321318571423,
+      "p99": 777.5198715714287
+    }
+  },
+  "requests": {
+    "file": "requests.jsonl",
+    "schemaVersion": 1,
+    "count": 700
+  }
+}

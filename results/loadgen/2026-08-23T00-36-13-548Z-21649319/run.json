@@ -1,24 +1,24 @@
 {
   "schema": "loadgen-run",
   "schemaVersion": 1,
-  "runId": "2026-08-21T18-46-20-229Z-4a466668",
+  "runId": "2026-08-23T00-36-13-548Z-21649319",
   "runKind": "open-loop",
-  "recordedAtUtc": "2026-08-21T18:46:30.265Z",
+  "recordedAtUtc": "2026-08-23T00:36:33.584Z",
   "timing": {
     "clock": "performance.now",
-    "performanceTimeOriginUnixMs": 1787337977919.121,
-    "plannedStartMs": 2314.509194,
-    "plannedEndMs": 12314.509194,
-    "finishedMs": 12343.397191,
-    "plannedStartAtUtc": "2026-08-21T18:46:20.233Z",
-    "plannedEndAtUtc": "2026-08-21T18:46:30.233Z",
-    "finishedAtUtc": "2026-08-21T18:46:30.262Z"
+    "performanceTimeOriginUnixMs": 1787445370919.788,
+    "plannedStartMs": 2632.498874,
+    "plannedEndMs": 22632.498874,
+    "finishedMs": 22662.132873,
+    "plannedStartAtUtc": "2026-08-23T00:36:13.552Z",
+    "plannedEndAtUtc": "2026-08-23T00:36:33.552Z",
+    "finishedAtUtc": "2026-08-23T00:36:33.581Z"
   },
   "config": {
     "endpoint": "http://127.0.0.1:8000/infer",
     "requestsPerSecond": 5,
-    "durationSeconds": 10,
-    "timeoutMs": 5000,
+    "durationSeconds": 20,
+    "timeoutMs": 120000,
     "datasetPath": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json"
   },
   "workload": {
@@ -27,7 +27,7 @@
     "totalImageByteLength": 5530510
   },
   "source": {
-    "gitCommit": "6408c6f5c52c6deabf1305a96bffac360dd88a06",
+    "gitCommit": "fb2d3622c3073588109e5af46ae222bd3708d7ac",
     "gitDirty": true
   },
   "hardware": {
@@ -46,31 +46,31 @@
     "maxOutputTokens": null
   },
   "summary": {
-    "totalRequests": 50,
-    "successfulRequests": 50,
+    "totalRequests": 90,
+    "successfulRequests": 90,
     "failedRequests": 0,
-    "achievedArrivalRateRps": 4.999957121286088,
-    "completionRateRps": 4.98564560786343,
-    "successfulThroughputRps": 4.98564560786343,
+    "achievedArrivalRateRps": 5.000118164028437,
+    "completionRateRps": 4.991815777430093,
+    "successfulThroughputRps": 4.991815777430093,
     "successfulRequestLatencyMs": {
-      "p50": 190.17868499999895,
-      "p95": 293.26579500000025,
-      "p99": 838.5713189999997
+      "p50": 172.78000899999824,
+      "p95": 260.31158399999913,
+      "p99": 776.6751789999998
     },
     "dispatchLatenessMs": {
-      "p50": -0.190866000000824,
-      "p95": 0.5427300000001196,
-      "p99": 1.5701439999998001
+      "p50": -0.36533500000041386,
+      "p95": 0.6868660000000091,
+      "p99": 1.1695769999987533
     },
     "plannedToCompleteMs": {
-      "p50": 189.77852799999891,
-      "p95": 293.58736,
-      "p99": 838.9168819999995
+      "p50": 171.74589899999773,
+      "p95": 259.57286099999874,
+      "p99": 776.1196639999998
     }
   },
   "requests": {
     "file": "requests.jsonl",
     "schemaVersion": 1,
-    "count": 50
+    "count": 100
   }
 }

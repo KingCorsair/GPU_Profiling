@@ -288,10 +288,21 @@ const WARMUP_REQUESTS = 10;
 
 function summarizeRun(run: LoadRun): LoadSummary {
   const results = run.results.slice(WARMUP_REQUESTS);
+
+  if (results.length === 0) {
+    throw new Error(
+      `Run must contain more than ${WARMUP_REQUESTS} requests`,
+    );
+  }
+
+  const measurementStartMs = results[0]!.scheduledAtMs;
+
   const successfulResults = results.filter(
     (result) => result.error === null,
   );
-  const failedResults = results.filter((result) => result.error !== null);
+  const failedResults = results.filter(
+    (result) => result.error !== null,
+  );
   const successfulRequestLatencies = successfulResults.map(
     (result) => result.completedAtMs - result.sentAtMs,
   );
@@ -311,24 +322,32 @@ function summarizeRun(run: LoadRun): LoadSummary {
   );
   const lastCompletedAtMs = results.reduce(
     (latest, result) => Math.max(latest, result.completedAtMs),
-    run.plannedStartMs,
+    measurementStartMs,
   );
   const arrivalSpanMs = lastSentAtMs - firstSentAtMs;
   const achievedArrivalRateRps =
     results.length >= 2 && arrivalSpanMs > 0
       ? ((results.length - 1) * 1000) / arrivalSpanMs
       : null;
-  /* Include the configured window and any extra time spent draining requests. */
-  const measurementEndMs = Math.max(run.plannedEndMs, lastCompletedAtMs);
-  const elapsedSeconds = (measurementEndMs - run.plannedStartMs) / 1000;
+
+  const measurementEndMs = Math.max(
+    run.plannedEndMs,
+    lastCompletedAtMs,
+  );
+  const elapsedSeconds =
+    (measurementEndMs - measurementStartMs) / 1000;
+
   return {
     totalRequests: results.length,
     successfulRequests: successfulResults.length,
     failedRequests: failedResults.length,
     achievedArrivalRateRps,
     completionRateRps: results.length / elapsedSeconds,
-    successfulThroughputRps: successfulResults.length / elapsedSeconds,
-    successfulRequestLatencyMs: summarizePercentiles(successfulRequestLatencies),
+    successfulThroughputRps:
+      successfulResults.length / elapsedSeconds,
+    successfulRequestLatencyMs: summarizePercentiles(
+      successfulRequestLatencies,
+    ),
     dispatchLatenessMs: summarizePercentiles(dispatchLateness),
     plannedToCompleteMs: summarizePercentiles(plannedToComplete),
   };
