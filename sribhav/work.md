@@ -98,3 +98,28 @@ Shuffle within category, not across the whole set. If you randomly pair an MME b
 One more thing worth deciding: with only 90 examples, a single shuffle is noisy — consider running it 3-5 times with different seeds and looking at the range, not one number.
 
 That's the concept — the actual shuffle-and-score harness is yours to write per the project rules, since it's the mechanism that validates your scorer. Happy to review it once you've got a draft, or scaffold just the file-I/O boilerplate around it if you want.
+
+---
+PART 2
+---
+Reviewed it. One real bug against your own design note, plus a design question worth resolving before you trust the output.
+
+Bug: random_category_baseline samples one answer, not the whole reference list.
+
+At eval_random_baseline.py:140:
+
+
+references.append(str(rng.choice(other_record["answers"])))
+Your Aug 22 note is explicit: "Shuffle whole reference-lists between examples, not individual crowd answers within one example." This does the opposite — it grabs the full answers list from a mismatched record, then throws away all but one randomly chosen answer.
+
+That breaks the comparison you're building the whole script around. normal_evaluation scores each prediction against every one of its own references and keeps the max (mirroring the Aug 20 aggregation decision — max-over-references). The random baseline scores against exactly one reference. A single answer gives the scorer far fewer chances to land a match than a full list of ~10 does, so the random distribution will look artificially low — not because the metric is discriminating correctness, but because you've handicapped the number of shots it gets. That's exactly the kind of confound rule 17 is supposed to rule out, and it'll make BERTScore/NLI look more discriminating than they actually are.
+
+Fix direction: when you pick other_record, use its entire answers list the same way normal_evaluation uses a record's own list — expand into (pred, ref) pairs for every answer in that list, score them all, and keep the max per record, per trial. Same aggregation logic, just against the wrong record's list instead of the right one.
+
+Design question, not a bug: which reference gets picked, and by what?
+
+In normal_evaluation (eval_random_baseline.py:110-114), you pick the "best" reference by maximizing composite_score, then report bert_f1 and nli_score from that same reference. But your Aug 14 plan explicitly decided to keep BERTScore and entailment independent so disagreement stays visible ("a blend collapses the diagnostic signal you need"). If BERTScore's best-matching reference and NLI's best-matching reference aren't the same one — plausible, since they measure different things — then reporting both metrics off the composite-winning reference silently mixes them back together, which is the thing you decided against fusing. Worth deciding deliberately: max-per-metric independently (each metric picks its own best reference), or max-by-composite with both readouts riding along. Right now it's the latter, by default rather than by decision.
+
+Small note: --threshold defaults to 0.75 — the exact round number your Aug 14 plan called out as the wrong way to pick a threshold. Fine as a CLI default since you're presumably supplying your own after eyeballing distributions, just flagging in case it gets used unthinkingly.
+
+Once the reference-list fix is in, I'm happy to look at the diff.
