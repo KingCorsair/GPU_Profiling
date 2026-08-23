@@ -15,3 +15,6 @@ ScienceQA/train/
 ScienceQA/val/
 ScienceQA/test/
 ScienceQA/data/scienceqa/images/
+
+# Generated load-test result artifacts
+results/loadgen/

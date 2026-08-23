@@ -27,6 +27,9 @@ type RequestResult = {
   scheduledAtMs: number;
   sentAtMs: number;
   completedAtMs: number;
+  latencyMs: number; // completedAtMs - sentAtMs
+  dispatchLatenessMs: number; // sentAtMs - scheduledAtMs
+  plannedToCompleteMs: number; // completedAtMs - scheduledAtMs
   status: number | null;
   error: string | null;
 };
@@ -105,7 +108,7 @@ type RunManifest = {
   summary: LoadSummary;
   requests: {
     file: "requests.jsonl";
-    schemaVersion: 1;
+    schemaVersion: 2;
     count: number;
   };
 };
@@ -176,6 +179,29 @@ return {
 }
 
 
+/* Captures completion once, then derives every duration from the same timestamp. */
+function makeRequestResult(
+  sequence: number,
+  scheduledAtMs: number,
+  sentAtMs: number,
+  status: number | null,
+  error: string | null,
+): RequestResult {
+  const completedAtMs = performance.now();
+
+  return {
+    sequence,
+    scheduledAtMs,
+    sentAtMs,
+    completedAtMs,
+    latencyMs: completedAtMs - sentAtMs,
+    dispatchLatenessMs: sentAtMs - scheduledAtMs,
+    plannedToCompleteMs: completedAtMs - scheduledAtMs,
+    status,
+    error,
+  };
+}
+
 /* Sends one request and turns both successes and failures into a result record. */
 async function sendOne(
   sequence: number,
@@ -195,36 +221,33 @@ async function sendOne(
     status = response.status;
     if (!response.ok) {
       await response.text();
-      return {
+      return makeRequestResult(
         sequence,
         scheduledAtMs,
         sentAtMs,
-        completedAtMs: performance.now(),
         status,
-        error: "Request failed with status " + status,
-      };
+        "Request failed with status " + status,
+      );
     }
     const responseBody = (await response.json()) as InferResponse;
     if (typeof responseBody.answer !== "string") {
       throw new Error("Response body is missing a string answer");
     }
-    return {
+    return makeRequestResult(
       sequence,
       scheduledAtMs,
       sentAtMs,
-      completedAtMs: performance.now(),
       status,
-      error: null,
-    };
+      null,
+    );
   } catch (caught: unknown) {
-    return {
+    return makeRequestResult(
       sequence,
       scheduledAtMs,
       sentAtMs,
-      completedAtMs: performance.now(),
       status,
-      error: caught instanceof Error ? caught.message : String(caught),
-    };
+      caught instanceof Error ? caught.message : String(caught),
+    );
   }
 }
 
@@ -304,13 +327,13 @@ function summarizeRun(run: LoadRun): LoadSummary {
     (result) => result.error !== null,
   );
   const successfulRequestLatencies = successfulResults.map(
-    (result) => result.completedAtMs - result.sentAtMs,
+    (result) => result.latencyMs,
   );
   const dispatchLateness = results.map(
-    (result) => result.sentAtMs - result.scheduledAtMs,
+    (result) => result.dispatchLatenessMs,
   );
   const plannedToComplete = results.map(
-    (result) => result.completedAtMs - result.scheduledAtMs,
+    (result) => result.plannedToCompleteMs,
   );
   const firstSentAtMs = results.reduce(
     (earliest, result) => Math.min(earliest, result.sentAtMs),
@@ -527,7 +550,7 @@ async function main(): Promise<void> {
     summary,
     requests: {
       file: "requests.jsonl",
-      schemaVersion: 1,
+      schemaVersion: 2,
       count: run.results.length,
     },
   };
