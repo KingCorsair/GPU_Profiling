@@ -260,6 +260,40 @@ exception, called out below.
   the profiling pass that opens step 1, so you can actually confirm the bottleneck instead
   of guessing.
 
+  **Expanded after a walkthrough session (2026-08-29) — what I need to understand before this
+  runs, even if I'm not the one writing the harness:**
+  - `torch.profiler` separates CPU-side dispatch time from actual GPU kernel time —
+    that's the thing a plain `time.perf_counter()` can't give you, and it's the whole reason
+    to use it here instead of wall-clock timing.
+  - Shape: a `torch.profiler.profile(activities=[CPU, CUDA], record_shapes=True)` context
+    manager around the region of interest, with nested `record_function("label")` blocks
+    inside it to break the trace down by sub-region instead of getting one undifferentiated
+    number. `record_shapes=True` tags each op with the tensor shapes involved — needed to
+    later connect "this op is slow" to "because B/T/N was this size."
+  - Warm-up still applies here same as rule 3 — run ~10 calls outside the profiler context
+    first and throw them away (CUDA context init, kernel-cache warm-up), *then* open the
+    profiler for the calls that actually count.
+  - **Where the boundary goes matters a lot.** Wrap `prepare_inputs_labels_for_multimodal()`
+    specifically (near where `prep_start_evt`/`prep_end_evt` already bracket it in
+    `llava_llama.py`) — not the whole `generate()` call. Wrapping `generate()` buries the
+    multimodal-prep signal under every decode step's LM forward pass.
+  - Two ways to read the output, cheap to detailed:
+    1. `prof.key_averages().table(sort_by="cuda_time_total")` — a summary table with a
+       **call-count column**. This alone should show the diversity while-loop's
+       multiplication effect (`llava_arch.py:161-176`) — if `argsort`/`matmul` show up with
+       dozens of calls for one forward pass, that's the loop, visible without reading a
+       visual trace at all.
+    2. `prof.export_chrome_trace("trace.json")`, opened in Perfetto (`ui.perfetto.dev`) or
+       `chrome://tracing` — an actual timeline with CPU and GPU tracks. This is the literal
+       picture behind the heuristic above it in this doc: gaps on the GPU track while the CPU
+       track stays busy = launch-overhead-bound; one continuous saturated block on the GPU
+       track = bandwidth/compute-bound, and the fix there is doing less work, not fusing
+       launches.
+  - Point of this section: even if someone else (or Claude, after the one-confirmation gate
+    CLAUDE.md requires for this category of code) ends up writing the actual harness, I
+    should be able to look at its output and say which of the two possibilities it shows,
+    and why — that's the self-test bar, not just "the number went down."
+
 **Per build step — skim once, keep open as a reference tab while building:**
 - **#1 (Triton kernel):** official Triton tutorials in order — vector-add, fused-softmax,
   matmul. Also re-read `prepare_inputs_labels_for_multimodal` in `llava_llama.py` for the

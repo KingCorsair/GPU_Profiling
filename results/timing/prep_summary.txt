@@ -1,0 +1,35 @@
+visual_token_num=128 batch=1 prompt_len=66
+
+mean prepare_inputs_labels_for_multimodal: 47.99 ms
+mean generate(max_new_tokens=1) [prep + prefill fwd]: 111.27 ms
+prep as % of prefill request: 43.1%
+
+TOP 15 OPS BY CUDA TIME
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::linear         1.76%      13.093ms         9.35%      69.588ms      47.663us       0.000us         0.00%     235.878ms     161.560us          1460  
+                                            aten::addmm         4.36%      32.434ms         6.18%      46.004ms      31.510us     230.840ms        65.04%     235.878ms     161.560us          1460  
+                                 ampere_sgemm_128x64_tn         0.00%       0.000us         0.00%       0.000us       0.000us     135.482ms        38.17%     135.482ms     282.254us           480  
+                                 ampere_sgemm_32x128_tn         0.00%       0.000us         0.00%       0.000us       0.000us      91.843ms        25.88%      91.843ms      95.670us           960  
+                                              aten::bmm         4.09%      30.397ms         5.44%      40.457ms      38.901us      41.274ms        11.63%      44.628ms      42.912us          1040  
+                                            prep_iter_2         2.04%      15.182ms         9.96%      74.106ms      74.106ms       0.000us         0.00%      42.743ms      42.743ms             1  
+                                            prep_iter_0         1.85%      13.801ms         9.45%      70.296ms      70.296ms       0.000us         0.00%      41.993ms      41.993ms             1  
+                                            prep_iter_3         2.03%      15.101ms         9.98%      74.292ms      74.292ms       0.000us         0.00%      41.751ms      41.751ms             1  
+                                            prep_iter_4         2.06%      15.321ms        10.58%      78.719ms      78.719ms       0.000us         0.00%      40.514ms      40.514ms             1  
+                                            prep_iter_1         1.84%      13.692ms         9.45%      70.295ms      70.295ms       0.000us         0.00%      40.298ms      40.298ms             1  
+                                            prep_iter_8         2.03%      15.124ms        10.04%      74.725ms      74.725ms       0.000us         0.00%      35.553ms      35.553ms             1  
+                                            prep_iter_7         2.08%      15.457ms        10.00%      74.409ms      74.409ms       0.000us         0.00%      35.485ms      35.485ms             1  
+                                            prep_iter_5         2.02%      15.035ms         9.98%      74.251ms      74.251ms       0.000us         0.00%      35.441ms      35.441ms             1  
+                                            prep_iter_9         2.09%      15.517ms        10.53%      78.346ms      78.346ms       0.000us         0.00%      35.428ms      35.428ms             1  
+                                            prep_iter_6         2.01%      14.989ms        10.03%      74.635ms      74.635ms       0.000us         0.00%      35.410ms      35.410ms             1  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 744.089ms
+Self CUDA time total: 354.934ms
+
+
+Total self CPU time in region:  744.09 ms  (over 10 iters)
+Total self CUDA time in region: 739.55 ms  (over 10 iters)
+  of which big matmul/attn/conv kernels: 272.11 ms (36.8%)
+  of which everything else (gather/index/cat/argsort/pad/etc.): 467.44 ms (63.2%)
+CPU time / CUDA time ratio in region: 1.01x (>>1 means launch/dispatch overhead dominates actual GPU work)

@@ -1,7 +1,7 @@
 """POST /infer — same HTTP contract in fake and model mode.
 
 fake  : await asyncio.sleep(random_duration), no model loaded.
-model : later calls the unpruned model. Not implemented yet.
+model : calls the unpruned model after loading it once at startup.
 
 Mode is chosen with SERVER_MODE=fake|model (default fake) so load_gen.py
 never has to know which one it's hitting.
@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 MODE = os.environ.get("SERVER_MODE", "fake")
+SERVICE_NAME = "csnbs-llava-server"
 
 DEFAULT_MODEL_PATH = (
     Path(__file__).resolve().parents[1]
@@ -59,6 +60,13 @@ class InferRequest(BaseModel):
 
 class InferResponse(BaseModel):
     answer: str
+
+
+class HealthResponse(BaseModel):
+    service: str
+    pid: int
+    mode: str
+    model_loaded: bool
 
 
 _fake_slots = asyncio.Semaphore(16)
@@ -138,6 +146,25 @@ async def _infer_model(image: bytes, question: str) -> str:
         output_ids,
         skip_special_tokens=True,
     )[0].strip()
+
+
+def _model_loaded() -> bool:
+    return (
+        MODE == "model"
+        and tokenizer is not None
+        and model is not None
+        and image_processor is not None
+    )
+
+
+@app.get("/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
+    return HealthResponse(
+        service=SERVICE_NAME,
+        pid=os.getpid(),
+        mode=MODE,
+        model_loaded=_model_loaded(),
+    )
 
 
 @app.post("/infer", response_model=InferResponse)
