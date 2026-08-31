@@ -104,7 +104,6 @@ type RunManifest = {
   workload: WorkloadMetadata;
   source: SourceMetadata;
   hardware: HardwareMetadata;
-  benchmark: BenchmarkMetadata;
   summary: LoadSummary;
   requests: {
     file: "requests.jsonl";
@@ -169,6 +168,7 @@ if (endpoint === null) {
   if (datasetpath === null) {
     throw new Error("Missing --dataset argument");
   }
+
 return {
   endpoint,
   requestsPerSecond,
@@ -501,15 +501,7 @@ async function main(): Promise<void> {
   const source = collectSourceMetadata();
   const hardware = collectHardwareMetadata();
   const workload = describeWorkload(payloads);
-  const benchmark: BenchmarkMetadata = {
-    modelId: null,
-    checkpoint: null,
-    pruningMethod: null,
-    pruningRatio: null,
-    tokenRemovalMode: null,
-    batchSize: 1,
-    maxOutputTokens: null,
-  };
+ 
   const runId = makeRunId(
     new Date().toISOString(),
     config.requestsPerSecond,
@@ -546,7 +538,6 @@ async function main(): Promise<void> {
     workload,
     source,
     hardware,
-    benchmark,
     summary,
     requests: {
       file: "requests.jsonl",
