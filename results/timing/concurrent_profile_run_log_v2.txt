@@ -1,0 +1,45 @@
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.16s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.32s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.45s/it]
+STAGE:2026-09-01 02:41:12 4048:4048 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+STAGE:2026-09-01 02:41:19 4048:4048 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2026-09-01 02:41:19 4048:4048 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+
+3 back-to-back sequential requests, wall time: 5075.6 ms
+Per-slot start/done timeline (seconds since first request launched):
+  t=0.0096s  slot 0  start
+  t=1.0694s  slot 0  done
+  t=1.0694s  slot 1  start
+  t=3.4471s  slot 1  done
+  t=3.4471s  slot 2  start
+  t=5.0851s  slot 2  done
+
+Sum of individual slot durations: 5075.5 ms
+Actual wall time for all 3 back-to-back requests: 5075.6 ms
+Inter-request gap (dead time between requests): 0.1 ms (0.0 ms avg per boundary)
+Timeline written to /workspace/GPU_Profiling/results/timing/concurrent_request_timeline.json
+
+Settings:
+{
+  "gpu": "NVIDIA A40",
+  "torch_version": "2.2.2+cu121",
+  "transformers_version": "4.37.2",
+  "attn_implementation": "sdpa",
+  "model": "llava-v1.5-7b",
+  "model_path": "/workspace/GPU_Profiling/vis_pruner_copy/checkpoints/llava-v1.5-7b",
+  "visual_token_num": 576,
+  "important_ratio": 0.5,
+  "max_new_tokens": 64,
+  "min_new_tokens": 16,
+  "n_requests": 3,
+  "execution_mode": "sequential back-to-back (not concurrent) -- a true multi-thread concurrent attempt against the shared model instance crashed with a CUDA device-side assert (out-of-bounds index_select in the pruning gather path); see the module docstring and results/timing/concurrent_profile_run_log.txt",
+  "n_warmup_requests_sequential": 6,
+  "wall_total_ms": 5075.55,
+  "sum_slot_durations_ms": 5075.5,
+  "inter_request_gap_ms": 0.05
+}
+
+Chrome trace written to /workspace/GPU_Profiling/results/timing/concurrent_trace.json
+CUDA-time-sorted summary written to /workspace/GPU_Profiling/results/timing/concurrent_summary_by_cuda_time.txt
+Call-count-sorted summary written to /workspace/GPU_Profiling/results/timing/concurrent_summary_by_count.txt

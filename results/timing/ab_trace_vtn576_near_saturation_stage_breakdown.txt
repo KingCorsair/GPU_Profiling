@@ -1,0 +1,24 @@
+visual_token_num=576 mode=near_saturation n_requests=5 num_transformer_layers=32 attn_implementation=sdpa
+
+stage                          count      cpu_ms     cuda_ms
+slot0_multimodal_prep             13      78.403      48.243
+slot0_vision_tower                 1      72.989      43.873
+slot0_mm_projector                 1       0.219       1.121
+slot0_kv_cache_legacy_rebuild     416       1.821       0.000
+slot0_kv_cache_append            384      19.615      19.886
+slot0_prefill                      1      35.926     117.270
+slot0_full_request                 1     717.385     630.648
+slot0_decode_step_1                1      39.045      38.029
+slot0_decode_step_2                1      37.653      40.533
+slot0_decode_step_3                1      37.496      38.449
+slot0_decode_step_4                1      41.263      48.060
+slot0_decode_step_5                1      39.421      35.260
+slot0_decode_step_6                1      41.578      39.526
+slot0_decode_step_7                1      40.016      35.754
+slot0_decode_step_8                1      42.180      37.638
+slot0_decode_step_9                1      39.502      38.038
+slot0_decode_step_10               1      42.050      35.967
+slot0_decode_step_11               1      39.440      40.034
+slot0_decode_step_12               1      39.631      35.099
+
+decode phase total (slot0, 12 steps): cuda_ms=462.387 (avg 38.532 ms/step)

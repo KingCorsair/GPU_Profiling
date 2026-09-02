@@ -1,0 +1,12 @@
+PART 1 -- No-load / single-request A/B comparison (576 vs 128 visual tokens)
+n_requests=10  important_ratio=0.5  max_new_tokens_cap=64  gpu=NVIDIA A40  git=ae8eaf7338
+
+metric                                   576         128    gain %
+latency_median_ms                      652.1       553.0     15.2%
+latency_mean_ms                        887.6       778.4     12.3%
+latency_stdev_ms                       565.1       494.8     12.4%
+multimodal_prep_mean_ms                 49.7        68.4    -37.8%
+prefill_lm_forward_mean_ms             111.5        44.4     60.2%
+decode_lm_forward_mean_ms              711.8       652.1      8.4%
+output_token_count_mean                 25.2        24.3      3.6%
+gpu_util_pct_mean_sampled               95.9        98.5     -2.7%

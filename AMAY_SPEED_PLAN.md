@@ -11,6 +11,14 @@ Config flags (FlashAttention-2, `torch.compile(mode="reduce-overhead")`) already
 evaluated and ruled out for this doc's purpose — they help, but they're one line, not a
 project. This plan is about the things worth actually hand-building.
 
+**Related documents:**
+- [`AMAY_VISPRUNER_PROFILING_REPORT.md`](AMAY_VISPRUNER_PROFILING_REPORT.md) — the completed
+  profiling/research phase: every experiment, what it measured, where its evidence lives, and
+  the findings this plan is built on. Read that first if the *why* behind an item here isn't
+  obvious from this doc alone.
+- [`prompts/GENERATE_VISPRUNER_PROFILING_REPORT.md`](prompts/GENERATE_VISPRUNER_PROFILING_REPORT.md)
+  — the prompt that generates/updates the report above, for when new experiments need folding in.
+
 ---
 
 ## The four candidates, ranked
@@ -342,3 +350,31 @@ deepening of it. Revisit only if #1–#4 are done and there's time left.
 Each step should produce a number, on my own throwaway harness, before moving to the next
 — per CLAUDE.md, only Rithvik's harness produces reportable numbers, but I need to know a
 change helped before it's worth asking him to measure it properly.
+
+---
+
+## Status (2026-08-29)
+
+**Step 1 (profile the fixup path) — done.** Ran `scripts/profile_multimodal_prep.py`
+(`visual_token_num=128`) on the A40. Results:
+
+- `prepare_inputs_labels_for_multimodal` is **40.7%** of a 1-token prefill request.
+- Of that region's CUDA time, **63.2%** sits in non-matmul ops (gather/index/argsort/cat/pad),
+  only 36.8% in big matmul/attn kernels → **launch-overhead-bound, not compute-bound**.
+  Confirms the Triton kernel premise before building it, per the rule at the top of this
+  section ("don't skip this").
+- Full table + numbers: `results/timing/prep_summary.txt` (short, readable). Full Chrome
+  trace: `results/timing/prep_trace.json` (open in `ui.perfetto.dev`, not as text).
+
+**Self-test to pass before moving on:** explain out loud why 63.2% non-matmul time means
+launch-bound, and why that's the reason to build the kernel next — not just "the number
+says so."
+
+**Not yet decided:** whether to add fine-grained `record_function` labels inside
+`llava_arch.py` (around the 5 named hotspots — diversity while-loop, anyres branch,
+per-batch masking, main-loop syncs, padding/rebuild loop) to break the profiler output down
+per-region instead of one blob per iteration. Current run only shows the aggregate; this
+would show which specific region dominates before committing to the kernel's exact scope.
+
+**Next up:** step 2, the Triton fixup kernel itself — mine to write, not Claude's, per
+CLAUDE.md's protected list, past the one-time confirm already used for the profiling script.

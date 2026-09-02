@@ -1,0 +1,23 @@
+{
+  "gpu": "NVIDIA A40",
+  "torch_version": "2.2.2+cu121",
+  "transformers_version": "4.37.2",
+  "attn_implementation": "sdpa",
+  "model": "llava-v1.5-7b",
+  "visual_token_num": 576,
+  "important_ratio": 0.5,
+  "mode": "near_saturation",
+  "n_requests": 5,
+  "max_new_tokens_cap": 64,
+  "do_sample": false,
+  "output_token_counts": [
+    14,
+    54,
+    17,
+    23,
+    12
+  ],
+  "wall_total_ms": 5838.4,
+  "n_warmup": 10,
+  "num_transformer_layers": 32
+}

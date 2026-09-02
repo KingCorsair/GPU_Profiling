@@ -1,0 +1,58 @@
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:30<00:30, 30.26s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:41<00:00, 19.01s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:41<00:00, 20.69s/it]
+Using 10 fixed representative requests (same set for both configs):
+  textvqa_34628: 'what is the name of the runner on the left?' [ocr]
+  textvqa_34620: 'how many items can you get for $5?' [ocr]
+  textvqa_34614: 'what does the light sign read on the farthest right window?' [ocr]
+  textvqa_34638: 'whats the lowest number yard line that you can see?' [ocr]
+  textvqa_34633: 'are these bottles of pepsi?' [ocr]
+  textvqa_34610: 'who is at the center of all of this?' [ocr]
+  textvqa_34608: 'what is the time?' [ocr]
+  textvqa_34618: 'what brand is the bottle with red label?' [ocr]
+  textvqa_34616: "is this denny's?" [ocr]
+  textvqa_34622: 'what is one of the brands being advertised?' [ocr]
+
+=== Config: visual_token_num=576 ===
+  textvqa_34628: 548.8 ms, 14 tokens, 'The name of the runner on the left is Willis.'
+  textvqa_34620: 1769.2 ms, 54 tokens, 'In the image, there are four items available for $'
+  textvqa_34614: 676.0 ms, 17 tokens, 'The light sign on the farthest right window reads '
+  textvqa_34638: 802.5 ms, 23 tokens, 'The lowest number yard line that I can see in the '
+  textvqa_34633: 500.5 ms, 12 tokens, 'Yes, these are bottles of Pepsi.'
+  textvqa_34610: 2099.1 ms, 65 tokens, 'The center of attention in this scene is a man who'
+  textvqa_34608: 584.7 ms, 15 tokens, 'The time on the watch is 10:10.'
+  textvqa_34618: 743.2 ms, 21 tokens, 'The bottle with a red label is a bottle of Jack Da'
+  textvqa_34616: 524.2 ms, 14 tokens, "Yes, this is a Denny's restaurant sign."
+  textvqa_34622: 628.3 ms, 17 tokens, 'One of the brands being advertised in the image is'
+  -> median latency: 652.1 ms  (mean 887.6 ms, stdev 565.1 ms)
+
+=== Config: visual_token_num=128 ===
+  textvqa_34628: 517.7 ms, 14 tokens, 'The name of the runner on the left is Willis.'
+  textvqa_34620: 1306.9 ms, 43 tokens, 'At the store, you can get a package of 3 Tuff Stuf'
+  textvqa_34614: 623.4 ms, 19 tokens, 'The light sign on the farthest right window reads '
+  textvqa_34638: 762.2 ms, 23 tokens, 'The lowest number yard line that I can see in the '
+  textvqa_34633: 537.5 ms, 16 tokens, 'Yes, the image shows a row of bottles of Pepsi.'
+  textvqa_34610: 1994.3 ms, 65 tokens, 'The center of attention in this image is a person '
+  textvqa_34608: 481.9 ms, 15 tokens, 'The time on the watch is 10:10.'
+  textvqa_34618: 566.6 ms, 17 tokens, "The bottle with a red label is Jack Daniel's whisk"
+  textvqa_34616: 453.7 ms, 14 tokens, "Yes, this is a Denny's restaurant sign."
+  textvqa_34622: 539.4 ms, 17 tokens, 'One of the brands being advertised in the image is'
+  -> median latency: 553.0 ms  (mean 778.4 ms, stdev 494.8 ms)
+
+Full results written to /workspace/GPU_Profiling/results/timing/ab_noload_comparison.json
+
+PART 1 -- No-load / single-request A/B comparison (576 vs 128 visual tokens)
+n_requests=10  important_ratio=0.5  max_new_tokens_cap=64  gpu=NVIDIA A40  git=ae8eaf7338
+
+metric                                   576         128    gain %
+latency_median_ms                      652.1       553.0     15.2%
+latency_mean_ms                        887.6       778.4     12.3%
+latency_stdev_ms                       565.1       494.8     12.4%
+multimodal_prep_mean_ms                 49.7        68.4    -37.8%
+prefill_lm_forward_mean_ms             111.5        44.4     60.2%
+decode_lm_forward_mean_ms              711.8       652.1      8.4%
+output_token_count_mean                 25.2        24.3      3.6%
+gpu_util_pct_mean_sampled               95.9        98.5     -2.7%
+
+Table written to /workspace/GPU_Profiling/results/timing/ab_noload_comparison_table.txt

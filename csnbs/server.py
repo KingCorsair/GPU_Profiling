@@ -45,7 +45,10 @@ if MODE == "model":
         str(MODEL_PATH),
         None,
         get_model_name_from_path(str(MODEL_PATH)),
-        visual_token_num=576,
+        # Overridable so A/B load-test runs (e.g. VisPruner 128 vs. unpruned
+        # 576) can select this per-process without a code change; unset
+        # keeps prior behavior (576, effectively unpruned) exactly.
+        visual_token_num=int(os.environ.get("VISUAL_TOKEN_NUM", "576")),
         important_ratio=0.5,
     )
     model.eval()

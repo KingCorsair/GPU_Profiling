@@ -1,0 +1,457 @@
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.23s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.38s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.51s/it]
+INFO:     Started server process [4678]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58214 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58228 - "GET /health HTTP/1.1" 200 OK
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 3.0 --duration 30 --timeout 120000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58262 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58264 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58272 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58276 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58296 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58300 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58262 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58264 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58272 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58276 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36096 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36108 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36150 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36164 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36170 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36186 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36192 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36204 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58296 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58300 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58262 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58264 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58272 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58276 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36216 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36220 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36222 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36096 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36108 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36150 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36164 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36170 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36186 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58296 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58300 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58236 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58262 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58264 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58272 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58276 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36192 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36216 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36220 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58254 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36222 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36096 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36108 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36150 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36164 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58234 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58296 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36314 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39598 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39614 - "POST /infer HTTP/1.1" 200 OK
+{
+  "runId": "03-19-29Z_rps-3_4742a956",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-19-29Z_rps-3_4742a956",
+  "summary": {
+    "totalRequests": 80,
+    "successfulRequests": 80,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 3.0001078149125204,
+    "completionRateRps": 2.2493779074487503,
+    "successfulThroughputRps": 2.2493779074487503,
+    "successfulRequestLatencyMs": {
+      "p50": 7629.882889,
+      "p95": 10951.375145000002,
+      "p99": 13418.157296999998
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.19511133333071484,
+      "p95": 0.6317843333381461,
+      "p99": 0.8361713333360967
+    },
+    "plannedToCompleteMs": {
+      "p50": 7629.436110666669,
+      "p95": 10951.076273,
+      "p99": 13417.425384333335
+    }
+  }
+}
+INFO:     127.0.0.1:54348 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54364 - "GET /health HTTP/1.1" 200 OK
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 0.5 --duration 30 --timeout 120000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52944 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "POST /infer HTTP/1.1" 200 OK
+{
+  "runId": "03-20-10Z_rps-0.5_9433ab38",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-10Z_rps-0.5_9433ab38",
+  "summary": {
+    "totalRequests": 5,
+    "successfulRequests": 5,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 0.4999977776348779,
+    "completionRateRps": 0.5,
+    "successfulThroughputRps": 0.5,
+    "successfulRequestLatencyMs": {
+      "p50": 652.1457120000014,
+      "p95": 860.7157550000011,
+      "p99": 860.7157550000011
+    },
+    "dispatchLatenessMs": {
+      "p50": 1.368609999997716,
+      "p95": 1.6957599999986996,
+      "p99": 1.6957599999986996
+    },
+    "plannedToCompleteMs": {
+      "p50": 653.5064270000003,
+      "p95": 862.0843649999988,
+      "p99": 862.0843649999988
+    }
+  }
+}
+INFO:     127.0.0.1:48848 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48860 - "GET /health HTTP/1.1" 200 OK
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 2.0 --duration 30 --timeout 120000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48904 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48916 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48904 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48916 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48920 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48924 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48926 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59318 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48904 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48916 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48920 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48924 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48926 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59318 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59320 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48904 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48916 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48920 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48924 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48926 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59322 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48904 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48916 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48920 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48924 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44332 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48876 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48888 - "POST /infer HTTP/1.1" 200 OK
+{
+  "runId": "03-20-40Z_rps-2_37c21e40",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-40Z_rps-2_37c21e40",
+  "summary": {
+    "totalRequests": 50,
+    "successfulRequests": 50,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 1.9999708418944915,
+    "completionRateRps": 2,
+    "successfulThroughputRps": 2,
+    "successfulRequestLatencyMs": {
+      "p50": 1373.5095800000017,
+      "p95": 5376.414236999999,
+      "p99": 8009.136283999998
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.006500000003143214,
+      "p95": 0.8406819999981963,
+      "p99": 2.6007659999995667
+    },
+    "plannedToCompleteMs": {
+      "p50": 1372.6828559999994,
+      "p95": 5377.0459599999995,
+      "p99": 8009.414009999999
+    }
+  }
+}
+INFO:     127.0.0.1:44346 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44350 - "GET /health HTTP/1.1" 200 OK
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 1.0 --duration 30 --timeout 120000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44356 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44356 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44356 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59134 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44354 - "POST /infer HTTP/1.1" 200 OK
+{
+  "runId": "03-21-12Z_rps-1_7618f7bc",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-12Z_rps-1_7618f7bc",
+  "summary": {
+    "totalRequests": 20,
+    "successfulRequests": 20,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 0.9999905885096295,
+    "completionRateRps": 1,
+    "successfulThroughputRps": 1,
+    "successfulRequestLatencyMs": {
+      "p50": 492.1822350000002,
+      "p95": 767.322626000001,
+      "p99": 919.5217489999995
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.4012059999986377,
+      "p95": 0.6652279999998427,
+      "p99": 0.7162040000002889
+    },
+    "plannedToCompleteMs": {
+      "p50": 491.82260900000074,
+      "p95": 767.8518010000007,
+      "p99": 918.8438310000001
+    }
+  }
+}
+INFO:     127.0.0.1:48094 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48110 - "GET /health HTTP/1.1" 200 OK
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 1.5 --duration 30 --timeout 120000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59932 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59932 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59940 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59954 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59932 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59940 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59932 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59932 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48122 - "POST /infer HTTP/1.1" 200 OK
+{
+  "runId": "03-21-43Z_rps-1.5_b9dbdc93",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-43Z_rps-1.5_b9dbdc93",
+  "summary": {
+    "totalRequests": 35,
+    "successfulRequests": 35,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 1.5000517230408068,
+    "completionRateRps": 1.5,
+    "successfulThroughputRps": 1.5,
+    "successfulRequestLatencyMs": {
+      "p50": 474.62413500000184,
+      "p95": 2333.053675000001,
+      "p99": 2489.2095530000006
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.2696063333314669,
+      "p95": 0.5174673333385726,
+      "p99": 1.5213859999985289
+    },
+    "plannedToCompleteMs": {
+      "p50": 474.3545286666704,
+      "p95": 2333.163543333334,
+      "p99": 2490.730938999999
+    }
+  }
+}
+INFO:     127.0.0.1:45066 - "GET /health HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4678]
+Waiting for model server (visual_token_num=128)...
+Server ready.
+
+--- visual_token_num=128  RPS level: 3.0 ---
+  -> /workspace/GPU_Profiling/results/loadgen/2026-09-01/03-19-29Z_rps-3_4742a956/run.json
+  -> p50=7630ms p95=10951ms throughput=2.249rps gpu_util_mean=65.8% cpu_busy_mean=7.6%
+
+--- visual_token_num=128  RPS level: 0.5 ---
+  -> /workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-10Z_rps-0.5_9433ab38/run.json
+  -> p50=652ms p95=861ms throughput=0.500rps gpu_util_mean=33.3% cpu_busy_mean=5.8%
+
+--- visual_token_num=128  RPS level: 2.0 ---
+  -> /workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-40Z_rps-2_37c21e40/run.json
+  -> p50=1374ms p95=5376ms throughput=2.000rps gpu_util_mean=70.1% cpu_busy_mean=7.4%
+
+--- visual_token_num=128  RPS level: 1.0 ---
+  -> /workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-12Z_rps-1_7618f7bc/run.json
+  -> p50=492ms p95=767ms throughput=1.000rps gpu_util_mean=39.5% cpu_busy_mean=6.4%
+
+--- visual_token_num=128  RPS level: 1.5 ---
+  -> /workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-43Z_rps-1.5_b9dbdc93/run.json
+  -> p50=475ms p95=2333ms throughput=1.500rps gpu_util_mean=48.7% cpu_busy_mean=7.0%
+
+Load-test sweep completed for visual_token_num=128.
+Stopping server...
+
+Metadata written to /workspace/GPU_Profiling/results/timing/concurrent_load_metadata_vtn128.json
+
+Concurrent load sweep (visual_token_num=128) -- 30s per level, dataset=/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+Server settings: visual_token_num=128 important_ratio=0.5 max_new_tokens=64
+
+rps_target  throughput    p50_ms    p95_ms    p99_ms  failed  gpu_util%  gpu_mem_MiB  cpu_busy%
+       0.5       0.500       652       861       861       0       33.3      15149.0        5.8
+       1.0       1.000       492       767       920       0       39.5      15149.0        6.4
+       1.5       1.500       475      2333      2489       0       48.7      15149.0        7.0
+       2.0       2.000      1374      5376      8009       0       70.1      15149.0        7.4
+       3.0       2.249      7630     10951     13418       0       65.8      15128.7        7.6
+
+Summary table written to /workspace/GPU_Profiling/results/timing/concurrent_load_summary_vtn128.txt

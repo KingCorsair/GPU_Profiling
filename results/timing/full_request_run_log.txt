@@ -1,0 +1,90 @@
+You are using a model of type llava to instantiate a model of type llava_llama. This is not supported for all configurations of models and can yield errors.
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.84s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.29s/it]
+STAGE:2026-09-01 02:17:58 2618:2618 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+STAGE:2026-09-01 02:18:00 2618:2618 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2026-09-01 02:18:00 2618:2618 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+batch=1 prompt_len=66 visual_token_num=128 important_ratio=0.5
+forward() calls: 24 (1 prefill + 23 decode steps)
+output_ids shape: (1, 25)  generated_text: 'Pepsi cola company pepsi cola company pepsi cola company pepsi cola company pepsi cola'
+wall time for generate() (post-warm-up, synced): 1146.11 ms
+
+Settings:
+{
+  "gpu": "NVIDIA A40",
+  "gpu_total_mem_gb": 47.7,
+  "torch_version": "2.2.2+cu121",
+  "cuda_version": "12.1",
+  "cudnn_version": 8902,
+  "transformers_version": "4.37.2",
+  "attn_implementation": "sdpa",
+  "model_path": "/workspace/GPU_Profiling/vis_pruner_copy/checkpoints/llava-v1.5-7b",
+  "model": "llava-v1.5-7b",
+  "num_transformer_layers": 32,
+  "visual_token_num": 128,
+  "important_ratio": 0.5,
+  "visual_token_num_actually_used": 128,
+  "batch_size": 1,
+  "prompt_len_tokens": 66,
+  "max_new_tokens_requested": 24,
+  "output_token_count": 25,
+  "forward_calls_total": 24,
+  "decode_steps": 23,
+  "n_warmup_requests": 10,
+  "profiled_requests": 1,
+  "generated_text": "Pepsi cola company pepsi cola company pepsi cola company pepsi cola company pepsi cola",
+  "wall_time_generate_ms_post_warmup": 1146.11,
+  "git_commit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+  "dtype": "fp16",
+  "image_path": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/images/textvqa_fe32ee8991d2e59f.jpg"
+}
+
+Settings written to /workspace/GPU_Profiling/results/timing/full_request_settings.json
+Chrome trace written to /workspace/GPU_Profiling/results/timing/full_request_trace.json
+CUDA-time-sorted summary written to /workspace/GPU_Profiling/results/timing/full_request_summary_by_cuda_time.txt
+Call-count-sorted summary written to /workspace/GPU_Profiling/results/timing/full_request_summary_by_count.txt
+CPU-time-sorted summary written to /workspace/GPU_Profiling/results/timing/full_request_summary_by_cpu_time.txt
+
+====================================================================================================
+STAGE BREAKDOWN
+====================================================================================================
+visual_token_num=128 batch=1 prompt_len=66 max_new_tokens=24 decode_steps=23 num_transformer_layers=32 attn_implementation=sdpa
+
+stage                    count      cpu_ms     cuda_ms   self_cpu_ms  self_cuda_ms
+image_preprocessing          1     106.636       0.041       105.327         0.000
+multimodal_prep             24     112.520      46.151         6.439         0.000
+vision_tower                 1      78.205      36.239        65.267         0.000
+mm_projector                 1       0.196       0.318         0.070         0.000
+kv_cache_legacy_rebuild     768       3.017       0.000         3.017         0.000
+kv_cache_append            736      38.398      11.756        16.386         0.000
+prefill                      1      36.717      60.795         9.947         0.000
+request_completion           1       0.854       0.001         0.762         0.000
+decode_step_1                1      38.936      38.407        10.281         0.000
+decode_step_2                1      44.891      35.275        11.102         0.000
+decode_step_3                1      42.988      35.187        11.118         0.000
+decode_step_4                1      41.139      37.497        10.710         0.000
+decode_step_5                1      42.782      36.016        10.426         0.000
+decode_step_6                1      39.772      35.525        10.293         0.000
+decode_step_7                1      40.610      27.550        10.756         0.000
+decode_step_8                1      42.522      27.578        10.616         0.000
+decode_step_9                1      40.845      27.534        10.689         0.000
+decode_step_10               1      43.734      27.517        11.086         0.000
+decode_step_11               1      40.318      27.520        10.231         0.000
+decode_step_12               1      42.600      27.529        10.699         0.000
+decode_step_13               1      40.087      27.548        10.192         0.000
+decode_step_14               1      42.040      27.535        10.277         0.000
+decode_step_15               1      40.070      27.531        10.633         0.000
+decode_step_16               1      40.170      27.544        10.479         0.000
+decode_step_17               1      42.115      27.556        12.420         0.000
+decode_step_18               1      41.006      27.539        10.524         0.000
+decode_step_19               1      42.832      27.561        10.608         0.000
+decode_step_20               1      39.503      27.563        10.197         0.000
+decode_step_21               1      41.840      27.567        10.380         0.000
+decode_step_22               1      39.450      27.564        10.182         0.000
+decode_step_23               1      41.686      27.574        10.370         0.000
+
+decode phase (sum of 23 decode_step_* regions): cuda_ms=686.217 cpu_ms=951.936 (avg 29.836 ms cuda / step)
+prefill phase: cuda_ms=60.795 cpu_ms=36.717
+
+Stage breakdown written to /workspace/GPU_Profiling/results/timing/full_request_stage_breakdown.txt

@@ -1,0 +1,9 @@
+Concurrent load sweep (visual_token_num=128) -- 30s per level, dataset=/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+Server settings: visual_token_num=128 important_ratio=0.5 max_new_tokens=64
+
+rps_target  throughput    p50_ms    p95_ms    p99_ms  failed  gpu_util%  gpu_mem_MiB  cpu_busy%
+       0.5       0.500       652       861       861       0       33.3      15149.0        5.8
+       1.0       1.000       492       767       920       0       39.5      15149.0        6.4
+       1.5       1.500       475      2333      2489       0       48.7      15149.0        7.0
+       2.0       2.000      1374      5376      8009       0       70.1      15149.0        7.4
+       3.0       2.249      7630     10951     13418       0       65.8      15128.7        7.6

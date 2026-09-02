@@ -1,0 +1,352 @@
+{
+  "metadata": {
+    "gpu": "NVIDIA A40",
+    "torch_version": "2.2.2+cu121",
+    "transformers_version": "4.37.2",
+    "model": "llava-v1.5-7b",
+    "model_path": "/workspace/GPU_Profiling/vis_pruner_copy/checkpoints/llava-v1.5-7b",
+    "important_ratio": 0.5,
+    "n_requests": 10,
+    "n_warmup": 10,
+    "max_new_tokens_cap": 64,
+    "do_sample": false,
+    "output_token_policy": "natural EOS stopping, capped at max_new_tokens (matches csnbs/server.py)",
+    "git_commit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+    "dataset_path": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+    "request_ids_used": [
+      "textvqa_34628",
+      "textvqa_34620",
+      "textvqa_34614",
+      "textvqa_34638",
+      "textvqa_34633",
+      "textvqa_34610",
+      "textvqa_34608",
+      "textvqa_34618",
+      "textvqa_34616",
+      "textvqa_34622"
+    ]
+  },
+  "configs": {
+    "576": {
+      "summary": {
+        "visual_token_num": 576,
+        "n_requests": 10,
+        "latency_mean_ms": 887.6363218179904,
+        "latency_median_ms": 652.1452054730617,
+        "latency_stdev_ms": 565.0529817713257,
+        "latency_min_ms": 500.4874069709331,
+        "latency_max_ms": 2099.07523507718,
+        "multimodal_prep_mean_ms": 49.68341240892187,
+        "prefill_lm_forward_mean_ms": 111.5067970275879,
+        "decode_lm_forward_mean_ms": 711.8037954330443,
+        "output_token_count_mean": 25.2,
+        "output_token_count_min": 12,
+        "output_token_count_max": 65,
+        "gpu_util_pct_mean_sampled": 95.9,
+        "gpu_util_pct_max_sampled": 99.0
+      },
+      "per_request": [
+        {
+          "wall_latency_s": 0.5487526271026582,
+          "output_token_count": 14,
+          "prompt_len": 54,
+          "generated_text": "The name of the runner on the left is Willis.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.04968661104794592,
+          "generate_time_s": 0.4865139570320025,
+          "prefill_lm_forward_time_s": 0.11108860778808594,
+          "prefill_prep_time_s": 1.3088000006973743e-05,
+          "decode_lm_forward_time_s": 0.36999190521240233,
+          "decode_steps": 12
+        },
+        {
+          "wall_latency_s": 1.7692257519811392,
+          "output_token_count": 54,
+          "prompt_len": 53,
+          "generated_text": "In the image, there are four items available for $5 each. These items are colorful cakes or frosting, which are displayed in a store. The four items are placed in a row, and each one is priced at $5.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.035943762050010264,
+          "generate_time_s": 1.725765414070338,
+          "prefill_lm_forward_time_s": 0.1117399673461914,
+          "prefill_prep_time_s": 1.2992000207304955e-05,
+          "decode_lm_forward_time_s": 1.5963770217895508,
+          "decode_steps": 52
+        },
+        {
+          "wall_latency_s": 0.6760158289689571,
+          "output_token_count": 17,
+          "prompt_len": 57,
+          "generated_text": "The light sign on the farthest right window reads \"all lit.\"",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.08588448096998036,
+          "generate_time_s": 0.583188853925094,
+          "prefill_lm_forward_time_s": 0.11805305480957032,
+          "prefill_prep_time_s": 9.952000342309476e-06,
+          "decode_lm_forward_time_s": 0.46041619300842285,
+          "decode_steps": 15
+        },
+        {
+          "wall_latency_s": 0.802508797030896,
+          "output_token_count": 23,
+          "prompt_len": 55,
+          "generated_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.035684767994098365,
+          "generate_time_s": 0.7612994069932029,
+          "prefill_lm_forward_time_s": 0.11114419555664062,
+          "prefill_prep_time_s": 1.4240000396966935e-05,
+          "decode_lm_forward_time_s": 0.64368332862854,
+          "decode_steps": 21
+        },
+        {
+          "wall_latency_s": 0.5004874069709331,
+          "output_token_count": 12,
+          "prompt_len": 51,
+          "generated_text": "Yes, these are bottles of Pepsi.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.07350465806666762,
+          "generate_time_s": 0.4210370050277561,
+          "prefill_lm_forward_time_s": 0.10972259521484375,
+          "prefill_prep_time_s": 1.104000024497509e-05,
+          "decode_lm_forward_time_s": 0.3076837100982666,
+          "decode_steps": 10
+        },
+        {
+          "wall_latency_s": 2.09907523507718,
+          "output_token_count": 65,
+          "prompt_len": 53,
+          "generated_text": "The center of attention in this scene is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, and his focus is on the board as he",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.03525497193913907,
+          "generate_time_s": 2.057903397944756,
+          "prefill_lm_forward_time_s": 0.11099734497070313,
+          "prefill_prep_time_s": 1.033599954098463e-05,
+          "decode_lm_forward_time_s": 1.9295757122039794,
+          "decode_steps": 63
+        },
+        {
+          "wall_latency_s": 0.5846771210199222,
+          "output_token_count": 15,
+          "prompt_len": 48,
+          "generated_text": "The time on the watch is 10:10.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.06511801294982433,
+          "generate_time_s": 0.5127560941036791,
+          "prefill_lm_forward_time_s": 0.10975856018066406,
+          "prefill_prep_time_s": 1.1839999817311763e-05,
+          "decode_lm_forward_time_s": 0.39876307106018066,
+          "decode_steps": 13
+        },
+        {
+          "wall_latency_s": 0.7431620260467753,
+          "output_token_count": 21,
+          "prompt_len": 53,
+          "generated_text": "The bottle with a red label is a bottle of Jack Daniel's whiskey.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.03534011205192655,
+          "generate_time_s": 0.6992770349606872,
+          "prefill_lm_forward_time_s": 0.1110739517211914,
+          "prefill_prep_time_s": 1.1680000461637974e-05,
+          "decode_lm_forward_time_s": 0.5824701118469239,
+          "decode_steps": 19
+        },
+        {
+          "wall_latency_s": 0.5241838420042768,
+          "output_token_count": 14,
+          "prompt_len": 50,
+          "generated_text": "Yes, this is a Denny's restaurant sign.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.03535105602350086,
+          "generate_time_s": 0.4837166230427101,
+          "prefill_lm_forward_time_s": 0.1111046371459961,
+          "prefill_prep_time_s": 1.2063999660313129e-05,
+          "decode_lm_forward_time_s": 0.36863289833068846,
+          "decode_steps": 12
+        },
+        {
+          "wall_latency_s": 0.6282745819771662,
+          "output_token_count": 17,
+          "prompt_len": 54,
+          "generated_text": "One of the brands being advertised in the image is Yamaha.",
+          "visual_token_num_used": 576,
+          "multimodal_prep_time_generate_s": 0.04506569099612534,
+          "generate_time_s": 0.5755431530997157,
+          "prefill_lm_forward_time_s": 0.11038505554199218,
+          "prefill_prep_time_s": 1.1359999887645245e-05,
+          "decode_lm_forward_time_s": 0.4604440021514893,
+          "decode_steps": 15
+        }
+      ]
+    },
+    "128": {
+      "summary": {
+        "visual_token_num": 128,
+        "n_requests": 10,
+        "latency_mean_ms": 778.3525306964293,
+        "latency_median_ms": 553.036956989672,
+        "latency_stdev_ms": 494.7850360054178,
+        "latency_min_ms": 453.68757599499077,
+        "latency_max_ms": 1994.3082890240476,
+        "multimodal_prep_mean_ms": 68.44893738161772,
+        "prefill_lm_forward_mean_ms": 44.360438919067384,
+        "decode_lm_forward_mean_ms": 652.1321229934692,
+        "output_token_count_mean": 24.3,
+        "output_token_count_min": 14,
+        "output_token_count_max": 65,
+        "gpu_util_pct_mean_sampled": 98.5,
+        "gpu_util_pct_max_sampled": 99.0
+      },
+      "per_request": [
+        {
+          "wall_latency_s": 0.5176816299790516,
+          "output_token_count": 14,
+          "prompt_len": 54,
+          "generated_text": "The name of the runner on the left is Willis.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.11034655501134694,
+          "generate_time_s": 0.3998037630226463,
+          "prefill_lm_forward_time_s": 0.04451964950561523,
+          "prefill_prep_time_s": 1.8464000895619392e-05,
+          "decode_lm_forward_time_s": 0.35113513565063476,
+          "decode_steps": 12
+        },
+        {
+          "wall_latency_s": 1.306857971008867,
+          "output_token_count": 43,
+          "prompt_len": 53,
+          "generated_text": "At the store, you can get a package of 3 Tuff Stuff Camouflage Cake Mix and a package of 3 Tuff Stuff Blue Fondant for $5.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.04606892296578735,
+          "generate_time_s": 1.2539392109028995,
+          "prefill_lm_forward_time_s": 0.04452713775634766,
+          "prefill_prep_time_s": 1.0304000228643417e-05,
+          "decode_lm_forward_time_s": 1.1983928928375245,
+          "decode_steps": 41
+        },
+        {
+          "wall_latency_s": 0.6233642069855705,
+          "output_token_count": 19,
+          "prompt_len": 57,
+          "generated_text": "The light sign on the farthest right window reads \"3.29.\"",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.06809166492894292,
+          "generate_time_s": 0.5474678119644523,
+          "prefill_lm_forward_time_s": 0.04514511871337891,
+          "prefill_prep_time_s": 1.2191999703645706e-05,
+          "decode_lm_forward_time_s": 0.4971828441619873,
+          "decode_steps": 17
+        },
+        {
+          "wall_latency_s": 0.7621693119872361,
+          "output_token_count": 23,
+          "prompt_len": 55,
+          "generated_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.09153484692797065,
+          "generate_time_s": 0.6641048500314355,
+          "prefill_lm_forward_time_s": 0.04404780960083008,
+          "prefill_prep_time_s": 1.1776000261306763e-05,
+          "decode_lm_forward_time_s": 0.6139246673583985,
+          "decode_steps": 21
+        },
+        {
+          "wall_latency_s": 0.537459596991539,
+          "output_token_count": 16,
+          "prompt_len": 51,
+          "generated_text": "Yes, the image shows a row of bottles of Pepsi.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.0735675849718973,
+          "generate_time_s": 0.45783807104453444,
+          "prefill_lm_forward_time_s": 0.04389120101928711,
+          "prefill_prep_time_s": 1.2575999833643437e-05,
+          "decode_lm_forward_time_s": 0.4095500144958496,
+          "decode_steps": 14
+        },
+        {
+          "wall_latency_s": 1.9943082890240476,
+          "output_token_count": 65,
+          "prompt_len": 53,
+          "generated_text": "The center of attention in this image is a person who is wearing a red hat and is surrounded by a group of people. They are likely the focus of the conversation or event taking place in the room. The presence of the person in the red hat suggests that they might be a notable figure or the main subject of",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.0822066740365699,
+          "generate_time_s": 1.9037647979566827,
+          "prefill_lm_forward_time_s": 0.044057216644287106,
+          "prefill_prep_time_s": 1.1455999687314034e-05,
+          "decode_lm_forward_time_s": 1.8422906551361085,
+          "decode_steps": 63
+        },
+        {
+          "wall_latency_s": 0.4819228110136464,
+          "output_token_count": 15,
+          "prompt_len": 48,
+          "generated_text": "The time on the watch is 10:10.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.04613708902616054,
+          "generate_time_s": 0.42846210894640535,
+          "prefill_lm_forward_time_s": 0.0439466552734375,
+          "prefill_prep_time_s": 1.0048000141978264e-05,
+          "decode_lm_forward_time_s": 0.3804846076965332,
+          "decode_steps": 13
+        },
+        {
+          "wall_latency_s": 0.566630190005526,
+          "output_token_count": 17,
+          "prompt_len": 53,
+          "generated_text": "The bottle with a red label is Jack Daniel's whiskey.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.07146576989907771,
+          "generate_time_s": 0.48736787599045783,
+          "prefill_lm_forward_time_s": 0.04428112030029297,
+          "prefill_prep_time_s": 1.5168000012636184e-05,
+          "decode_lm_forward_time_s": 0.43846204566955566,
+          "decode_steps": 15
+        },
+        {
+          "wall_latency_s": 0.45368757599499077,
+          "output_token_count": 14,
+          "prompt_len": 50,
+          "generated_text": "Yes, this is a Denny's restaurant sign.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.04887582897208631,
+          "generate_time_s": 0.3992507179500535,
+          "prefill_lm_forward_time_s": 0.04448003387451172,
+          "prefill_prep_time_s": 1.2223999947309494e-05,
+          "decode_lm_forward_time_s": 0.3509696636199951,
+          "decode_steps": 12
+        },
+        {
+          "wall_latency_s": 0.5394437239738181,
+          "output_token_count": 17,
+          "prompt_len": 54,
+          "generated_text": "One of the brands being advertised in the image is Yamaha.",
+          "visual_token_num_used": 128,
+          "multimodal_prep_time_generate_s": 0.046194437076337636,
+          "generate_time_s": 0.48820157803129405,
+          "prefill_lm_forward_time_s": 0.044708446502685545,
+          "prefill_prep_time_s": 1.0048000141978264e-05,
+          "decode_lm_forward_time_s": 0.43892870330810546,
+          "decode_steps": 15
+        }
+      ]
+    }
+  },
+  "gain": {
+    "latency_median_gain_percent": 15.197267058261538,
+    "formula": "(latency_576 - latency_128) / latency_576 * 100",
+    "multimodal_prep_mean_ms": {
+      "576": 49.68341240892187,
+      "128": 68.44893738161772,
+      "gain_percent": -37.77020148746073
+    },
+    "prefill_lm_forward_mean_ms": {
+      "576": 111.5067970275879,
+      "128": 44.360438919067384,
+      "gain_percent": 60.21727813767964
+    },
+    "decode_lm_forward_mean_ms": {
+      "576": 711.8037954330443,
+      "128": 652.1321229934692,
+      "gain_percent": 8.383163003966885
+    }
+  }
+}

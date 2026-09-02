@@ -6,7 +6,7 @@ DB_DIR = "./chroma_db"
 COLLECTION_NAME = "my_docs"
 EMBED_MODEL = "nomic-embed-text"
 LLM_MODEL = "llama3.2"             
-TOP_K = 4                         
+TOP_K = 4
 
 PROMPT_TEMPLATE = """Answer the question using ONLY the context below.
 If the answer isn't contained in the context, say "I don't know based on the provided documents."

@@ -15,3 +15,10 @@ ScienceQA/train/
 ScienceQA/val/
 ScienceQA/test/
 ScienceQA/data/scienceqa/images/
+
+# Chrome/perfetto profiler traces -- 50-430MB each, over GitHub's 100MB limit.
+# The derived *_stage_breakdown.txt / *_summary_by_*.txt files are the tracked
+# evidence; regenerate raw traces with scripts/profile_ab_trace.py and
+# scripts/profile_full_request.py.
+results/timing/*_trace.json
+results/timing/ab_trace_*.json

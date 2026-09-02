@@ -1,0 +1,9 @@
+{
+  "note": "manual single-request calibration against the live model server (csnbs/server.py, MODE=model) before choosing the RPS progression for run_concurrent_load_test.py",
+  "server_settings": {"visual_token_num": 576, "important_ratio": 0.5, "max_new_tokens": 64},
+  "question": "what is the name of the runner on the left?",
+  "answer": "The name of the runner on the left is Willis.",
+  "latencies_ms": {"warmup_first_request": 1227.7, "measured_1": 565.6, "measured_2": 554.8, "measured_3": 562.1},
+  "steady_state_estimate_ms": 561,
+  "implied_serial_throughput_ceiling_rps": 1.78
+}

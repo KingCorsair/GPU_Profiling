@@ -1,0 +1,854 @@
+<title>VisPruner Engineering Roadmap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef1f4;
+    --border: #d7dee4;
+    --text: #141a20;
+    --text-dim: #5b6a78;
+    --text-faint: #8695a3;
+    --accent: #d9640f;
+    --accent-soft: #fbe6d4;
+    --accent-2: #0d7d74;
+    --accent-2-soft: #dcf1ee;
+    --ok: #1f8a4c;
+    --ok-soft: #e1f4e8;
+    --warn: #9a6b00;
+    --warn-soft: #fbedcc;
+    --crit: #b3261e;
+    --crit-soft: #fbe2e0;
+    --muted: #6b7684;
+    --muted-soft: #e7eaed;
+    --shadow: 0 1px 2px rgba(20,26,32,0.04), 0 6px 20px rgba(20,26,32,0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a0e12;
+      --surface: #12181f;
+      --surface-2: #1a222b;
+      --border: #26313d;
+      --text: #e8edf2;
+      --text-dim: #9aabb9;
+      --text-faint: #6b7987;
+      --accent: #ff9b4d;
+      --accent-soft: #3a2410;
+      --accent-2: #5fd4c8;
+      --accent-2-soft: #10302d;
+      --ok: #6fcf97;
+      --ok-soft: #123322;
+      --warn: #f2c94c;
+      --warn-soft: #362a08;
+      --crit: #f28b82;
+      --crit-soft: #3a1512;
+      --muted: #8b96a3;
+      --muted-soft: #1c232b;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a0e12;
+    --surface: #12181f;
+    --surface-2: #1a222b;
+    --border: #26313d;
+    --text: #e8edf2;
+    --text-dim: #9aabb9;
+    --text-faint: #6b7987;
+    --accent: #ff9b4d;
+    --accent-soft: #3a2410;
+    --accent-2: #5fd4c8;
+    --accent-2-soft: #10302d;
+    --ok: #6fcf97;
+    --ok-soft: #123322;
+    --warn: #f2c94c;
+    --warn-soft: #362a08;
+    --crit: #f28b82;
+    --crit-soft: #3a1512;
+    --muted: #8b96a3;
+    --muted-soft: #1c232b;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+  h1, h2, h3, h4 { font-family: 'Sora', system-ui, sans-serif; text-wrap: balance; margin: 0; color: var(--text); }
+  code, .mono, .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent-2); }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .topbar-inner {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 16px 24px; flex-wrap: wrap; gap: 8px 20px;
+  }
+  .topbar .brand { font-family: 'Sora'; font-weight: 700; font-size: 15px; letter-spacing: 0.01em; }
+  .topbar .brand span { color: var(--accent); }
+  .topbar nav { display: flex; gap: 18px; flex-wrap: wrap; }
+  .topbar nav a { color: var(--text-dim); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .topbar nav a:hover { color: var(--accent); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 56px 0 40px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono'; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 4px 10px 4px 8px;
+    margin-bottom: 18px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero h1 { font-size: clamp(28px, 4.2vw, 42px); font-weight: 800; line-height: 1.12; max-width: 15ch; }
+  .hero .lede { max-width: 62ch; margin-top: 18px; font-size: 16.5px; color: var(--text-dim); }
+  .hero .lede b { color: var(--text); font-weight: 600; }
+
+  /* ---------- Signal decay meter ---------- */
+  .decay {
+    margin-top: 40px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface); box-shadow: var(--shadow); padding: 24px 28px 20px;
+  }
+  .decay-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; flex-wrap: wrap; gap: 6px; }
+  .decay-head h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); font-weight: 600; }
+  .decay-head .src { font-size: 11.5px; color: var(--text-faint); font-family: 'IBM Plex Mono'; }
+  .decay-rows { display: flex; flex-direction: column; gap: 14px; }
+  .decay-row { display: grid; grid-template-columns: 168px 1fr 108px; align-items: center; gap: 14px; }
+  .decay-row .label { font-size: 13.5px; color: var(--text-dim); font-weight: 500; }
+  .decay-row .label small { display: block; font-size: 11px; color: var(--text-faint); font-weight: 400; margin-top: 1px; }
+  .decay-track { height: 20px; background: var(--surface-2); border-radius: 5px; overflow: hidden; position: relative; }
+  .decay-fill { height: 100%; border-radius: 5px 0 0 5px; }
+  .decay-row .val { font-family: 'IBM Plex Mono'; font-weight: 600; font-size: 15px; text-align: right; }
+  .decay-row .val small { display: block; font-size: 10.5px; font-weight: 400; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .decay-fill.f1 { width: 58%; background: var(--accent); }
+  .decay-fill.f2 { width: 13.4%; background: var(--accent); opacity: 0.75; }
+  .decay-fill.f3 { width: 3.8%; background: var(--accent-2); }
+  .decay-foot { margin-top: 16px; font-size: 12.5px; color: var(--text-faint); border-top: 1px solid var(--border); padding-top: 12px; }
+  .decay-foot b { color: var(--text-dim); }
+
+  /* ---------- Section shell ---------- */
+  section { padding: 52px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+  .section-head { margin-bottom: 26px; }
+  .section-kicker { font-family: 'IBM Plex Mono'; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 8px; }
+  .section-head h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 700; }
+  .section-head p { color: var(--text-dim); max-width: 68ch; margin-top: 10px; font-size: 14.5px; }
+
+  /* ---------- Cards grid ---------- */
+  .grid { display: grid; gap: 16px; }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .card p { color: var(--text-dim); font-size: 13.5px; margin: 0; }
+  .card .kv { margin-top: 12px; font-size: 12px; font-family: 'IBM Plex Mono'; color: var(--text-faint); }
+
+  /* finding cards */
+  .finding { border-left: 3px solid var(--accent); }
+  .finding .stat { font-family: 'IBM Plex Mono'; font-size: 24px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+  .finding .stat.teal { color: var(--accent-2); }
+  .finding .src { margin-top: 10px; font-size: 11px; color: var(--text-faint); font-family: 'IBM Plex Mono'; word-break: break-word; }
+
+  /* pills / badges */
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 100px; font-family: 'IBM Plex Mono'; letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .pill-core { background: var(--ok-soft); color: var(--ok); }
+  .pill-ext { background: var(--warn-soft); color: var(--warn); }
+  .pill-opt { background: var(--muted-soft); color: var(--muted); }
+  .pill-crit { background: var(--crit-soft); color: var(--crit); }
+  .pill-new { background: var(--accent-2-soft); color: var(--accent-2); }
+  .pill-spec { background: var(--accent-soft); color: var(--accent); }
+
+  /* category cards */
+  .cat-card { display: flex; flex-direction: column; gap: 10px; }
+  .cat-card .cat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .cat-card .cat-icon {
+    width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono'; font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .cat-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--text-dim); font-size: 13px; }
+  .cat-card li { margin-bottom: 4px; }
+
+  /* ---------- Dependency diagram ---------- */
+  .dep-wrap { overflow-x: auto; }
+  .dep {
+    min-width: 760px; display: grid; grid-template-columns: 1fr; gap: 0; align-items: center;
+  }
+  .dep-node {
+    border: 1px solid var(--border); background: var(--surface); border-radius: 10px;
+    padding: 14px 18px; font-size: 13px; box-shadow: var(--shadow); position: relative;
+  }
+  .dep-node .t { font-family: 'Sora'; font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .dep-node .d { color: var(--text-dim); font-size: 12px; }
+  .dep-node.phase0 { border-color: var(--crit); }
+  .dep-node.phase0 .t { color: var(--crit); }
+  .dep-arrow-v { width: 2px; height: 26px; background: var(--border); margin: 0 auto; position: relative; }
+  .dep-arrow-v::after {
+    content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--border);
+  }
+  .dep-tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 10px 0; }
+  .dep-track-label { font-family: 'IBM Plex Mono'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-bottom: 10px; text-align: center; }
+  .dep-track { display: flex; flex-direction: column; align-items: center; gap: 0; border: 1px dashed var(--border); border-radius: 12px; padding: 16px 14px; }
+  .dep-track .dep-node { width: 100%; }
+  .dep-converge { text-align: center; margin-top: 4px; color: var(--text-faint); font-size: 12px; font-family: 'IBM Plex Mono'; }
+
+  /* ---------- Timeline ---------- */
+  .timeline-wrap { overflow-x: auto; padding-bottom: 8px; }
+  .timeline { display: flex; gap: 0; min-width: 920px; }
+  .tl-item { flex: 1; min-width: 150px; position: relative; padding: 0 10px; }
+  .tl-item:not(:last-child)::after {
+    content: ''; position: absolute; top: 17px; left: 60%; width: 90%; height: 2px; background: var(--border); z-index: 0;
+  }
+  .tl-dot {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono'; font-weight: 700;
+    font-size: 13px; color: var(--accent); position: relative; z-index: 1; margin-bottom: 10px;
+  }
+  .tl-dot.dim { border-color: var(--border); color: var(--text-faint); }
+  .tl-item h5 { font-size: 12.5px; font-weight: 700; margin: 0 0 4px; }
+  .tl-item .cat { font-size: 10.5px; color: var(--accent-2); font-family: 'IBM Plex Mono'; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .tl-item p { font-size: 11.5px; color: var(--text-dim); margin: 0; }
+
+  /* ---------- Phase detail (details/summary) ---------- */
+  .phase {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow);
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .phase > summary {
+    list-style: none; cursor: pointer; padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+    justify-content: space-between; flex-wrap: wrap;
+  }
+  .phase > summary::-webkit-details-marker { display: none; }
+  .phase-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .phase-num {
+    font-family: 'IBM Plex Mono'; font-weight: 700; font-size: 13px; color: var(--accent);
+    background: var(--accent-soft); border-radius: 6px; width: 32px; height: 32px; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .phase-title { font-family: 'Sora'; font-weight: 700; font-size: 15px; }
+  .phase-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+  .phase-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .chev { color: var(--text-faint); transition: transform 0.15s ease; font-size: 12px; }
+  .phase[open] .chev { transform: rotate(90deg); }
+
+  .phase-body { padding: 4px 20px 22px; border-top: 1px solid var(--border); }
+  .pf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 22px; margin-top: 16px; }
+  .pf-field h6 { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); font-weight: 600; margin: 0 0 4px; }
+  .pf-field p, .pf-field div { font-size: 13px; color: var(--text-dim); margin: 0; }
+  .pf-field .mono-line { font-family: 'IBM Plex Mono'; font-size: 12px; color: var(--text); background: var(--surface-2); padding: 6px 8px; border-radius: 5px; display: inline-block; }
+  .pf-full { grid-column: 1 / -1; }
+  .pf-tasks { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-dim); }
+  .pf-tasks li { margin-bottom: 5px; }
+
+  /* ---------- validation formula ---------- */
+  .formula-box {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px;
+    font-family: 'IBM Plex Mono'; font-size: 13px; line-height: 1.9; overflow-x: auto;
+  }
+  .formula-box .c1 { color: var(--accent-2); }
+  .formula-box .c2 { color: var(--accent); }
+
+  /* ---------- tables ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; background: var(--surface); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  thead th {
+    background: var(--surface-2); font-family: 'IBM Plex Mono'; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-faint); font-weight: 600; position: sticky; top: 0;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.num, th.num { font-family: 'IBM Plex Mono'; }
+
+  /* ---------- completion checklist ---------- */
+  .complete-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .complete-col { border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; background: var(--surface); box-shadow: var(--shadow); }
+  .complete-col h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 15px; }
+  .complete-col.min { border-top: 3px solid var(--ok); }
+  .complete-col.ideal { border-top: 3px solid var(--accent-2); }
+  .complete-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .complete-list li { display: flex; gap: 10px; font-size: 13px; color: var(--text-dim); align-items: flex-start; }
+  .complete-list li::before { content: '□'; color: var(--text-faint); flex-shrink: 0; font-size: 13px; margin-top: 1px; }
+
+  /* ---------- footer ---------- */
+  footer { padding: 40px 0 60px; border-top: 1px solid var(--border); }
+  footer .foot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  footer h5 { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-bottom: 10px; }
+  footer p, footer a { font-size: 13px; color: var(--text-dim); }
+  footer a { display: block; margin-bottom: 6px; text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  footer .note { margin-top: 30px; font-size: 12px; color: var(--text-faint); border-top: 1px solid var(--border); padding-top: 18px; }
+
+  @media (max-width: 720px) {
+    .decay-row { grid-template-columns: 1fr; gap: 6px; }
+    .decay-row .val { text-align: left; }
+    .dep-tracks { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="topbar">
+  <div class="topbar-inner wrap">
+    <div class="brand">VisPruner <span>Engineering Roadmap</span></div>
+    <nav>
+      <a href="#findings">Findings</a>
+      <a href="#categories">Categories</a>
+      <a href="#dependencies">Dependencies</a>
+      <a href="#phases">Phases</a>
+      <a href="#validation">Validation</a>
+      <a href="#complete">Done</a>
+      <a href="#table">Master table</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow"><span class="dot"></span>Planning document — nothing implemented yet</div>
+    <h1>Closing the gap between what VisPruner cuts and what a request actually feels</h1>
+    <p class="lede">
+      VisPruner removes most of LLaVA's visual tokens and cuts prefill compute by
+      <b>56&ndash;60%</b>, measured directly. That win barely survives contact with the rest of
+      the system. This roadmap turns the profiling phase's findings into a sequenced,
+      benchmark-gated engineering plan &mdash; one measurable change at a time.
+    </p>
+
+    <div class="decay">
+      <div class="decay-head">
+        <h3>The signal, as it attenuates through the system</h3>
+        <span class="src">AMAY_VISPRUNER_PROFILING_REPORT.md &sect;10</span>
+      </div>
+      <div class="decay-rows">
+        <div class="decay-row">
+          <div class="label">Prefill compute<small>algorithmic reduction, 576&rarr;128 tokens</small></div>
+          <div class="decay-track"><div class="decay-fill f1"></div></div>
+          <div class="val">~58%<small>measured</small></div>
+        </div>
+        <div class="decay-row">
+          <div class="label">Isolated latency<small>complete request, no load</small></div>
+          <div class="decay-track"><div class="decay-fill f2"></div></div>
+          <div class="val">~13.4%<small>derived estimate</small></div>
+        </div>
+        <div class="decay-row">
+          <div class="label">Serving capacity<small>throughput ceiling under load</small></div>
+          <div class="decay-track"><div class="decay-fill f3"></div></div>
+          <div class="val">~3.8%<small>provisional</small></div>
+        </div>
+      </div>
+      <div class="decay-foot">
+        <b>Read literally, not proportionally</b> &mdash; these three bars measure different quantities, not one shrinking number.
+        Raw isolated-latency gain measured 15.2%; 13.4% is a <b>derived estimate</b> correcting a timer that excluded ~86.7ms of
+        image preprocessing (never re-measured directly). The 3.8% capacity figure is <b>provisional</b>: its two load sweeps
+        were not temporally interleaved. The 58% prefill figure never moves &mdash; it is the one number in this chain that
+        doesn't degrade under any condition tested.
+      </div>
+    </div>
+  </div>
+
+  <section id="findings">
+    <div class="section-head">
+      <div class="section-kicker">What did profiling find?</div>
+      <h2>Five measurements that define this roadmap</h2>
+      <p>Every phase below traces back to one of these. Full detail and source files live in <code>AMAY_VISPRUNER_PROFILING_REPORT.md</code>.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card finding">
+        <div class="stat">56&ndash;57</div>
+        <h4>The diversity loop runs backwards</h4>
+        <p>Iterations of VisPruner's own token-selection loop at 128 tokens &mdash; predicted from the code, confirmed in the raw trace. At 576 tokens (unpruned), it runs <b>zero</b> iterations. Pruning harder currently makes selection <i>more</i> expensive, not less.</p>
+        <div class="src">ab_trace_vtn128_isolated.json &middot; llava_arch.py:160&ndash;176</div>
+      </div>
+      <div class="card finding">
+        <div class="stat">6&ndash;8%</div>
+        <h4>Decode barely moves</h4>
+        <p>vs. a 56&ndash;60% prefill reduction. Decode reads the full weight matrix every step regardless of visual-token count, and it's 6&ndash;16&times; larger than prefill &mdash; the single biggest reason the algorithmic win doesn't reach the user.</p>
+        <div class="src">ab_noload_comparison_table.txt</div>
+      </div>
+      <div class="card finding">
+        <div class="stat teal">1 req</div>
+        <h4>The server is strictly serial</h4>
+        <p>Verified from source, not inferred: <code>csnbs/server.py</code>'s handler calls <code>generate()</code> synchronously with no yield point. One request in flight, ever &mdash; capacity is capped by mean service time regardless of how cheap a single request gets.</p>
+        <div class="src">csnbs/server.py &middot; _infer_model</div>
+      </div>
+      <div class="card finding">
+        <div class="stat" style="color:var(--crit)">crash</div>
+        <h4>Concurrency isn't just missing &mdash; it's unsafe</h4>
+        <p>A genuine multi-thread attempt against the shared model instance crashed with a CUDA device-side assert inside the pruning gather path. This is why batching needs a correctness fix first, not just more threads.</p>
+        <div class="src">concurrent_profile_run_log.txt &middot; 2,752 lines</div>
+      </div>
+      <div class="card finding">
+        <div class="stat">768</div>
+        <h4>KV-cache rebuilds every step</h4>
+        <p><code>DynamicCache.from_legacy_cache()</code> reconstructs the whole cache object every decode step, identically at both token counts &mdash; a generic tax, and the specific reason CUDA Graphs can't capture a stable buffer yet.</p>
+        <div class="src">full_request_stage_breakdown.txt</div>
+      </div>
+      <div class="card finding">
+        <div class="stat teal">2.3&times;</div>
+        <h4>Prefill scales sub-linearly</h4>
+        <p>~4.2&times; fewer tokens (587&rarr;139) should mean ~4.2&times; less prefill time. Measured: only 2.3&times; less. Some fixed, per-call cost doesn't shrink with the sequence &mdash; not yet root-caused.</p>
+        <div class="src">ab_trace_vtn{576,128}_isolated_stage_breakdown.txt</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="categories">
+    <div class="section-head">
+      <div class="section-kicker">What are we building?</div>
+      <h2>Six engineering categories</h2>
+      <p>Four were the original plan. Profiling evidence justified two more &mdash; neither is Triton, KV-cache, CUDA Graphs, or batching in disguise; each has a deliverable the other four can't produce.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card cat-card">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--accent-soft);color:var(--accent);">T</div>
+          <span class="pill pill-core">core</span>
+        </div>
+        <h4>Triton / Kernel Fusion</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Fuses the diversity-selection loop and the gather/fixup path into single kernel launches.</p>
+        <ul><li>Diversity-loop fusion &mdash; <span class="pill pill-spec">pruning-specific</span></li><li>Gather/fixup kernel &mdash; <span class="pill pill-spec">pruning-specific</span></li></ul>
+      </div>
+      <div class="card cat-card">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--accent-2-soft);color:var(--accent-2);">K</div>
+          <span class="pill pill-core">core</span>
+        </div>
+        <h4>KV-Cache Optimization</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Replaces the per-step legacy-tuple rebuild with a persisted cache object, then a fixed-size buffer.</p>
+        <ul><li>Persisted Cache object &mdash; <span class="pill pill-ext" style="background:var(--muted-soft);color:var(--muted);">pruning-enabling</span></li><li>Append speedup &mdash; prerequisite for CUDA Graphs</li></ul>
+      </div>
+      <div class="card cat-card">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--muted-soft);color:var(--muted);">G</div>
+          <span class="pill pill-ext">extension</span>
+        </div>
+        <h4>CUDA Graphs</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Captures the steady-state decode step to collapse 34k+ kernel launches per request into one replay.</p>
+        <ul><li>Generic &mdash; helps both configs by a similar amount</li><li>Hard-blocked on KV-Cache</li></ul>
+      </div>
+      <div class="card cat-card">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--warn-soft);color:var(--warn);">B</div>
+          <span class="pill pill-ext">extension</span>
+        </div>
+        <h4>Batching / Serving</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Real tensor-level batched forward passes, replacing naive per-request serialization.</p>
+        <ul><li>Serving optimization &mdash; capacity, not the 576-vs-128 delta</li><li>Hard-blocked on Serving Correctness</li></ul>
+      </div>
+      <div class="card cat-card" style="border-color:var(--accent-2);">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--accent-2-soft);color:var(--accent-2);">D</div>
+          <span class="pill pill-new">new</span> <span class="pill pill-core">core</span>
+        </div>
+        <h4>Pruning Dataflow / Co-Design</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Reordering, not kernel-writing: run the projector after the gather, investigate prefill's sub-linear scaling.</p>
+        <ul><li>Zero new kernels &mdash; a code reorder with a correctness constraint on the anyres path</li></ul>
+      </div>
+      <div class="card cat-card" style="border-color:var(--crit);">
+        <div class="cat-top">
+          <div class="cat-icon" style="background:var(--crit-soft);color:var(--crit);">C</div>
+          <span class="pill pill-new">new</span> <span class="pill pill-crit">prerequisite</span>
+        </div>
+        <h4>Serving Correctness</h4>
+        <p style="color:var(--text-dim);font-size:13px;">Root-cause the concurrency crash. Produces no latency number of its own &mdash; its deliverable is "no longer crashes."</p>
+        <ul><li>Unblocks Batching</li><li>Cheapest phase, done first</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="dependencies">
+    <div class="section-head">
+      <div class="section-kicker">How do they connect?</div>
+      <h2>Two independent tracks, one convergence point</h2>
+      <p>Per-request compute work (left) never touches the serving/capacity work (right) until both feed into batching at the end. Nothing here forces a single-file sequence &mdash; most of this can run in parallel.</p>
+    </div>
+    <div class="dep-wrap">
+      <div class="dep">
+        <div class="dep-node phase0">
+          <div class="t">Phase 0 &middot; Serving Correctness audit</div>
+          <div class="d">Root-cause the crash. Cheap, informs both tracks below. Done first &mdash; not because the example order said so, but because it's the lowest-cost way to de-risk the highest-effort later phase.</div>
+        </div>
+        <div class="dep-arrow-v"></div>
+        <div class="dep-tracks">
+          <div class="dep-track">
+            <div class="dep-track-label">Track 1 &middot; per-request compute</div>
+            <div class="dep-node"><div class="t">Pruning Dataflow</div><div class="d">Projector reorder + prefill investigation</div></div>
+            <div class="dep-arrow-v"></div>
+            <div class="dep-node"><div class="t">Triton</div><div class="d">Diversity loop, then gather/fixup kernel</div></div>
+            <div class="dep-arrow-v"></div>
+            <div class="dep-node"><div class="t">KV&ndash;Cache</div><div class="d">Persisted object, then fixed-size buffer &mdash; independent of Triton, shown sequential here for one-at-a-time benchmarking</div></div>
+            <div class="dep-arrow-v"></div>
+            <div class="dep-node"><div class="t">CUDA Graphs</div><div class="d">Hard-depends on KV&ndash;Cache directly above</div></div>
+          </div>
+          <div class="dep-track">
+            <div class="dep-track-label">Track 2 &middot; serving capacity</div>
+            <div class="dep-node" style="min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;">
+              <div><div class="t">waits on Phase 0</div><div class="d">No independent work here &mdash; capacity work cannot start safely until the crash is understood</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="dep-arrow-v"></div>
+        <div class="dep-node" style="border-color:var(--accent);">
+          <div class="t">Batching</div>
+          <div class="d">Hard-depends only on Phase 0. Soft-benefits from Track 1 being done first (batches an already-cheaper request) &mdash; not required.</div>
+        </div>
+        <div class="dep-converge">&darr; final consolidated benchmark (&sect;10 of the roadmap)</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phases">
+    <div class="section-head">
+      <div class="section-kicker">What comes first?</div>
+      <h2>Seven phases, one measurable change at a time</h2>
+      <p>Click a phase to expand its full spec &mdash; problem, evidence, files, tasks, benchmark, success/rejection criteria.</p>
+    </div>
+
+    <div class="timeline-wrap">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot">0</div><div class="cat">Correctness</div><h5>Audit the crash</h5><p>Root-cause + fix or document</p></div>
+        <div class="tl-item"><div class="tl-dot">1</div><div class="cat">Dataflow</div><h5>Reorder + investigate</h5><p>Projector, prefill scaling</p></div>
+        <div class="tl-item"><div class="tl-dot">2</div><div class="cat">Triton</div><h5>Fuse pruning kernels</h5><p>Diversity loop, then fixup</p></div>
+        <div class="tl-item"><div class="tl-dot">3</div><div class="cat">KV&ndash;Cache</div><h5>Stabilize the cache</h5><p>Persisted object, buffer</p></div>
+        <div class="tl-item"><div class="tl-dot dim">4</div><div class="cat">CUDA Graphs</div><h5>Capture decode</h5><p>Blocked on Phase 3</p></div>
+        <div class="tl-item"><div class="tl-dot dim">5</div><div class="cat">Batching</div><h5>Real concurrency</h5><p>Blocked on Phase 0</p></div>
+        <div class="tl-item"><div class="tl-dot dim">6</div><div class="cat">Validate</div><h5>Final benchmark</h5><p>Everything, together</p></div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;">
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">0</div>
+            <div><div class="phase-title">Serving Correctness / Concurrency Safety audit</div><div class="phase-sub">Root-cause the crash before anything depends on it being fixed</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-core">core</span><span class="pill pill-crit">no dependency</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p>Shared model instance is not safe for concurrent access &mdash; a real crash, not a theoretical concern.</p></div>
+            <div class="pf-field"><h6>Evidence</h6><p><code>indexSelectSmallIndex</code> assertion, out-of-bounds index_select in the pruning gather path.</p></div>
+            <div class="pf-field"><h6>Source</h6><p class="mono-line">concurrent_profile_run_log.txt</p></div>
+            <div class="pf-field"><h6>Files</h6><p class="mono-line">llava_arch.py &middot; encode_images(), prepare_inputs_labels_for_multimodal()</p></div>
+            <div class="pf-field pf-full"><h6>Implementation tasks</h6>
+              <ol class="pf-tasks">
+                <li>Reproduce with <code>CUDA_LAUNCH_BLOCKING=1</code> for a precise stack trace.</li>
+                <li>Audit for non-local mutable state in the pruning path.</li>
+                <li>Write a minimal two-thread repro isolating the exact race.</li>
+                <li>Decide: reentrant fix vs. explicit lock vs. "wait for real batching."</li>
+                <li>If a code fix is chosen, re-run the repro to confirm no crash.</li>
+              </ol>
+            </div>
+            <div class="pf-field"><h6>Success criterion</h6><p>Two-thread repro: N/N runs, correct output.</p></div>
+            <div class="pf-field"><h6>Rejection criterion</h6><p>If the only fix is a global lock, that's a valid finding &mdash; document it, don't force it.</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>Medium &middot; 1.5&ndash;3 days total</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p>Written root-cause + fix or documented decision + repro test.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">1</div>
+            <div><div class="phase-title">Pruning Dataflow / Algorithm-System Co-Design</div><div class="phase-sub">Reorder the projector; investigate prefill's sub-linear scaling</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-core">core</span><span class="pill pill-opt">no dependency</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p>Projector runs on all 576 tokens before pruning discards most of them; prefill doesn't scale proportionally with token count.</p></div>
+            <div class="pf-field"><h6>Evidence</h6><p>Projector cost ~0.3&ndash;1.1ms, config-independent; prefill 117.4ms&rarr;51.5ms (2.3&times;) vs. ~4.2&times; token reduction.</p></div>
+            <div class="pf-field"><h6>Source</h6><p class="mono-line">llava_arch.py:185 vs :271 &middot; ab_trace_vtn{576,128}_isolated_stage_breakdown.txt</p></div>
+            <div class="pf-field"><h6>Design</h6><p>Gather-then-project for the flat/single-image path only; anyres <code>spatial+unpad</code> branch's existing ordering constraint is preserved untouched.</p></div>
+            <div class="pf-field pf-full"><h6>Implementation tasks</h6>
+              <ol class="pf-tasks">
+                <li>Reorder gather-then-project for the flat/single-image path.</li>
+                <li>Verify the anyres branch is byte-identical to before.</li>
+                <li>Build a standalone prefill-only microbenchmark sweeping <code>visual_token_num</code> &isin; {576, 384, 256, 128}.</li>
+                <li>Document whether the scaling gap is a step function (fixed cost) or a smooth curve (structural).</li>
+              </ol>
+            </div>
+            <div class="pf-field"><h6>Success criterion</h6><p>Projector cost scales with T; no anyres regression.</p></div>
+            <div class="pf-field"><h6>Rejection criterion</h6><p>Any anyres output difference &rarr; revert immediately.</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>Low&ndash;Medium &middot; ~2&ndash;2.5 days</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p>Reordered code + written prefill-scaling finding.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">2</div>
+            <div><div class="phase-title">Triton &mdash; diversity-loop fusion, then gather/fixup kernel</div><div class="phase-sub">The strongest pruning-specific evidence in the whole investigation</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-core">2a core</span><span class="pill pill-ext">2b extension</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p>Diversity loop runs ~56 iterations at T=128, zero at T=576 &mdash; the clearest place VisPruner's own mechanism works against its benefit.</p></div>
+            <div class="pf-field"><h6>Evidence</h6><p><code>argsort</code>&times;57, <code>max</code>&times;56, <code>matmul</code>&times;56, <code>cat</code>&times;63 vs. <code>argsort</code>&times;1 and zero of the rest at T=576.</p></div>
+            <div class="pf-field"><h6>Source</h6><p class="mono-line">ab_trace_vtn128_isolated.json (raw trace op counts)</p></div>
+            <div class="pf-field"><h6>Files</h6><p class="mono-line">llava_arch.py:160&ndash;176 (2a) &middot; :272, :350&ndash;390 (2b, new triton_fixup.py)</p></div>
+            <div class="pf-field pf-full"><h6>Implementation tasks (2a)</h6>
+              <ol class="pf-tasks">
+                <li>Extract the current Python loop as a standalone correctness reference.</li>
+                <li>Study MegaBlocks' <code>_padded_copy</code>/<code>gather()</code> as a kernel template.</li>
+                <li>Write the Triton kernel for pairwise-similarity + selection.</li>
+                <li>Handle the loop's iterative shrinking in one launch or a small fixed number of launches.</li>
+                <li>Validate exact index-set equality vs. the reference across &ge;20 images, several T settings.</li>
+                <li>Integrate behind a feature flag for direct comparison.</li>
+              </ol>
+            </div>
+            <div class="pf-field"><h6>Success criterion</h6><p><code>multimodal_prep</code> at T=128 &le; T=576's; additional realized pruning gain positive, outside noise floor.</p></div>
+            <div class="pf-field"><h6>Rejection criterion</h6><p>Any index-set mismatch on any test image; keep the Python path where the kernel is slower.</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>High &middot; 5&ndash;9 days (2a) + 5&ndash;8 days (2b, extension)</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p><code>triton_diversity_select.py</code>, <code>triton_fixup.py</code>, correctness suite.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">3</div>
+            <div><div class="phase-title">KV-Cache &mdash; persisted object, then fixed-size buffer</div><div class="phase-sub">Config-independent fix; the direct prerequisite for CUDA Graphs</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-core">3a core</span><span class="pill pill-ext">3b extension</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p><code>DynamicCache.from_legacy_cache()</code> rebuilds the whole cache object every decode step.</p></div>
+            <div class="pf-field"><h6>Evidence</h6><p>768 rebuild calls in a 23-step request, identical at both token counts &mdash; a generic, not pruning, cost.</p></div>
+            <div class="pf-field"><h6>Source</h6><p class="mono-line">full_request_stage_breakdown.txt</p></div>
+            <div class="pf-field"><h6>Files</h6><p class="mono-line">llava_llama.py &middot; generate()/forward() &middot; transformers.cache_utils.DynamicCache</p></div>
+            <div class="pf-field pf-full"><h6>Implementation tasks</h6>
+              <ol class="pf-tasks">
+                <li>Reproduce and log the exact call path before changing anything.</li>
+                <li>Retain a <code>Cache</code> object as generation-loop state instead of round-tripping through a legacy tuple.</li>
+                <li>Confirm HF-side machinery inspecting <code>past_key_values</code>'s type still behaves correctly.</li>
+                <li>(3b) Replace the per-step <code>torch.cat</code> growth with a preallocated fixed-size buffer; verify address stability directly &mdash; this <i>is</i> the "ready for CUDA Graphs" acceptance test.</li>
+              </ol>
+            </div>
+            <div class="pf-field"><h6>Success criterion</h6><p>Rebuild call count &rarr; 0; decode CPU/CUDA ratio improves similarly at both configs (confirms pruning-enabling, not pruning-specific, classification).</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>Medium &middot; 2&ndash;4 days (3a) + 4&ndash;6 days (3b)</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p>Modified generate()/forward(); preallocated KV buffer with verified stable addresses.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">4</div>
+            <div><div class="phase-title">CUDA Graphs &mdash; decode-step capture/replay</div><div class="phase-sub">Generic win: helps both configs by a similar absolute amount</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-ext">extension</span><span class="pill pill-crit">blocked on Phase 3</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p>34,722 kernel launches in one 24-token request; decode CPU time exceeds CUDA time every step, both configs.</p></div>
+            <div class="pf-field"><h6>Design</h6><p>Capture a single fixed-shape decode-step forward pass against Phase 3b's stable buffer; replay per step. EOS detection stays outside the captured region.</p></div>
+            <div class="pf-field"><h6>Success criterion</h6><p>Decode ms/step drops at both configs by a similar absolute amount &mdash; a large 576-vs-128 relative shift would itself need explaining.</p></div>
+            <div class="pf-field"><h6>Rejection criterion</h6><p>Any silent correctness break across a range of output lengths &mdash; validate exhaustively before trusting timing.</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>High &middot; 6&ndash;9 days</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p>Graph-capture implementation; before/after decode-ms/step, both configs.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">5</div>
+            <div><div class="phase-title">Batching &mdash; basic, padded</div><div class="phase-sub">Co-designed with Rithvik &mdash; csnbs/server.py is his file</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-ext">extension</span><span class="pill pill-crit">blocked on Phase 0</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <div class="pf-grid">
+            <div class="pf-field"><h6>Problem</h6><p>Throughput ceiling barely moves (2.166&rarr;2.249 rps) despite large per-request compute savings.</p></div>
+            <div class="pf-field"><h6>Design</h6><p>Accumulate a small window of requests, pad + stack tensors, one batched forward pass, split outputs back per-request.</p></div>
+            <div class="pf-field pf-full"><h6>Implementation tasks</h6>
+              <ol class="pf-tasks">
+                <li>Identify the batching boundary &mdash; a time window or fixed size with a max wait, chosen explicitly.</li>
+                <li>Batched tensor construction: stack images, pad token sequences to the batch's longest.</li>
+                <li>Support single-image batches first; multi-image is a further extension.</li>
+                <li>Introduce prompt-length bucketing only if naive padding proves wasteful &mdash; measure first.</li>
+                <li>Validate output separation &mdash; no cross-request contamination, including under different completion lengths.</li>
+                <li>Benchmark batch sizes 1/2/4/8 explicitly.</li>
+              </ol>
+            </div>
+            <div class="pf-field"><h6>Success criterion</h6><p>Throughput ceiling measurably exceeds ~2.2rps at both configs.</p></div>
+            <div class="pf-field"><h6>Rejection criterion</h6><p>Any cross-request output contamination is a blocking correctness bug, not a tradeoff.</p></div>
+            <div class="pf-field"><h6>Difficulty / time</h6><p>Very high &middot; 9&ndash;14 days</p></div>
+            <div class="pf-field"><h6>Deliverable</h6><p>Batched request path; correctness suite; properly interleaved before/after load sweep.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="phase">
+        <summary>
+          <div class="phase-left">
+            <div class="phase-num">6</div>
+            <div><div class="phase-title">Final consolidated benchmark</div><div class="phase-sub">Every landed phase, one coherent report &mdash; defined in &sect;10, not run yet</div></div>
+          </div>
+          <div class="phase-right"><span class="pill pill-core">core (as a step)</span><span class="chev">&#9656;</span></div>
+        </summary>
+        <div class="phase-body">
+          <p style="color:var(--text-dim);font-size:13.5px;">See <a href="#validation">Final benchmark suite</a> below for the full, un-executed specification.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <section id="validation">
+    <div class="section-head">
+      <div class="section-kicker">How will we know each optimization worked?</div>
+      <h2>The pruning-advantage formula</h2>
+      <p>Applied to every phase that touches per-request latency. Distinguishes "made LLaVA faster" from "made more of VisPruner's own benefit appear as real latency."</p>
+    </div>
+    <div class="formula-box">
+      <div>VisPruner advantage <span class="c1">before</span> = (L576_before &minus; L128_before) / L576_before</div>
+      <div>VisPruner advantage <span class="c2">after</span>&nbsp;&nbsp;= (L576_after &minus; L128_after) / L576_after</div>
+      <div style="margin-top:10px;">additional realized pruning gain = advantage_<span class="c2">after</span> &minus; advantage_<span class="c1">before</span></div>
+    </div>
+    <p style="color:var(--text-dim);font-size:13.5px;max-width:70ch;margin-top:16px;">
+      A pruning-enabling or generic fix (Phases 0, 3, 4) that improves both configs by a similar absolute amount will
+      correctly show <code>additional_realized_pruning_gain &asymp; 0</code> &mdash; that's the expected, correct outcome, reported
+      as "reduced total latency, did not change the realized pruning advantage," never oversold. Only Phases 1 and 2 are
+      expected to show a clearly positive gain here; if they don't, that's a reportable finding, not a result to suppress.
+    </p>
+
+    <div class="table-scroll" style="margin-top:24px;">
+      <table>
+        <thead><tr><th>Component of the final suite</th><th>Design requirement</th><th>Fixes which exploratory-phase weakness</th></tr></thead>
+        <tbody>
+          <tr><td>Complete-request timing</td><td>Timer starts before image load, ends after response text</td><td class="num">&sect;9.1 &mdash; Part-1 timing bug</td></tr>
+          <tr><td>Output-length policy</td><td>Run both fixed-length and natural-EOS, explicitly labeled</td><td class="num">&sect;9.8 &mdash; EOS length variance</td></tr>
+          <tr><td>576/128 ordering</td><td>Genuinely interleaved or randomized per trial</td><td class="num">&sect;9.2 &mdash; non-interleaved sweeps</td></tr>
+          <tr><td>Sample count</td><td>p95 &ge;100 samples; p99 &ge;1000 or omitted</td><td class="num">&sect;9.5 &mdash; n=5 p95&asymp;p99 collapse</td></tr>
+          <tr><td>Profiler trace</td><td>Same record_function label scheme as the profiling phase, both configs, isolated + near-saturation</td><td class="num">enables direct before/after diff</td></tr>
+          <tr><td>Kernel-launch count</td><td>Total cudaLaunchKernel, before vs. after, both configs</td><td class="num">validates Phases 2 &amp; 4 directly</td></tr>
+          <tr><td>Correctness checks</td><td>Exact-text comparison vs. pre-optimization baseline for every non-generic change</td><td class="num">rule 15 &mdash; real removal, not masking</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--text-faint);font-size:12px;margin-top:10px;">Defined here, not executed. This suite runs once, after Phase 6, not as part of this planning pass.</p>
+  </section>
+
+  <section id="complete">
+    <div class="section-head">
+      <div class="section-kicker">When is the project finished?</div>
+      <h2>Minimum vs. ideal completion</h2>
+    </div>
+    <div class="complete-cols">
+      <div class="complete-col min">
+        <h4><span class="pill pill-core">Minimum</span> Complete project</h4>
+        <ul class="complete-list">
+          <li>Phase 0 completed and documented, whatever its outcome</li>
+          <li>Phase 1 (reorder) + Phase 2a (diversity-loop Triton) implemented, correctness-verified, benchmarked</li>
+          <li>Phase 3a (persisted Cache object) implemented and benchmarked</li>
+          <li>A final, properly interleaved load sweep</li>
+          <li>A final profiler-trace comparison against the original profiling-phase traces</li>
+          <li>All final-validation scripts reproducible, checked into <code>scripts/</code></li>
+          <li>A written conclusion stating, plainly, how much of the 58%&rarr;13%&rarr;4% gap actually closed</li>
+        </ul>
+      </div>
+      <div class="complete-col ideal">
+        <h4><span class="pill pill-new">Ideal</span> Extended project</h4>
+        <ul class="complete-list">
+          <li>Everything in Minimum, plus:</li>
+          <li>Phase 2b (fixup kernel) implemented and benchmarked</li>
+          <li>Phase 3b (fixed-size buffer) implemented and benchmarked</li>
+          <li>Phase 4 (CUDA Graphs) implemented and benchmarked</li>
+          <li>Phase 5 (basic batching) implemented and benchmarked</li>
+          <li>The Optional bucket (paged KV, packed/varlen batching) revisited only if Phase 5's results create real memory pressure or measured padding waste to justify them</li>
+          <li>A comparison against vLLM's actual implementation of the toy versions built here</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="table">
+    <div class="section-head">
+      <div class="section-kicker">Master reference</div>
+      <h2>Every phase, one row each</h2>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>Category</th><th>Technique</th><th>Success metric</th><th>Dependency</th><th>Core/Ext</th><th class="num">Effort</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="num">0</td><td>Serving Correctness</td><td>Root-cause + fix the crash</td><td>N/N repro runs pass</td><td>None</td><td><span class="pill pill-core">Core</span></td><td class="num">1.5&ndash;3d</td></tr>
+          <tr><td class="num">1</td><td>Pruning Dataflow</td><td>Projector reorder + investigation</td><td>Projector cost scales with T</td><td>None</td><td><span class="pill pill-core">Core</span></td><td class="num">1.5&ndash;2d</td></tr>
+          <tr><td class="num">2a</td><td>Triton</td><td>Diversity-loop fusion</td><td>multimodal_prep(128) &le; (576)</td><td>None</td><td><span class="pill pill-core">Core</span></td><td class="num">5&ndash;9d</td></tr>
+          <tr><td class="num">2b</td><td>Triton</td><td>Gather/fixup kernel</td><td>Fixup launch count drops</td><td>Soft: Phase 1</td><td><span class="pill pill-ext">Extension</span></td><td class="num">5&ndash;8d</td></tr>
+          <tr><td class="num">3a</td><td>KV&ndash;Cache</td><td>Persisted Cache object</td><td>Rebuild calls &rarr; 0</td><td>None</td><td><span class="pill pill-core">Core</span></td><td class="num">2&ndash;4d</td></tr>
+          <tr><td class="num">3b</td><td>KV&ndash;Cache</td><td>Fixed-size buffer</td><td>Stable tensor addresses</td><td>3a</td><td><span class="pill pill-ext">Extension</span></td><td class="num">4&ndash;6d</td></tr>
+          <tr><td class="num">4</td><td>CUDA Graphs</td><td>Decode capture/replay</td><td>Decode ms/step drops, both configs</td><td><b>3a + 3b</b></td><td><span class="pill pill-ext">Extension</span></td><td class="num">6&ndash;9d</td></tr>
+          <tr><td class="num">5</td><td>Batching</td><td>Basic padded batching</td><td>Throughput ceiling &gt; ~2.2rps</td><td><b>Phase 0</b></td><td><span class="pill pill-ext">Extension</span></td><td class="num">9&ndash;14d</td></tr>
+          <tr><td class="num">6</td><td>&mdash;</td><td>Final consolidated benchmark</td><td>See completion criteria</td><td>All landed phases</td><td><span class="pill pill-core">Core</span></td><td class="num">defined in &sect;10</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:24px;">
+      <div class="card">
+        <h4>First implementation, two answers</h4>
+        <p><b>Overall:</b> Phase 0 &mdash; cheapest phase, de-risks Batching early, may inform Triton kernel safety.<br><br>
+        <b>First <i>performance</i> optimization specifically:</b> Phase 2a, diversity-loop fusion &mdash; the strongest evidence of any candidate (56 measured iterations against a 56-iteration code prediction) and the clearest pruning-specific win available.</p>
+      </div>
+      <div class="card">
+        <h4>New categories, and why they earned their own section</h4>
+        <p><b>Pruning Dataflow:</b> zero kernel-writing &mdash; a reorder, not a Triton task.<br>
+        <b>Serving Correctness:</b> produces no latency number &mdash; a prerequisite, not a form of Batching.<br>
+        Forcing either into the original four would have hidden what each one actually delivers.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-grid">
+      <div>
+        <h5>Source documents (read-only)</h5>
+        <a href="AMAY_ENGINEERING_ROADMAP.md">AMAY_ENGINEERING_ROADMAP.md &middot; full roadmap</a>
+        <a href="AMAY_VISPRUNER_PROFILING_REPORT.md">AMAY_VISPRUNER_PROFILING_REPORT.md &middot; profiling evidence</a>
+        <a href="AMAY_SPEED_PLAN.md">AMAY_SPEED_PLAN.md &middot; earlier planning doc</a>
+      </div>
+      <div>
+        <h5>Status</h5>
+        <p>Planning only. No optimization in this roadmap has been implemented. No profiling experiment has been re-run to produce this page &mdash; every number here traces to a file in <code>results/timing/</code>.</p>
+      </div>
+    </div>
+    <div class="note">This page is a new, standalone file. It does not modify, replace, or supersede any existing document in this repository.</div>
+  </footer>
+
+</div>

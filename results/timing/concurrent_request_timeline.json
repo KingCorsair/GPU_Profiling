@@ -1,0 +1,39 @@
+{
+  "n_requests": 3,
+  "execution_mode": "sequential (back-to-back), not concurrent -- see module docstring",
+  "wall_total_s": 5.314595374977216,
+  "sum_slot_durations_s": 5.3144,
+  "inter_request_gap_s": 0.00019537497721611174,
+  "events": [
+    {
+      "slot": 0,
+      "event": "start",
+      "t_s": 0.0154
+    },
+    {
+      "slot": 0,
+      "event": "done",
+      "t_s": 1.1281
+    },
+    {
+      "slot": 1,
+      "event": "start",
+      "t_s": 1.1281
+    },
+    {
+      "slot": 1,
+      "event": "done",
+      "t_s": 3.6035
+    },
+    {
+      "slot": 2,
+      "event": "start",
+      "t_s": 3.6036
+    },
+    {
+      "slot": 2,
+      "event": "done",
+      "t_s": 5.3299
+    }
+  ]
+}

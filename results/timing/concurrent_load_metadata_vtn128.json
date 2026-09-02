@@ -1,0 +1,215 @@
+{
+  "visual_token_num": 128,
+  "rps_levels_target": [
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.0
+  ],
+  "execution_order_rps": [
+    3.0,
+    0.5,
+    2.0,
+    1.0,
+    1.5
+  ],
+  "duration_seconds_per_level": 30,
+  "dataset_path": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+  "dataset_record_count": 90,
+  "server_settings": {
+    "visual_token_num": 128,
+    "important_ratio": 0.5,
+    "max_new_tokens": 64,
+    "do_sample": false,
+    "use_cache": true
+  },
+  "server_concurrency_model": "single uvicorn worker, single asyncio event loop; /infer's model path (csnbs/server.py:_infer_model) calls model.generate() synchronously with no await/executor handoff, so it blocks the event loop for the full request -- requests are serviced strictly one at a time regardless of arrival concurrency",
+  "levels": [
+    {
+      "rps_target": 0.5,
+      "run_json_path": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-10Z_rps-0.5_9433ab38/run.json",
+      "monitor_csv_path": "/workspace/GPU_Profiling/results/timing/loadgen_monitor/vtn128_rps-0.5.csv",
+      "run_summary": {
+        "totalRequests": 5,
+        "successfulRequests": 5,
+        "failedRequests": 0,
+        "achievedArrivalRateRps": 0.4999977776348779,
+        "completionRateRps": 0.5,
+        "successfulThroughputRps": 0.5,
+        "successfulRequestLatencyMs": {
+          "p50": 652.1457120000014,
+          "p95": 860.7157550000011,
+          "p99": 860.7157550000011
+        },
+        "dispatchLatenessMs": {
+          "p50": 1.368609999997716,
+          "p95": 1.6957599999986996,
+          "p99": 1.6957599999986996
+        },
+        "plannedToCompleteMs": {
+          "p50": 653.5064270000003,
+          "p95": 862.0843649999988,
+          "p99": 862.0843649999988
+        }
+      },
+      "resource_summary": {
+        "samples": 30,
+        "gpu_util_pct_mean": 33.3,
+        "gpu_util_pct_max": 98.0,
+        "gpu_mem_used_mib_mean": 15149.0,
+        "gpu_mem_used_mib_max": 15149.0,
+        "cpu_busy_pct_mean": 5.8,
+        "cpu_busy_pct_max": 7.3
+      }
+    },
+    {
+      "rps_target": 1.0,
+      "run_json_path": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-12Z_rps-1_7618f7bc/run.json",
+      "monitor_csv_path": "/workspace/GPU_Profiling/results/timing/loadgen_monitor/vtn128_rps-1.0.csv",
+      "run_summary": {
+        "totalRequests": 20,
+        "successfulRequests": 20,
+        "failedRequests": 0,
+        "achievedArrivalRateRps": 0.9999905885096295,
+        "completionRateRps": 1,
+        "successfulThroughputRps": 1,
+        "successfulRequestLatencyMs": {
+          "p50": 492.1822350000002,
+          "p95": 767.322626000001,
+          "p99": 919.5217489999995
+        },
+        "dispatchLatenessMs": {
+          "p50": -0.4012059999986377,
+          "p95": 0.6652279999998427,
+          "p99": 0.7162040000002889
+        },
+        "plannedToCompleteMs": {
+          "p50": 491.82260900000074,
+          "p95": 767.8518010000007,
+          "p99": 918.8438310000001
+        }
+      },
+      "resource_summary": {
+        "samples": 30,
+        "gpu_util_pct_mean": 39.5,
+        "gpu_util_pct_max": 99.0,
+        "gpu_mem_used_mib_mean": 15149.0,
+        "gpu_mem_used_mib_max": 15149.0,
+        "cpu_busy_pct_mean": 6.4,
+        "cpu_busy_pct_max": 7.7
+      }
+    },
+    {
+      "rps_target": 1.5,
+      "run_json_path": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-21-43Z_rps-1.5_b9dbdc93/run.json",
+      "monitor_csv_path": "/workspace/GPU_Profiling/results/timing/loadgen_monitor/vtn128_rps-1.5.csv",
+      "run_summary": {
+        "totalRequests": 35,
+        "successfulRequests": 35,
+        "failedRequests": 0,
+        "achievedArrivalRateRps": 1.5000517230408068,
+        "completionRateRps": 1.5,
+        "successfulThroughputRps": 1.5,
+        "successfulRequestLatencyMs": {
+          "p50": 474.62413500000184,
+          "p95": 2333.053675000001,
+          "p99": 2489.2095530000006
+        },
+        "dispatchLatenessMs": {
+          "p50": -0.2696063333314669,
+          "p95": 0.5174673333385726,
+          "p99": 1.5213859999985289
+        },
+        "plannedToCompleteMs": {
+          "p50": 474.3545286666704,
+          "p95": 2333.163543333334,
+          "p99": 2490.730938999999
+        }
+      },
+      "resource_summary": {
+        "samples": 30,
+        "gpu_util_pct_mean": 48.7,
+        "gpu_util_pct_max": 99.0,
+        "gpu_mem_used_mib_mean": 15149.0,
+        "gpu_mem_used_mib_max": 15149.0,
+        "cpu_busy_pct_mean": 7.0,
+        "cpu_busy_pct_max": 8.1
+      }
+    },
+    {
+      "rps_target": 2.0,
+      "run_json_path": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-20-40Z_rps-2_37c21e40/run.json",
+      "monitor_csv_path": "/workspace/GPU_Profiling/results/timing/loadgen_monitor/vtn128_rps-2.0.csv",
+      "run_summary": {
+        "totalRequests": 50,
+        "successfulRequests": 50,
+        "failedRequests": 0,
+        "achievedArrivalRateRps": 1.9999708418944915,
+        "completionRateRps": 2,
+        "successfulThroughputRps": 2,
+        "successfulRequestLatencyMs": {
+          "p50": 1373.5095800000017,
+          "p95": 5376.414236999999,
+          "p99": 8009.136283999998
+        },
+        "dispatchLatenessMs": {
+          "p50": -0.006500000003143214,
+          "p95": 0.8406819999981963,
+          "p99": 2.6007659999995667
+        },
+        "plannedToCompleteMs": {
+          "p50": 1372.6828559999994,
+          "p95": 5377.0459599999995,
+          "p99": 8009.414009999999
+        }
+      },
+      "resource_summary": {
+        "samples": 30,
+        "gpu_util_pct_mean": 70.1,
+        "gpu_util_pct_max": 99.0,
+        "gpu_mem_used_mib_mean": 15149.0,
+        "gpu_mem_used_mib_max": 15149.0,
+        "cpu_busy_pct_mean": 7.4,
+        "cpu_busy_pct_max": 9.2
+      }
+    },
+    {
+      "rps_target": 3.0,
+      "run_json_path": "/workspace/GPU_Profiling/results/loadgen/2026-09-01/03-19-29Z_rps-3_4742a956/run.json",
+      "monitor_csv_path": "/workspace/GPU_Profiling/results/timing/loadgen_monitor/vtn128_rps-3.0.csv",
+      "run_summary": {
+        "totalRequests": 80,
+        "successfulRequests": 80,
+        "failedRequests": 0,
+        "achievedArrivalRateRps": 3.0001078149125204,
+        "completionRateRps": 2.2493779074487503,
+        "successfulThroughputRps": 2.2493779074487503,
+        "successfulRequestLatencyMs": {
+          "p50": 7629.882889,
+          "p95": 10951.375145000002,
+          "p99": 13418.157296999998
+        },
+        "dispatchLatenessMs": {
+          "p50": -0.19511133333071484,
+          "p95": 0.6317843333381461,
+          "p99": 0.8361713333360967
+        },
+        "plannedToCompleteMs": {
+          "p50": 7629.436110666669,
+          "p95": 10951.076273,
+          "p99": 13417.425384333335
+        }
+      },
+      "resource_summary": {
+        "samples": 39,
+        "gpu_util_pct_mean": 65.8,
+        "gpu_util_pct_max": 99.0,
+        "gpu_mem_used_mib_mean": 15128.7,
+        "gpu_mem_used_mib_max": 15149.0,
+        "cpu_busy_pct_mean": 7.6,
+        "cpu_busy_pct_max": 10.1
+      }
+    }
+  ]
+}

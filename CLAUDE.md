@@ -181,7 +181,11 @@ These silently invalidate everything downstream if broken.
 
 15. **Real removal, not masking.** Masked tokens still cost compute. Gathering on kept
     indices produces a genuinely smaller tensor. Then fix everything downstream: position
-    IDs, attention masks, KV cache sizing.
+    IDs, attention masks, KV cache sizing. **Current state:** the boolean-mask removal
+    itself already exists, vendored from VisPruner in
+    `vis_pruner_copy/llava/model/llava_arch.py`. The "fix everything downstream" part —
+    the gather/position-id/mask-rebuild fixup — is Amay's active work; live status and plan
+    in `AMAY_SPEED_PLAN.md`.
 16. **Preserve spatial order after top-k.** `topk` returns score-sorted indices. Feeding
     tokens out of raster order silently degrades quality in ways that are miserable to debug.
 17. **Always run a `random` scoring baseline.** If random performs as well as the method,
