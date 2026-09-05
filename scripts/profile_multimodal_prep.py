@@ -5,9 +5,11 @@ targets for a Triton kernel) is actually launch/bandwidth-bound before writing
 one. Per AMAY_SPEED_PLAN.md step 1 / AMAY_TIMING_NOTES.md's `torch.profiler`
 section. Throwaway — not Rithvik's harness, produces no reportable numbers.
 """
+import subprocess
 import sys
 import time
 import torch
+from torch.autograd import DeviceType
 
 sys.path.insert(0, "vis_pruner_copy")
 
@@ -29,6 +31,13 @@ BATCH_SIZE = 1           # this code path hardcodes batch=1 for single-image req
                          # here yet; that's the batching work still on the roadmap.
 N_WARMUP = 10
 N_PROFILED = 10
+
+GIT_COMMIT = subprocess.run(
+    ["git", "-C", "/workspace/GPU_Profiling", "rev-parse", "--short", "HEAD"],
+    capture_output=True, text=True,
+).stdout.strip() or "unknown"
+GPU_NAME = torch.cuda.get_device_name(0)
+print(f"git commit: {GIT_COMMIT}   GPU: {GPU_NAME}")
 
 disable_torch_init()
 tokenizer, model, image_processor, _ = load_pretrained_model(
@@ -117,49 +126,90 @@ print("TOP OPS BY CALL COUNT (reveals per-item / per-iteration Python loops)")
 print("=" * 100)
 print(prof.key_averages().table(sort_by="count", row_limit=25))
 
-# Aggregate: how much of the region's CUDA time sits in ops with tiny per-call
+# Aggregate: how much of the region's GPU time sits in ops with tiny per-call
 # duration but high call counts (the launch-overhead signature) vs. a few
 # big matmul/conv/attention kernels (the compute-bound signature).
+#
+# `key_averages()` returns TWO rows for the same GPU work: an aten-level
+# operator row (device_type CPU, e.g. `aten::addmm`, whose self_cuda_time_total
+# is attributed up from the kernels it launched) and a kernel-level row
+# (device_type CUDA, e.g. `ampere_sgemm_128x64_tn`). Summing over both
+# double-counts every GPU microsecond -- the earlier version of this script did,
+# and printed 739.6 ms where the profiler's own footer said 354.9 ms. Sum
+# exactly one level: the kernel rows. That is real GPU busy time, and it is what
+# "Self CUDA time total" in the table above reports.
 events = prof.key_averages()
-total_cuda_us = sum(e.self_cuda_time_total for e in events)
+kernel_events = [e for e in events if e.device_type == DeviceType.CUDA]
+aten_events = [e for e in events if e.device_type == DeviceType.CPU]
+
+gpu_busy_us = sum(e.self_cuda_time_total for e in kernel_events)
+aten_attributed_us = sum(e.self_cuda_time_total for e in aten_events)
 total_cpu_us = sum(e.self_cpu_time_total for e in events)
-BIG_KERNEL_OPS = {"aten::linear", "aten::matmul", "aten::mm", "aten::bmm",
-                   "aten::conv2d", "aten::_scaled_dot_product_attention",
-                   "aten::scaled_dot_product_attention", "aten::addmm"}
-big_kernel_cuda_us = sum(e.self_cuda_time_total for e in events if e.key in BIG_KERNEL_OPS)
-small_op_cuda_us = total_cuda_us - big_kernel_cuda_us
+
+# Classify the KERNEL rows, by kernel name. The previous classifier matched a set
+# of `aten::` names, which never match a kernel row, so every ampere_sgemm_* /
+# sm80_xmma_* row fell through into "everything else" and inflated it to 63.2%.
+BIG_KERNEL_PATTERNS = ("gemm", "conv", "cutlass", "xmma", "attention", "flash")
+
+
+def is_big_kernel(name):
+    n = name.lower()
+    return any(p in n for p in BIG_KERNEL_PATTERNS)
+
+
+big_kernel_cuda_us = sum(e.self_cuda_time_total for e in kernel_events if is_big_kernel(e.key))
+small_op_cuda_us = gpu_busy_us - big_kernel_cuda_us
+
+# The classifier is a name-substring heuristic, so show what it left unmatched:
+# if a large GEMM family shows up here, the pattern list is wrong, not the GPU.
+unmatched = sorted(
+    (e for e in kernel_events if not is_big_kernel(e.key)),
+    key=lambda e: -e.self_cuda_time_total,
+)[:5]
+
+
+def _pct(x):
+    return 100 * x / max(gpu_busy_us, 1)
+
+
+summary_lines = [
+    f"Total self CPU time in region:  {total_cpu_us/1000:.2f} ms  (over {N_PROFILED} iters)",
+    f"GPU busy in region (kernel rows only): {gpu_busy_us/1000:.2f} ms  (over {N_PROFILED} iters)",
+    f"  of which big matmul/attn/conv kernels: {big_kernel_cuda_us/1000:.2f} ms "
+    f"({_pct(big_kernel_cuda_us):.1f}%)",
+    f"  of which everything else (gather/index/cat/argsort/pad/etc.): "
+    f"{small_op_cuda_us/1000:.2f} ms ({_pct(small_op_cuda_us):.1f}%)",
+    f"CPU time / GPU busy ratio in region: {total_cpu_us/max(gpu_busy_us,1):.2f}x "
+    f"(>>1 means launch/dispatch overhead dominates actual GPU work)",
+    "",
+    f"[cross-check] same GPU time attributed at the aten level: "
+    f"{aten_attributed_us/1000:.2f} ms -- should be close to the kernel-row figure "
+    f"above. These are two views of the same work; adding them is the double-count.",
+    "[cross-check] largest kernels NOT classified as big matmul/attn/conv:",
+]
+summary_lines += [
+    f"    {e.self_cuda_time_total/1000:8.2f} ms  {e.key[:90]}" for e in unmatched
+]
 
 print("\n" + "=" * 100)
 print("SUMMARY")
 print("=" * 100)
-print(f"Total self CPU time in region:  {total_cpu_us/1000:.2f} ms  (over {N_PROFILED} iters)")
-print(f"Total self CUDA time in region: {total_cuda_us/1000:.2f} ms  (over {N_PROFILED} iters)")
-print(f"  of which big matmul/attn/conv kernels: {big_kernel_cuda_us/1000:.2f} ms "
-      f"({100*big_kernel_cuda_us/max(total_cuda_us,1):.1f}%)")
-print(f"  of which everything else (gather/index/cat/argsort/pad/etc.): "
-      f"{small_op_cuda_us/1000:.2f} ms ({100*small_op_cuda_us/max(total_cuda_us,1):.1f}%)")
-print(f"CPU time / CUDA time ratio in region: {total_cpu_us/max(total_cuda_us,1):.2f}x "
-      f"(>>1 means launch/dispatch overhead dominates actual GPU work)")
+print("\n".join(summary_lines))
 print(f"\nRegion as % of a 1-token prefill request: {100*prep_only_s/generate_1tok_s:.1f}%")
 
 prof.export_chrome_trace("/workspace/GPU_Profiling/results/timing/prep_trace.json")
 print("\nChrome trace written to results/timing/prep_trace.json")
 
 # Short, human-readable summary (not the full trace) -- meant to be opened directly,
-# not loaded into a trace viewer.
+# not loaded into a trace viewer. Same `summary_lines` the console printed, so the
+# two can't drift apart.
 with open("/workspace/GPU_Profiling/results/timing/prep_summary.txt", "w") as f:
-    f.write(f"visual_token_num={VISUAL_TOKEN_NUM} batch={BATCH_SIZE} prompt_len={input_ids.shape[1]}\n\n")
+    f.write(f"visual_token_num={VISUAL_TOKEN_NUM} batch={BATCH_SIZE} prompt_len={input_ids.shape[1]}\n")
+    f.write(f"git commit: {GIT_COMMIT}   GPU: {GPU_NAME}\n\n")
     f.write(f"mean prepare_inputs_labels_for_multimodal: {prep_only_s*1000:.2f} ms\n")
     f.write(f"mean generate(max_new_tokens=1) [prep + prefill fwd]: {generate_1tok_s*1000:.2f} ms\n")
     f.write(f"prep as % of prefill request: {100*prep_only_s/generate_1tok_s:.1f}%\n\n")
     f.write("TOP 15 OPS BY CUDA TIME\n")
     f.write(str(prof.key_averages().table(sort_by="cuda_time_total", row_limit=15)))
-    f.write(f"\n\nTotal self CPU time in region:  {total_cpu_us/1000:.2f} ms  (over {N_PROFILED} iters)\n")
-    f.write(f"Total self CUDA time in region: {total_cuda_us/1000:.2f} ms  (over {N_PROFILED} iters)\n")
-    f.write(f"  of which big matmul/attn/conv kernels: {big_kernel_cuda_us/1000:.2f} ms "
-            f"({100*big_kernel_cuda_us/max(total_cuda_us,1):.1f}%)\n")
-    f.write(f"  of which everything else (gather/index/cat/argsort/pad/etc.): "
-            f"{small_op_cuda_us/1000:.2f} ms ({100*small_op_cuda_us/max(total_cuda_us,1):.1f}%)\n")
-    f.write(f"CPU time / CUDA time ratio in region: {total_cpu_us/max(total_cuda_us,1):.2f}x "
-            f"(>>1 means launch/dispatch overhead dominates actual GPU work)\n")
+    f.write("\n\n" + "\n".join(summary_lines) + "\n")
 print("Short summary written to results/timing/prep_summary.txt")

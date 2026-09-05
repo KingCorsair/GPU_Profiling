@@ -29,17 +29,57 @@ essentially all of it sits in phase B.
 
 **Everything else is a GPU-work problem, and 93% of the GPU work is phase A.**
 
-### Two numbers in `prep_summary.txt` are wrong — don't quote them
+### Two numbers in `prep_summary.txt` were wrong — FIXED, see corrected values below
 
-`profile_multimodal_prep.py` sums `self_cuda_time_total` over `prof.key_averages()`, which
-contains both aten-level rows (`aten::addmm`) and kernel-level rows (`ampere_sgemm_128x64_tn`).
-It double-counts; its own table footer says 354.9 ms where the script prints 739.6 ms.
+`profile_multimodal_prep.py` *used to sum* `self_cuda_time_total` over `prof.key_averages()`,
+which contains both aten-level rows (`aten::addmm`) and kernel-level rows
+(`ampere_sgemm_128x64_tn`). It double-counted; its own table footer said 354.9 ms where the
+script printed 739.6 ms.
 
 - `63.2% everything else (gather/index/cat/argsort/pad)` — wrong. The classifier only matched
   `aten::` names, so every `ampere_sgemm_*` / `sm80_xmma_*` row landed in "everything else."
 - `CPU time / CUDA time ratio: 1.01x` — wrong. Actual 744/355 = **2.10x**.
 
-Fixed in P0. Every other line in that summary holds.
+**Fixed** (P0 item 1). The script now splits `key_averages()` by `device_type` and sums the
+kernel-level rows only, so its printed GPU busy equals the profiler's own footer exactly
+(354.88 vs 354.875 ms on the verification run, commit `c317688`, A40). Corrected values, from
+the regenerated `results/timing/prep_summary.txt`:
+
+| | Before (wrong) | After (verified) |
+|---|---|---|
+| GPU busy over 10 iters | 739.6 ms | **354.9 ms** |
+| big matmul/attn/conv kernels | 272.1 ms (36.8%) | 272.0 ms (**76.6%**) |
+| everything else | 467.4 ms (63.2%) | 82.9 ms (**23.4%**) |
+| CPU / GPU-busy ratio | 1.01x | **1.90x** |
+
+Two caveats on the corrected numbers. The 1.90x is this run's 673.0 ms profiled CPU over
+354.9 ms GPU busy; the 2.10x predicted above used the *old* run's 744.1 ms CPU, and profiled
+CPU time is the noisiest thing in the trace (see the inflation caveat below), so treat the
+ratio as ~2x, not as two significant figures. And "everything else" at 23.4% is **not** the
+pruning loop: its largest single entry is `softmax_warp_forward` at 19.4 ms, which is ViT
+attention — phase A. The phase segmentation (P0 item 2) is what will actually separate these;
+until it lands, this split is GEMM-vs-non-GEMM, not phase-A-vs-phase-B.
+
+**A third number was also wrong, and is now withdrawn rather than corrected.** The script's
+`prep as % of prefill request` moved 43.1% → 25.1% between the two runs. That is not the
+double-count — it comes from a separate wall-clock read. The numerator was stable (47.99 →
+47.87 ms); the denominator, `generate(max_new_tokens=1)`, moved 111.27 → 190.66 ms. Cause:
+`N_WARMUP` warms `run_prep()` only and never `run_generate()`, so the generate loop is timed
+cold — a rule 3 violation, still present. **Quote no percentage-of-prefill figure from this
+script until that is fixed.** This is also the most likely explanation for the long-unexplained
+40.7%-vs-43.1% discrepancy recorded as §9.9 in the profiling report.
+
+**Downstream cleanup done at the same time.** The wrong 63.2% figure had propagated out of this
+script into three other documents, where it was the stated evidence for the gather/fixup Triton
+kernel's priority. All three now carry the corrected values:
+
+| Document | What changed |
+|---|---|
+| `AMAY_VISPRUNER_PROFILING_REPORT.md` | Experiment 1 marked **SUPERSEDED** (text preserved per its own Appendix B rule 7); new **Experiment 8** carries the re-measurement; §9.10 and §9.11 added to the corrections table; §9.9 root-caused |
+| `AMAY_ENGINEERING_ROADMAP.md` | Gather/fixup kernel demoted **priority 3 → 9** and Strong Extension → **Optional**; new **Phase 1a (FP32→FP16 vision tower)** added at priority 1, which this document already ranked P1 |
+| `AMAY_SPEED_PLAN.md` | Its "Step 1 — done" status block corrected in place (original text preserved, since the roadmap uses it as the historical baseline) |
+
+Every other line in that summary holds.
 
 ### Profiler-inflation caveat, applies to every CPU number below
 
@@ -585,7 +625,7 @@ the full forward pass. That is an Amdahl ceiling on the entire method, not just 
 ## Deliverables checklist
 
 **Measurement**
-- [ ] `profile_multimodal_prep.py` double-count bug fixed; aggregates recomputed
+- [x] `profile_multimodal_prep.py` double-count bug fixed; aggregates recomputed
 - [ ] A/B/C/D phase segmentation added to the script's output
 - [ ] `generate()` reads `forward_calls[0]["multimodal_prep_time"]` off CUDA events
 - [ ] Noise floor measured and written down (10 runs, randomised order, git commit + GPU recorded)

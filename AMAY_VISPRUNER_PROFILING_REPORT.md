@@ -100,6 +100,11 @@ All values below are drawn from experiment metadata files, not restated from mem
 
 ## Experiment 1 — Narrow multimodal-preparation profiling
 
+> **STATUS: SUPERSEDED by Experiment 8.** Every aggregate in this section's Results table was
+> produced by `profile_multimodal_prep.py` while it contained a GPU-time double-counting bug
+> (§9.10). The section is retained verbatim, per this report's own update protocol (Appendix B,
+> rule 7); **do not quote its numbers** — use Experiment 8's.
+
 ### Research question
 Is `prepare_inputs_labels_for_multimodal()` (the function VisPruner's real-removal gather/fixup logic lives in) actually launch-overhead-bound, before committing to writing a Triton kernel for it?
 
@@ -131,7 +136,13 @@ The region is a meaningful fraction of a prefill request, and most of its GPU ti
 Single function in isolation, not a full request. Says nothing about decode, serving, or the 576-vs-128 comparison (this experiment only ever ran at 128).
 
 ### Status
-**VALID WITH CAVEAT** — the underlying measurement is sound, but the summary percentage differs from what the planning document claims, and the "launch-overhead-bound" framing rests more on the 63.2% figure than on the (weaker) CPU/CUDA ratio evidence in the same file.
+**SUPERSEDED** by Experiment 8 (2026-09-03). The measurement *procedure* was sound; the script's
+aggregate arithmetic was not. Both figures the interpretation above rests on were wrong in the
+same direction, and correcting them **inverts this experiment's conclusion**: the region is
+GPU-compute-dominated (76.6% of its GPU busy time is in GEMM kernels), not "mostly small
+non-matmul ops." The original text is preserved above per Appendix B rule 7.
+
+*Previously read:* **VALID WITH CAVEAT** — the underlying measurement is sound, but the summary percentage differs from what the planning document claims, and the "launch-overhead-bound" framing rests more on the 63.2% figure than on the (weaker) CPU/CUDA ratio evidence in the same file.
 
 ---
 
@@ -178,7 +189,7 @@ Experiment 1 only covered one function. Where does latency go across the *entire
 | Self CUDA time total (whole profiled region) | 722.8ms | same |
 
 ### Interpretation
-Decode dominates (686ms of the total CUDA time, vs. 61ms for prefill) — but this run forced 23 decode steps, which inflates decode's share relative to what a natural, short-answer request would show (see Experiment 4/6 for that). Within decode specifically, CPU time exceeds CUDA time every single step (e.g. step 1: 38.9ms CPU vs 38.0ms CUDA; by step 12, 40.4ms CPU vs 28.9ms CUDA) — a real, measured launch-dispatch overhead signature, distinct from and more clear-cut than Experiment 1's ambiguous 1.01x ratio. In aggregate, matmuls still dominate total CUDA time (85%), meaning the system is not *globally* launch-bound — but the *decode phase specifically* shows a consistent, repeated pattern of CPU time exceeding GPU time, which is the pattern CUDA Graphs is designed to address.
+Decode dominates (686ms of the total CUDA time, vs. 61ms for prefill) — but this run forced 23 decode steps, which inflates decode's share relative to what a natural, short-answer request would show (see Experiment 4/6 for that). Within decode specifically, CPU time exceeds CUDA time every single step (e.g. step 1: 38.9ms CPU vs 38.0ms CUDA; by step 12, 40.4ms CPU vs 28.9ms CUDA) — a real, measured launch-dispatch overhead signature. (This was originally described as "more clear-cut than Experiment 1's ambiguous 1.01x ratio"; that 1.01x was a bug artifact — the corrected region ratio is ~1.9x, so Experiment 1 now *agrees* with this finding rather than sitting in tension with it. See Experiment 8 and §9.10.) In aggregate, matmuls still dominate total CUDA time (85%), meaning the system is not *globally* launch-bound — but the *decode phase specifically* shows a consistent, repeated pattern of CPU time exceeding GPU time, which is the pattern CUDA Graphs is designed to address.
 
 **KV-cache mechanism (new finding at this stage):** `DynamicCache.update()` is called twice per layer per decode step, not once. Splitting by whether the incoming key tensor represents the whole running sequence (`kv_cache_legacy_rebuild`, ~0 GPU cost, pure Python/list-append overhead) or a single new token (`kv_cache_append`, real `torch.cat`-based reallocation, 11.8ms CUDA / 38.4ms CPU over 736 calls) shows the mechanism: `llava_llama.py`'s custom `forward()` does not retain a persisted `Cache` object across `generate()` steps — `past_key_values` crosses the step boundary as a legacy tuple, forcing `DynamicCache.from_legacy_cache()` to reconstruct the cache object from scratch every single decode step, immediately before the real incremental append. The 32-layer, per-step call-count split (416 rebuild-shaped + 384 append-shaped per generate() call under this experiment's settings) is measured directly in `full_request_stage_breakdown.txt`. **The exact interactive stack-trace confirmation of this call chain (showing `modeling_llama.py:1016 → DynamicCache.from_legacy_cache → cache.update`) was produced via an ad-hoc diagnostic during this investigation and is not preserved in a saved file — only the resulting measurement (the count split) and the mechanism explanation (recorded as a code comment in `profile_full_request.py:161-176`) are canonical artifacts.**
 
@@ -451,6 +462,53 @@ absolute savings = 99.1 ms, unchanged (adding the same constant to both sides
 
 ---
 
+## Experiment 8 — Corrected multimodal-preparation aggregates (Experiment 1 re-run)
+
+### Research question
+Experiment 1's two headline aggregates were internally inconsistent with the profiler's own table footer in the same output file. Was the script's arithmetic wrong, and if so, does correcting it change Experiment 1's conclusion?
+
+### What this was
+A bug fix to `scripts/profile_multimodal_prep.py` plus a full re-run of Experiment 1 at identical settings. Unlike Experiment 7's correction, this is **a new measurement, not a derived estimate**.
+
+### The bug
+`prof.key_averages()` returns two rows for the same GPU work: an aten-level operator row (`aten::addmm`, `device_type` CPU, whose `self_cuda_time_total` is attributed up from the kernels it launched) and a kernel-level row (`ampere_sgemm_128x64_tn`, `device_type` CUDA). The script summed `self_cuda_time_total` over **both**, double-counting every GPU microsecond. Its own printed table footer disagreed with its own summary block in the same file — 354.9 ms vs 739.6 ms — which is how the bug was caught.
+
+A second defect sat in the same block: the "big matmul/attn/conv" classifier held a set of `aten::` operator names, which by construction never match a kernel-level row. Every `ampere_sgemm_*` / `sm80_xmma_*` row therefore fell through into the "everything else" bucket, inflating it.
+
+**Fix:** split `key_averages()` by `device_type` and sum the kernel rows only (real GPU busy time, the same quantity the footer reports); classify kernel rows by kernel name. The fix was validated on a synthetic FP32 GEMM workload before the model re-run, and the script now prints the largest unclassified kernels on every run so the name heuristic stays auditable.
+
+### Experimental setup
+Identical to Experiment 1: `visual_token_num=128`, `important_ratio=0.5`, batch=1, `prompt_len=66`, 10 warm-up + 10 profiled iterations. Commit `c317688`, NVIDIA A40, torch 2.2.2+cu121. Run provenance (commit + GPU) is now written into `prep_summary.txt` per benchmarking rule 7.
+
+### Results
+| Metric | Experiment 1 (wrong) | Experiment 8 (corrected) |
+|---|---|---|
+| GPU busy in region, 10 iters | 739.6 ms | **354.88 ms** |
+| — big matmul/attn/conv kernels | 272.1 ms (36.8%) | 272.0 ms (**76.6%**) |
+| — everything else (gather/index/cat/argsort/pad) | 467.4 ms (63.2%) | 82.9 ms (**23.4%**) |
+| CPU time / GPU-busy ratio | 1.01x | **1.90x** |
+| `prepare_inputs_labels_for_multimodal` as % of a 1-token prefill request | 43.1% | 25.1% — **see Limitations, this figure is unstable** |
+
+**Verification:** the script's printed GPU busy (354.88 ms) now matches the profiler's own `Self CUDA time total` footer (354.875 ms) in the same file. Absolute big-kernel time reproduced to within 0.05% of Experiment 1 (272.0 vs 272.1 ms), which is the expected result — that number was the one part of the old summary the bug did not touch, and it confirms the two runs measured the same work.
+
+### Interpretation
+**Experiment 1's conclusion inverts.** The region is not "mostly small non-matmul ops"; **76.6% of its GPU busy time is GEMM**. This is consistent with, and independently corroborated by, `AMAY_TRACE_PLAN.md`'s phase breakdown of the same trace: phase A (the CLIP ViT forward) is 33.02 ms of the 35.49 ms per-call GPU busy — **93.1%** — and runs at 96.3% GPU occupancy, i.e. genuinely compute-bound.
+
+The corrected 23.4% "everything else" bucket is **not** the pruning fixup path, and should not be cited as evidence for a fixup kernel. Its single largest entry is `softmax_warp_forward` at 19.4 ms/10 iters — ViT attention, phase A. The arithmetic bound is decisive: the non-GEMM bucket is 8.29 ms per call, while phase B (pruning selection) accounts for 2.06 ms and phase D (the gather/splice/pad/mask fixup itself) for **0.079 ms — 0.2% of GPU work**. At most a quarter of the non-GEMM bucket can be pruning-related at all, and the specific region the fixup kernel targets is a rounding error in GPU time.
+
+**The §9 "internal tension" dissolves.** Experiment 1 recorded an unresolved conflict between a 63.2%-non-matmul finding and a ~1x CPU/CUDA ratio that failed the script's own ">>1" threshold. Both halves were artifacts of the same bug, pulling in opposite directions: the non-matmul share was inflated, and the ratio was deflated (by a 2x-too-large denominator). Corrected, they tell one coherent story that matches the trace: GPU time is dominated by a saturated FP32 ViT, *and* there is real CPU-side dispatch overhead (1.90x, and a 12.5 ms per-call gap between 48.0 ms wall and 35.5 ms GPU busy) concentrated in phase B's 706 tiny kernels and 112 `cudaStreamSynchronize` calls. Compute-bound on the GPU and launch-overhead-burdened on the CPU are not contradictory claims about the same region — they describe different phases of it.
+
+### Limitations
+Still a single unreplicated run at one configuration; the noise floor remains unmeasured (`AMAY_TRACE_PLAN.md` P0 item 4), so no per-run difference here should be treated as significant on its own. Phase attribution above is inherited from the trace plan's manual segmentation of the trace, not yet produced by the script (P0 item 2).
+
+The "% of a 1-token prefill request" figure moved 43.1% → 25.1% between runs. **This is not the bug fix** — that figure comes from a separate wall-clock read, untouched by this change. Its numerator was stable (47.99 → 47.87 ms); its denominator, `generate(max_new_tokens=1)`, moved 111.27 → 190.66 ms. The likely cause is a benchmarking-rule-3 violation still present in the script: `N_WARMUP` warms `run_prep()` only, never `run_generate()`. Until that is fixed, **no percentage-of-prefill figure from this script should be quoted**, including this experiment's own 25.1%. This also supplies the most probable explanation for §9.9's unexplained 40.7%-vs-43.1% discrepancy: an unstable un-warmed denominator, not a transcription error.
+
+### Status
+**VALID.** A real re-measurement, verified against the profiler's own internal total. Supersedes Experiment 1's Results table in full. The one figure it does **not** rescue is the percentage-of-prefill, which is downgraded to unusable pending the warm-up fix.
+
+
+---
+
 ## 9. Experimental Limitations and Corrections
 
 | # | Issue | Affected experiment(s) | Affected result | Severity | Changes relative conclusions? | Correction | Future clean benchmark needed? |
@@ -463,7 +521,9 @@ absolute savings = 99.1 ms, unchanged (adding the same constant to both sides
 | **9.6** | "Near-saturation" profiler traces (Experiments 3, 6) use back-to-back sequential requests in one process, not genuine concurrent GPU execution | Experiments 3, 6 | Any claim about "concurrent" kernel-level behavior | **Moderate** | No conclusion in this report claims genuine GPU-level concurrency was observed — this was a deliberate design choice, stated as such in every relevant section | None needed; this is by design given 9.7 | A genuinely concurrent-safe profiling method would require first fixing 9.7 |
 | **9.7** | A prior attempt at genuine multi-thread concurrent `generate()` calls against the shared model instance **crashed** with a CUDA device-side assert | Experiment 3 | Establishes that concurrency cannot currently be tested this way — this is itself a finding, not a gap to route around | **High** (as an engineering finding, not a measurement error) | This crash is load-bearing evidence for why the server serializes requests and why real batching (not naive threading) is the correct next step | None — preserved as-is in `concurrent_profile_run_log.txt` | A fix (thread-safety audit / real tensor-level batching) is required before this can be re-attempted |
 | **9.8** | Natural EOS stopping means different requests (and different configs on the same question) generate slightly different numbers of tokens | Experiments 4, 6 | Any decode-time comparison implicitly assumes similar output length; Experiment 4's 128-config generated on average 0.9 fewer tokens than 576's | **Low-moderate** | Partially — a portion of the measured 8.4% decode-time gain in Experiment 4 is attributable to 128 generating slightly fewer tokens (different greedy trajectory), not purely a per-token speed difference; a rough per-token normalization suggests the *per-token* decode gain is closer to ~5% than the raw 8.4% | Not corrected in the canonical tables (both are reported as measured); this note is the correction | A token-count-matched decode comparison (as in Experiment 6's isolated trace, where both configs happened to generate exactly 14 tokens) is the cleaner comparison to cite for decode-specifically claims |
-| **9.9** | AMAY_SPEED_PLAN.md's own prose states Experiment 1's headline percentage as 40.7%; the canonical artifact (`prep_summary.txt`) says 43.1% | Experiment 1 | The percentage cited in the planning document | **Low** | No — both readings support the same qualitative conclusion (the region is a meaningful, launch-overhead-flavored chunk of prefill) | This report uses the artifact's number (43.1%) as canonical | No — source of the discrepancy not investigated further, not load-bearing enough to justify it |
+| **9.9** | AMAY_SPEED_PLAN.md's own prose states Experiment 1's headline percentage as 40.7%; the canonical artifact (`prep_summary.txt`) says 43.1% | Experiment 1 | The percentage cited in the planning document | **Low** | No — both readings support the same qualitative conclusion (the region is a meaningful, launch-overhead-flavored chunk of prefill) | **Root cause now identified (Experiment 8):** the denominator, `generate(max_new_tokens=1)`, is never warmed up, and moved 111.27 → 190.66 ms between two runs of the same script at the same settings. The discrepancy is run-to-run instability, not a transcription error. Neither 40.7% nor 43.1% is canonical; **the figure is withdrawn** pending the warm-up fix | Yes — re-measure after adding warm-up for `run_generate()` (benchmarking rule 3) |
+| **9.10** | `profile_multimodal_prep.py` summed `self_cuda_time_total` over both aten-level and kernel-level rows of `key_averages()`, double-counting all GPU time; and its "big kernel" classifier matched `aten::` names against kernel rows, which never match | Experiment 1 (and every document quoting it) | The region's GPU-busy total (739.6 vs true 354.9 ms), the non-matmul share (63.2% vs true 23.4%), and the CPU/CUDA ratio (1.01x vs true 1.90x) | **High** | **Yes — it inverts Experiment 1's conclusion.** The region is GPU-compute-dominated (76.6% GEMM), not dominated by small non-matmul ops. The 63.2% figure was the stated evidence for the gather/fixup Triton kernel's priority in `AMAY_SPEED_PLAN.md` and `AMAY_ENGINEERING_ROADMAP.md`; that justification does not survive | Script fixed and Experiment 1 re-run in full — see **Experiment 8**. Fix verified against the profiler's own `Self CUDA time total` footer | No — already re-measured. A noise-floor run is still outstanding separately (`AMAY_TRACE_PLAN.md` P0) |
+| **9.11** | `profile_multimodal_prep.py` warms up `run_prep()` for 10 iterations but never warms `run_generate()`, violating benchmarking rule 3 for the second of its two timed loops | Experiment 1, Experiment 8 | `generate(max_new_tokens=1)` mean, and therefore every "prep as % of prefill request" figure derived from it | **Moderate** | No conclusion in this report rests on the percentage-of-prefill figure; it is descriptive framing, not evidence for any ranking | None applied — the figure is marked withdrawn in Experiment 8 rather than corrected, since correcting it requires a re-run | Yes — add warm-up for `run_generate()`, then re-measure |
 
 ---
 

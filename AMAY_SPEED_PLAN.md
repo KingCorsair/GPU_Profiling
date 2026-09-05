@@ -355,20 +355,46 @@ change helped before it's worth asking him to measure it properly.
 
 ## Status (2026-08-29)
 
+> **CORRECTION (2026-09-03) — the numbers in this Status block are wrong, and the conclusion
+> they support is backwards.** The script that produced them double-counted GPU time; see
+> §9.10 and Experiment 8 in `AMAY_VISPRUNER_PROFILING_REPORT.md`. The original text is kept
+> below because `AMAY_ENGINEERING_ROADMAP.md` §1 uses this document as the "what the old plan
+> assumed" baseline and explicitly treats it as a document to compare against, not to rewrite.
+> **Corrected values, same config, re-measured on commit `c317688`:**
+>
+> - Of the region's GPU busy time, **76.6% is big matmul/attn kernels** and only **23.4%** is
+>   everything else → **compute-bound, not launch-overhead-bound.** The premise this step was
+>   run to confirm was *not* confirmed. It was refuted.
+> - Most of that 23.4% is the CLIP ViT's own softmax and elementwise work (phase A), not the
+>   fixup path. The gather/splice/pad/mask region this plan targets is **0.079 ms/call —
+>   0.2% of GPU work** (`AMAY_TRACE_PLAN.md` phase D).
+> - CPU/GPU-busy ratio is **1.90x**, not 1.01x. Real dispatch overhead does exist, but it sits
+>   in phase B's 706 tiny kernels and 112 stream syncs, not in the fixup.
+> - The **40.7% / 43.1%** "share of a prefill request" figure is **withdrawn entirely** — its
+>   denominator is an un-warmed `generate()` call that moved 111 → 191 ms between runs (§9.11).
+>
+> **Consequence for this plan's sequencing:** step 2 (the Triton fixup kernel) has lost the
+> evidence that put it first. `AMAY_TRACE_PLAN.md` supersedes the ordering below; the current
+> top priority is the FP32→FP16 vision tower, which touches the 93.1% of GPU time this step
+> mistakenly attributed to small ops.
+
 **Step 1 (profile the fixup path) — done.** Ran `scripts/profile_multimodal_prep.py`
 (`visual_token_num=128`) on the A40. Results:
 
-- `prepare_inputs_labels_for_multimodal` is **40.7%** of a 1-token prefill request.
-- Of that region's CUDA time, **63.2%** sits in non-matmul ops (gather/index/argsort/cat/pad),
+- ~~`prepare_inputs_labels_for_multimodal` is **40.7%** of a 1-token prefill request.~~ *(withdrawn)*
+- ~~Of that region's CUDA time, **63.2%** sits in non-matmul ops (gather/index/argsort/cat/pad),
   only 36.8% in big matmul/attn kernels → **launch-overhead-bound, not compute-bound**.
   Confirms the Triton kernel premise before building it, per the rule at the top of this
-  section ("don't skip this").
-- Full table + numbers: `results/timing/prep_summary.txt` (short, readable). Full Chrome
+  section ("don't skip this").~~ *(wrong — see correction above; actual split is 76.6% / 23.4%)*
+- Full table + numbers: `results/timing/prep_summary.txt` (short, readable — **regenerated
+  2026-09-03 with the fix; it no longer contains the numbers quoted above**). Full Chrome
   trace: `results/timing/prep_trace.json` (open in `ui.perfetto.dev`, not as text).
 
-**Self-test to pass before moving on:** explain out loud why 63.2% non-matmul time means
-launch-bound, and why that's the reason to build the kernel next — not just "the number
-says so."
+**Self-test to pass before moving on:** ~~explain out loud why 63.2% non-matmul time means
+launch-bound, and why that's the reason to build the kernel next~~ — replaced by a better one:
+explain out loud why a region can be 76.6% GEMM on the GPU *and* carry a 1.90x CPU/GPU-busy
+ratio at the same time, and what that combination implies about which of the two available
+levers (make the GEMMs cheaper vs. remove launch overhead) is worth pulling first.
 
 **Not yet decided:** whether to add fine-grained `record_function` labels inside
 `llava_arch.py` (around the 5 named hotspots — diversity while-loop, anyres branch,

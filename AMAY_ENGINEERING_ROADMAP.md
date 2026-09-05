@@ -27,7 +27,7 @@ Every phase below that touches the 576-vs-128 comparison inherits this same disc
 
 | What the old plan assumed | What profiling later established | What changed |
 |---|---|---|
-| `prepare_inputs_labels_for_multimodal` is "40.7%" of a 1-token prefill request, and is launch-overhead-bound (>>1 CPU/CUDA ratio implied) | The canonical artifact (`prep_summary.txt`) actually says **43.1%**, and the region's *own* CPU/CUDA ratio is 1.01x — not >>1. The 63.2%-non-matmul finding still supports "launch-overhead-flavored," but the >>1 framing overstates what that specific file shows. | This roadmap cites 43.1%, not 40.7%, and treats the "launch-overhead-bound" characterization as evidenced-but-imprecise, not settled. |
+| `prepare_inputs_labels_for_multimodal` is "40.7%" of a 1-token prefill request, and is launch-overhead-bound (>>1 CPU/CUDA ratio implied) | **Both the old plan's framing and this roadmap's earlier correction of it were wrong** — the script producing all of these figures double-counted GPU time (report §9.10, Experiment 8). Re-measured: the region is **76.6% GEMM** on the GPU, i.e. compute-bound, not launch-overhead-bound; "everything else" is **23.4%**, and most of that is CLIP ViT softmax, not the fixup path. The CPU/GPU-busy ratio is **1.90x** (real dispatch overhead does exist — in phase B's 706 tiny kernels and 112 stream syncs, not in the fixup). The percentage-of-prefill figure is **withdrawn** in both its 40.7% and 43.1% forms (§9.11 — un-warmed denominator). | This roadmap no longer cites any percentage-of-prefill figure, and treats the region as **compute-bound with a real but separately-located CPU dispatch cost**. The change is load-bearing: it is why the gather/fixup kernel is demoted from priority 3 to 9 below. |
 | The gather/fixup kernel (targeting `llava_arch.py:272`) was the primary, best-scoped Triton target | Profiling of the *whole* pipeline (Experiment 6) found a **larger, more surprising** target: the diversity-selection while-loop (`llava_arch.py:160-176`) runs ~56-57 real iterations at `visual_token_num=128` and **zero** at 576 — it is the single clearest place where VisPruner's own selection mechanism costs *more*, not less, as pruning gets more aggressive. | The gather/fixup kernel remains a valid target (Experiment 1's evidence for it still stands), but the diversity-loop fusion is now the **higher-priority** Triton target — new evidence, not present in the old plan. |
 | `mm_projector` running on all 576 tokens before pruning was flagged as "a bigger, kernel-free win... at aggressive ratios this is easily >4x more projector matmul than necessary" | Measured directly: `mm_projector`'s cost is **small in absolute terms** at this model's projector size (~0.3-1.1ms, isolated trace) — real, and directionally correct to fix, but not the large win the old plan's FLOP-counting argument implied. | The reorder remains worth doing (near-zero cost, correctness-neutral, frees the fixup kernel to operate on the smaller post-projection shape), but this roadmap does not claim it moves the needle much on its own — the old plan's estimate of its size was not confirmed by measurement. |
 | CUDA graph capture around the decode loop, blocked on "a preallocated, fixed-size KV cache buffer" (correctly anticipated as the hard part) | Profiling found the *specific mechanism* forcing cache instability: `past_key_values` round-trips through a legacy tuple between `generate()` steps, forcing `DynamicCache.from_legacy_cache()` to rebuild the cache object from scratch every step (768 rebuild-shaped calls measured in one 23-decode-step request), immediately before the real `torch.cat`-based append (736 calls). | The old plan's instinct (KV cache needs fixing before CUDA Graphs) is confirmed and now has a named, specific root cause rather than a general "KV cache grows every step" framing. |
@@ -51,9 +51,10 @@ Every phase below that touches the 576-vs-128 comparison inherits this same disc
 
 | Engineering change | Measured bottleneck | Category | Why it belongs there | Classification | Expected impact | Dependency | Priority |
 |---|---|---|---|---|---|---|---|
-| Fuse/vectorize the diversity-selection while-loop | ~56-57 iterations, ~330+ kernel launches at T=128, zero at T=576 (`ab_trace_vtn128_isolated.json` op counts) | **Triton** | Requires writing a new fused kernel to replace an iterative Python loop — this is kernel authoring, not a reorder | PRUNING-SPECIFIC | Moderate-significant | None (can start immediately) | **1** |
-| Gather + position-id + mask fixup kernel | 63.2% non-matmul CUDA time in `prepare_inputs_labels_for_multimodal` (Experiment 1) | **Triton** | Also kernel authoring; fuses several small ops (gather/argsort/cat/pad) into one launch | PRUNING-SPECIFIC | Moderate | Soft: benefits from Pruning Dataflow's mm_projector-reorder decision being made first (changes the kernel's input shape) | 3 |
-| Move `mm_projector` to run after the token-selection gather, not before | Projector runs on all 576 tokens unconditionally (`llava_arch.py:185`, before the mask at `:271`); measured cost small (~0.3-1.1ms) | **Pruning Dataflow / Algorithm-System Co-Design** | Zero kernel writing — this is purely a reorder of two existing operations | PRUNING-SPECIFIC (in direction; small in current measured magnitude) | Small | None | 2 |
+| **Run the CLIP vision tower in FP16 instead of FP32** | Phase A (CLIP ViT forward) is **33.02 ms of 35.49 ms** per-call GPU busy — **93.1%** — at 96.3% GPU occupancy, and every ViT GEMM is an FP32 `ampere_sgemm_*` while the projector two ops later is already `c10::Half` (`AMAY_TRACE_PLAN.md` P1, corroborated by report Experiment 8) | **Pruning Dataflow / Algorithm-System Co-Design** | No kernel authoring — it is a dtype/config change on an already-saturated GEMM, the only lever available on compute-bound work | GENERIC INFERENCE OPTIMIZATION | **Large** — the single biggest measured target in the prep path | None | **1** |
+| Fuse/vectorize the diversity-selection while-loop | ~56-57 iterations, ~330+ kernel launches at T=128, zero at T=576 (`ab_trace_vtn128_isolated.json` op counts) | **Triton** | Requires writing a new fused kernel to replace an iterative Python loop — this is kernel authoring, not a reorder | PRUNING-SPECIFIC | Moderate-significant | None (can start immediately) | **2** |
+| Gather + position-id + mask fixup kernel | ~~63.2% non-matmul CUDA time~~ — **withdrawn (§9.10).** Corrected: the region this kernel targets (phase D — gather, splice, pad/mask rebuild) is **0.079 ms/call, 0.2% of GPU work** (`AMAY_TRACE_PLAN.md`); what remains is a CPU-side cost of ~2.2 ms profiled wall, 9 syncs, 17 `nonzero`, 5 `item` | **Triton** | Also kernel authoring; fuses several small ops (gather/argsort/cat/pad) into one launch | PRUNING-SPECIFIC | **Very small on GPU time; the case is now launch/sync reduction only** | Soft: benefits from Pruning Dataflow's mm_projector-reorder decision being made first (changes the kernel's input shape) | **9** (was 3) |
+| Move `mm_projector` to run after the token-selection gather, not before | Projector runs on all 576 tokens unconditionally (`llava_arch.py:185`, before the mask at `:271`); measured cost small (~0.3-1.1ms) | **Pruning Dataflow / Algorithm-System Co-Design** | Zero kernel writing — this is purely a reorder of two existing operations | PRUNING-SPECIFIC (in direction; small in current measured magnitude) | Small | None | 3 |
 | Investigate prefill's sub-linear scaling (~4.2x fewer tokens → only ~2.3x less prefill time) | 117.4ms→51.5ms vs. an ideal ~4.2x-implied ~28ms (Experiment 6) | **Pruning Dataflow / Algorithm-System Co-Design** | Diagnostic first — not yet a scoped fix; belongs with the other "how is data organized/moved" questions | Unknown until investigated | Unknown | None | 4 |
 | Retain a persisted `Cache` object across `generate()` steps instead of round-tripping through a legacy tuple | `kv_cache_legacy_rebuild`: 768 calls/request, ~0ms GPU but real CPU overhead, identical at both token counts (Experiment 2) | **KV-Cache Optimization** | Directly changes cache-object lifecycle management | PRUNING-ENABLING (removes overhead equally from both configs; enables the next phase) | Small standalone; large as an enabler | None | 5 |
 | Speed up the KV-cache incremental append itself (`torch.cat` per layer per step) | `kv_cache_append`: 736 calls, 11.8ms CUDA / 38.4ms CPU (576) vs. 5.6ms CUDA (128) — the one KV-cache cost that already tracks token count | **KV-Cache Optimization** | Same subsystem as the item above | PRUNING-SPECIFIC in effect (already responds to token count) but the fix itself (fusing launch overhead) is generic | Small-moderate | Soft: cleaner after the persisted-Cache-object work | 6 |
@@ -160,14 +161,15 @@ Every phase below that touches the 576-vs-128 comparison inherits this same disc
 ### CORE PROJECT
 Work necessary to establish the central project result (that pruning-specific engineering measurably recovers more of VisPruner's algorithmic advantage than generic work does, and that serving-level fixes are necessary — not optional — to convert per-request gains into capacity gains):
 - Serving Correctness / Concurrency Safety audit (Phase 0)
-- Pruning Dataflow reorder + prefill investigation (Phase 1)
+- FP32→FP16 vision tower (Phase 1a)
+- Pruning Dataflow reorder + prefill investigation (Phase 1b)
 - Triton: diversity-loop fusion (Phase 2a)
 - KV-Cache: persisted `Cache` object (Phase 3)
 - The final four-way (576/128 × before/after) benchmark suite (§10), run after every phase
 
 ### STRONG EXTENSIONS
 Significantly strengthens the project but is not required for the central claim:
-- Triton: gather/fixup kernel (Phase 2b) — a second, well-evidenced Triton target; strengthens the Triton story but the diversity-loop fusion alone already demonstrates the pruning-specific-Triton thesis
+- ~~Triton: gather/fixup kernel (Phase 2b)~~ — **moved to OPTIONAL 2026-09-03.** It was listed here as "a second, well-evidenced Triton target"; the evidence was a double-counting artifact (§9.10) and the region is 0.2% of the prep path's GPU time. The diversity-loop fusion alone carries the pruning-specific-Triton thesis
 - KV-Cache: append-speedup (Phase 3b)
 - CUDA Graphs (Phase 4) — a strong, generic systems-depth demonstration, gated on Phase 3
 - Batching, basic version (Phase 5) — demonstrates the capacity story, gated on Phase 0
@@ -189,7 +191,7 @@ Not currently supported by any measurement in this repository; would require new
 
 **Exact operations targeted:** (1) the diversity-selection while-loop, `llava_arch.py:160-176`, inside `encode_images()`; (2) the post-selection gather + position-id remap + attention-mask rebuild, `llava_arch.py:272` and `:350-390`, inside `prepare_inputs_labels_for_multimodal()`.
 
-**Profiler evidence:** For (1): `aten::argsort`×57, `aten::max`×56, `aten::matmul`×56, `aten::cat`×63 measured inside the `multimodal_prep` span at `visual_token_num=128`, vs. `aten::argsort`×1 and zero of the others at `visual_token_num=576` (`ab_trace_vtn{576,128}_isolated.json`, parsed directly). For (2): 63.2% of the region's CUDA time in non-matmul ops (`prep_summary.txt`, Experiment 1).
+**Profiler evidence:** For (1): `aten::argsort`×57, `aten::max`×56, `aten::matmul`×56, `aten::cat`×63 measured inside the `multimodal_prep` span at `visual_token_num=128`, vs. `aten::argsort`×1 and zero of the others at `visual_token_num=576` (`ab_trace_vtn{576,128}_isolated.json`, parsed directly). For (2): **the original evidence — "63.2% of the region's CUDA time in non-matmul ops" — is withdrawn** (report §9.10 / Experiment 8: the script double-counted GPU time). Re-measured, non-GEMM work is 23.4% of the region's GPU busy time, and the fixup region specifically (phase D) is **0.079 ms/call — 0.2%**. What survives as evidence for (2) is CPU-side, not GPU-side: ~2.2 ms profiled CPU wall, 9 `cudaStreamSynchronize`, 17 `nonzero`, 5 `.item()` in that region (`AMAY_TRACE_PLAN.md` phase D). That is a launch/sync-reduction argument of small absolute size, not the compute-share argument originally claimed.
 
 **Is it pruning-specific?** (1) is unambiguously pruning-specific — its cost is a direct, monotonic function of how many tokens get discarded, and it is provably zero-cost at the unpruned baseline. (2) is pruning-specific in the sense that its magnitude scales with how much gets pruned, though the underlying inefficiency (many small ops instead of one fused op) is a generic pattern.
 
@@ -277,7 +279,36 @@ Each phase is designed to be benchmarked in isolation before the next begins, pe
 | **Expected performance impact** | None directly; this phase's value is unblocking Phase 5 |
 | **Deliverables** | A written root-cause explanation (this is exactly the kind of finding worth being able to explain from memory, per the project's self-test); a minimal reproducible two-thread test; either a fix or a documented decision that batching (not a thread-safety patch) is the real solution |
 
-### Phase 1 — Pruning Dataflow / Algorithm-System Co-Design
+### Phase 1a — FP32 → FP16 Vision Tower
+
+*Added 2026-09-03. This phase exists because correcting the double-counting bug (report §9.10 /
+Experiment 8) revealed that the prep path is compute-bound in a saturated FP32 GEMM, not
+launch-bound in small ops. It is the largest single measured target in this document, and it was
+absent from every earlier plan.*
+
+| Field | Detail |
+|---|---|
+| **Category** | Pruning Dataflow / Algorithm-System Co-Design (dtype/config, no kernel authoring) |
+| **Problem being solved** | The CLIP ViT runs in FP32 on a GPU whose FP16 tensor-core throughput is several times its FP32 SGEMM throughput |
+| **Why it matters** | Phase A (the ViT forward) is **33.02 ms of 35.49 ms** per-call GPU busy — **93.1%** — at 96.3% GPU occupancy. It is genuinely compute-bound, so there are no bubbles to fuse away; the only lever on a saturated GEMM is to make the GEMM cheaper. Every other item in this roadmap competes for the remaining ~7% |
+| **Measured evidence** | All 144 ViT `aten::addmm` rows carry `Input type: ['float','float','float']`; patch embed is `implicit_convolve_sgemm<float,...>`; the GEMM kernels are `ampere_sgemm_128x64_tn` (480 calls) and `ampere_sgemm_32x128_tn` (960 calls) — the FP32 SGEMM family. Two ops later the projector is already `c10::Half` / `sm80_xmma_gemm_f16f16`, so this is the vision tower specifically, not the model |
+| **Source of evidence** | `results/timing/prep_trace.json`; `AMAY_TRACE_PLAN.md` P1 and its phase table; report Experiment 8 |
+| **Exact files/functions involved** | The vision tower's dtype at load time (`llava/model/multimodal_encoder/`), and wherever `load_pretrained_model` decides the vision tower's precision independently of the LLM's |
+| **Proposed engineering design** | Load/cast the CLIP tower in FP16 to match the rest of the pipeline, then confirm the trace's `ampere_sgemm_*` rows are replaced by the `f16` GEMM family. This is a configuration change, not a rewrite — the risk is entirely in numerics, not in control flow |
+| **Prerequisite knowledge** | Which of the vision tower's ops are numerically sensitive to FP16 (layernorm accumulation in particular), and whether the projector's existing FP16 input path already implies the cast is safe at the boundary |
+| **Dependencies** | None. Blocks nothing, but makes every later GPU-time measurement in the prep path a different baseline — so it should land **before** the four-way benchmarks, not after |
+| **Implementation tasks** | 1. Cast the vision tower at load. 2. Re-run `profile_multimodal_prep.py`; confirm the FP32 SGEMM rows are gone from the trace. 3. Run the accuracy eval (per rule 12, including OCR/counting/spatial categories) before/after — a speedup that costs accuracy is not a win here. 4. Re-baseline every phase-A number in `AMAY_TRACE_PLAN.md` |
+| **Correctness tests** | Per-category accuracy before/after on the locked eval set — **not** just output-text spot checks. FP16 vision encoding can degrade fine-grained OCR specifically, which is exactly the category the project's own rule 12 exists to protect |
+| **Microbenchmark** | Phase A GPU busy alone, before/after, from the same trace-segmentation the P0 work adds |
+| **Success criterion** | Phase A GPU busy drops substantially (the trace's GEMM rows move to the `f16` family) **and** per-category accuracy is unchanged within the eval set's own noise |
+| **Rejection/rollback criterion** | Any per-category accuracy regression outside noise — particularly OCR — reverts this immediately. Speed is not worth silent quality loss on the exact task categories this project uses to argue pruning is safe |
+| **Difficulty** | Low to implement, moderate to validate (the validation is the real work) |
+| **Estimated implementation time** | 0.5 day |
+| **Estimated debugging time** | 1-2 days, nearly all of it accuracy validation |
+| **Expected performance impact** | **Large** relative to the prep path; still bounded by decode dominance at the end-to-end level (see §1 — prefill gains dilute) |
+| **Deliverables** | The dtype change; a before/after trace pair showing the GEMM family swap; a per-category accuracy comparison |
+
+### Phase 1b — Pruning Dataflow / Algorithm-System Co-Design
 
 | Field | Detail |
 |---|---|
@@ -316,7 +347,7 @@ Each phase is designed to be benchmarked in isolation before the next begins, pe
 | **Exact files/functions involved** | `llava_arch.py:160-176`, inside `encode_images()` |
 | **Proposed engineering design** | A Triton kernel performing the equivalent iterative deduplication (rank residual tokens by pairwise similarity, discard the most-similar-to-something-already-kept, repeat until `diverse_token_num` remain) in one launch, operating on the full `residual_indices` set at once rather than shrinking by ≤8 per Python-level pass |
 | **Prerequisite knowledge** | Triton's programming model (grid/block indexing, shared memory); the exact pairwise-similarity-and-argsort algorithm currently implemented in Python, well enough to reproduce its selection *exactly* (same tokens selected, same tie-breaking) — not just something similar |
-| **Dependencies** | None (independent of Phase 1) |
+| **Dependencies** | None (independent of Phase 1a/1b) |
 | **Implementation tasks (PR-sized)** | 1. Extract the current Python while-loop into a standalone, testable function taking `(image_normalized, residual_indices, diverse_token_num)` and returning the same signature, for use as the correctness reference. 2. Study `megablocks/backend/kernels.py`'s `_padded_copy`/`gather()` as a kernel-authoring template (per `AMAY_SPEED_PLAN.md`'s own reading list — preserved as sound advice). 3. Write a Triton kernel for the pairwise-similarity + argsort + selection step. 4. Handle the loop's iterative shrinking (`R` decreases by `r` each pass) — either as a single kernel that internally loops, or as a fixed small number of kernel launches replacing the ~56 Python-level ones. 5. Validate exact index-set equality against the Python reference across a range of images and `visual_token_num` settings. 6. Integrate behind a feature flag so the old path remains available for comparison. |
 | **Correctness tests** | Exact selected-index-set equality (not just "similar accuracy") against the Python reference, across ≥20 test images and at least 3 `visual_token_num` settings (e.g. 64, 128, 256); explicit raster-order preservation check per the project's rule 16 |
 | **Microbenchmark** | `multimodal_prep` region alone, isolated (reuse `scripts/profile_multimodal_prep.py`'s pattern), before/after, at multiple `visual_token_num` settings |
@@ -330,21 +361,23 @@ Each phase is designed to be benchmarked in isolation before the next begins, pe
 | **Expected performance impact** | Moderate-significant relative to `multimodal_prep`'s own cost; small relative to total end-to-end latency (decode still dominates) |
 | **Deliverables** | `triton_diversity_select.py` (new file, Amay's to write per `CLAUDE.md`'s ownership list); correctness test suite; before/after benchmark report |
 
-**Milestone 2b: Gather/fixup kernel (strong extension)**
+**Milestone 2b: Gather/fixup kernel (OPTIONAL — demoted 2026-09-03)**
+
+> **Demoted from Strong Extension to Optional.** The measured evidence this milestone rested on was an artifact of the double-counting bug in `profile_multimodal_prep.py` (report §9.10, Experiment 8). Corrected, the region it targets is 0.2% of the prep path's GPU time. It is kept here, fully scoped, because the CPU-side sync/launch cost is real and because the design work is already done — but it should not be built before Phase 1a (FP16 vision tower), which touches 93.1% of the same path's GPU time. Estimated payoff no longer justifies 5-8 days ahead of anything else in this document.
 
 | Field | Detail |
 |---|---|
 | **Category** | Triton |
 | **Problem being solved** | The original AMAY_SPEED_PLAN.md target — separate gather/argsort/cat/pad ops in the post-selection fixup path |
-| **Measured evidence** | 63.2% of the region's CUDA time in non-matmul ops |
-| **Source of evidence** | `prep_summary.txt`, Experiment 1 |
+| **Measured evidence** | ~~63.2% of the region's CUDA time in non-matmul ops~~ **— WITHDRAWN.** Corrected: phase D (this milestone's exact target) is **0.079 ms/call, 0.2% of GPU busy**. Remaining evidence is CPU-side only: ~2.2 ms profiled wall, 9 stream syncs, 17 `nonzero`, 5 `.item()` per call |
+| **Source of evidence** | `prep_summary.txt` (regenerated 2026-09-03), report Experiment 8 / §9.10, `AMAY_TRACE_PLAN.md` phase table |
 | **Exact files/functions involved** | `llava_arch.py:272` (single-image gather), `:350-390` (padding/position-id/mask rebuild loop) |
-| **Proposed engineering design** | As already scoped in `AMAY_SPEED_PLAN.md`: augment `encode_images()` to also return `selected_indices` directly (already computed, currently discarded into a boolean mask); write `gather_kernel()`/`triton_gather()` in a new `triton_fixup.py` doing gather + position-id remap + mask construction in one pass, operating on the shape produced by Phase 1's reorder (post-projection width) if Phase 1 has landed, or the pre-reorder shape otherwise |
-| **Dependencies** | Soft: Phase 1's projector-reorder decision (changes the kernel's expected input width) |
+| **Proposed engineering design** | As already scoped in `AMAY_SPEED_PLAN.md`: augment `encode_images()` to also return `selected_indices` directly (already computed, currently discarded into a boolean mask); write `gather_kernel()`/`triton_gather()` in a new `triton_fixup.py` doing gather + position-id remap + mask construction in one pass, operating on the shape produced by Phase 1b's reorder (post-projection width) if Phase 1b has landed, or the pre-reorder shape otherwise |
+| **Dependencies** | Soft: Phase 1b's projector-reorder decision (changes the kernel's expected input width) |
 | **Implementation tasks** | 1-4 as already itemized in `AMAY_SPEED_PLAN.md`'s own plan (augment `encode_images()`'s return, swap the single-image `else` branch's gather call, add the 3-way-unpack `, _` at the multi-image call site, write `gather_kernel`/`triton_gather`) — this roadmap does not re-derive that design, it cites it as still valid. 5. Extend to the anyres/multi-image branch (AMAY_SPEED_PLAN.md's own noted gap: "My augmentation only patches the single-image else branch; this whole branch is unaddressed"). 6. Address the per-batch main-loop syncs (`.sum()`, `.tolist()`) if batching (Phase 5) makes batch size > 1 relevant by this point. |
 | **Correctness tests** | Output embeddings, position IDs, and attention mask bit-identical to the pre-kernel path, across single-image and multi-image/anyres inputs |
 | **Microbenchmark / Full-system benchmark / Before-after metrics** | Same protocol as Milestone 2a, applied to the fixup region and to `prefill_lm_forward_mean_ms` |
-| **Success criterion** | Fixup-region CUDA time drops with launch count; end-to-end 128-vs-576 VisPruner advantage improves further |
+| **Success criterion** | Sync count in the fixup region drops from 9 to ~0 and profiled CPU wall for the region drops measurably. **Not** a CUDA-time criterion — there is only 0.079 ms/call of GPU time available to win, which is below any plausible noise floor, so a GPU-time success criterion here would be unfalsifiable |
 | **Difficulty** | High |
 | **Estimated implementation/debugging time** | 3-5 days / 2-3 days |
 | **Deliverables** | `triton_fixup.py`; correctness suite covering both single-image and anyres paths |
@@ -448,7 +481,7 @@ Every phase's benchmark should track, where relevant: complete request latency, 
 
 ### MINIMUM COMPLETE PROJECT
 - Phase 0 (correctness audit) completed and documented, whatever its outcome
-- Phase 1 (dataflow reorder) and Phase 2a (diversity-loop Triton kernel) implemented, correctness-verified, and benchmarked with the four-way 576/128-before/after protocol
+- Phase 1b (dataflow reorder) and Phase 2a (diversity-loop Triton kernel) implemented, correctness-verified, and benchmarked with the four-way 576/128-before/after protocol
 - Phase 3a (persisted Cache object) implemented and benchmarked
 - A final load sweep (properly interleaved) confirming whatever the state of batching is at project end
 - A final profiler-trace comparison (isolated + near-saturation, both configs) against the original profiling-phase traces, showing what changed and what didn't
@@ -482,7 +515,7 @@ To be executed once, after all landed optimizations, deliberately designed to fi
 | Kernel-launch comparison | Total `cudaLaunchKernel` count, before vs. after, both configs | Directly validates Phases 2 and 4's claims |
 | GPU utilization | Continuous background-thread sampling during every load level, as already established | Preserved from the existing methodology |
 | GPU memory | Continuous sampling; specifically watched under Phase 5's batching to see whether paged KV becomes justified | Directly informs the Optional-bucket revisit criterion in §5 |
-| Correctness/output checks | Exact-text comparison against the pre-optimization baseline for every non-generic-speedup change (Triton kernels, KV-cache change, batching); accuracy-preserving (not just "looks similar") checks per the project's own rule 15 |
+| Correctness/output checks | Exact-text comparison against the pre-optimization baseline for every non-generic-speedup change (Triton kernels, KV-cache change, batching); accuracy-preserving (not just "looks similar") checks per the project's own rule 15 | General rigor |
 
 This suite is **defined here, not executed** — per this task's explicit instruction not to run any benchmark now.
 
@@ -493,9 +526,10 @@ This suite is **defined here, not executed** — per this task's explicit instru
 | Phase | Category | Main technique | Problem solved | Deliverable | Success metric | Dependency | Core/Extension | Est. effort |
 |---|---|---|---|---|---|---|---|---|
 | 0 | Serving Correctness | Root-cause + fix the concurrency crash | Shared model instance unsafe under concurrent access | Fix or documented decision + 2-thread repro | N/N repro runs pass | None | Core | 1.5-3 days |
-| 1 | Pruning Dataflow | Projector reorder + prefill investigation | Wasted projector FLOPs; unexplained prefill sub-linear scaling | Reordered code + written finding | `mm_projector` cost scales with T; prefill mechanism named | None | Core | 1.5-2 days |
+| 1a | Pruning Dataflow | **FP32→FP16 vision tower** | ViT is 93.1% of prep GPU busy and runs FP32 on an A40 | Dtype change + before/after trace pair | Phase-A GPU busy drops; per-category accuracy unchanged | None | Core | 0.5 day + 1-2 days validation |
+| 1b | Pruning Dataflow | Projector reorder + prefill investigation | Wasted projector FLOPs; unexplained prefill sub-linear scaling | Reordered code + written finding | `mm_projector` cost scales with T; prefill mechanism named | None | Core | 1.5-2 days |
 | 2a | Triton | Diversity-loop fusion | ~56-iteration Python loop, pruning-specific tax | `triton_diversity_select.py` | `multimodal_prep` at T=128 ≤ T=576's | None | Core | 5-9 days |
-| 2b | Triton | Gather/fixup kernel | 63.2% non-matmul time in fixup region | `triton_fixup.py` | Fixup-region launch count drops | Soft: Phase 1 | Strong Extension | 5-8 days |
+| 2b | Triton | Gather/fixup kernel | ~~63.2% non-matmul time in fixup region~~ **withdrawn (§9.10)**; region is 0.2% of GPU busy, case is CPU-side sync reduction only | `triton_fixup.py` | Fixup-region sync count → ~0 (not a CUDA-time criterion) | Soft: Phase 1b | **Optional** (was Strong Extension) | 5-8 days |
 | 3a | KV-Cache | Persisted Cache object | Per-step `from_legacy_cache` rebuild | Modified `generate()`/`forward()` | Rebuild call count → 0 | None | Core | 2-4 days |
 | 3b | KV-Cache | Fixed-size buffer | `torch.cat` reallocation per step | Preallocated buffer | Stable tensor addresses (verified) | 3a | Strong Extension | 4-6 days |
 | 4 | CUDA Graphs | Decode-step capture/replay | 34k+ launches/request, CPU>CUDA per step | Graph-capture implementation | Decode ms/step drops, both configs | **3a + 3b** | Strong Extension | 6-9 days |
@@ -504,14 +538,14 @@ This suite is **defined here, not executed** — per this task's explicit instru
 
 ### Direct answers
 
-1. **Exact recommended implementation order:** Phase 0 → Phase 1 → Phase 2a → (2b, 3a in either order or parallel) → 3b → 4 → 5 → 6.
-2. **Which tasks can happen independently:** Phase 0, Phase 1, Phase 2a, and Phase 3a are mutually independent — any order or parallel work among them is fine.
-3. **Which tasks depend on earlier phases:** Phase 2b softly depends on Phase 1; Phase 3b hard-depends on 3a; Phase 4 hard-depends on 3a+3b; Phase 5 hard-depends on Phase 0.
-4. **Where Triton fits:** Phase 2 — independent of KV-cache/CUDA-Graphs/Batching entirely; only its second milestone (2b) has a soft dependency on Phase 1.
+1. **Exact recommended implementation order:** Phase 0 → **Phase 1a** → Phase 1b → Phase 2a → (3a, then 3b) → 4 → 5 → 6, with **2b demoted to Optional** and slotted in only if time remains. *(Revised 2026-09-03: 1a is new and goes first among the performance work because it touches 93.1% of the prep path's GPU time; 2b moved from third to last because the evidence ranking it third was a measurement bug — see §9.10.)*
+2. **Which tasks can happen independently:** Phase 0, Phase 1a, Phase 1b, Phase 2a, and Phase 3a are mutually independent — any order or parallel work among them is fine. Phase 1a should nonetheless land before any four-way benchmark, since it re-baselines every phase-A number.
+3. **Which tasks depend on earlier phases:** Phase 2b softly depends on Phase 1b; Phase 3b hard-depends on 3a; Phase 4 hard-depends on 3a+3b; Phase 5 hard-depends on Phase 0.
+4. **Where Triton fits:** Phase 2 — independent of KV-cache/CUDA-Graphs/Batching entirely; only its second milestone (2b) has a soft dependency on Phase 1b — and 2b is now Optional.
 5. **Where KV-cache fits:** Phase 3 — independent of Triton and Pruning Dataflow; is the hard prerequisite for CUDA Graphs.
 6. **Where CUDA Graphs fit:** Phase 4 — strictly after KV-cache (3a+3b); independent of Batching and of Triton.
 7. **Where batching fits:** Phase 5 — hard-depends only on Phase 0 (correctness), not on Triton/KV-cache/CUDA-Graphs, though doing it last means it batches an already-cheaper request.
 8. **Which new categories were necessary:** Pruning Dataflow / Algorithm-System Co-Design, and Serving Correctness / Concurrency Safety — both justified by specific code-level and crash-log evidence, not created for taxonomic tidiness.
-9. **What counts as project complete:** see §9 — Minimum requires Phases 0, 1, 2a, 3a plus a final interleaved load sweep, trace comparison, reproducible scripts, and an honest written conclusion; Ideal adds 2b, 3b, 4, 5, and a revisit of the Optional bucket.
+9. **What counts as project complete:** see §9 — Minimum requires Phases 0, 1a, 1b, 2a, 3a plus a final interleaved load sweep, trace comparison, reproducible scripts, and an honest written conclusion; Ideal adds 2b, 3b, 4, 5, and a revisit of the Optional bucket.
 10. **What the final benchmark suite contains:** see §10 in full — defined, not run.
 11. **Which optimization should be implemented first:** **Phase 0** (the correctness audit) — it is the cheapest phase, it de-risks the highest-effort later phase (Batching) early rather than late, and understanding the crash may also inform how Phase 2's Triton kernels should be written to avoid the same class of bug. If a narrower "first *performance* optimization" answer is wanted specifically: **Phase 2a, the diversity-loop Triton fusion** — it has the strongest, most directly quantified evidence of any candidate in this roadmap (56 measured iterations against a 56-iteration code-level prediction) and is the clearest PRUNING-SPECIFIC win available.
