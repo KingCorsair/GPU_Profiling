@@ -1,0 +1,142 @@
+{
+  "schema": "vispruner-load-campaign-v1",
+  "campaign": {
+    "name": "RunPod stock VisPruner A/B under serialized open-loop load",
+    "status": "exploratory",
+    "sourceHost": "RunPod",
+    "sourceRoot": "/workspace/GPU_Profiling",
+    "runDateUtc": "2026-09-01",
+    "gpu": "NVIDIA A40",
+    "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+    "gitDirty": true,
+    "workloadId": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "datasetRecordCount": 90,
+    "durationSecondsPerLevel": 30,
+    "warmupRequestsExcludedPerLevel": 10,
+    "importantRatio": 0.5,
+    "maxNewTokens": 64,
+    "batchSize": 1,
+    "serverConcurrency": "single Uvicorn worker; synchronous model.generate blocks the event loop and serializes requests",
+    "engineeringStatus": "No engineered serving implementation or post-engineering run is present in this campaign."
+  },
+  "series": [
+    {
+      "id": "stock-576",
+      "label": "No-drop control (576 tokens)",
+      "servingPath": "stock",
+      "visualTokenNum": 576,
+      "executionOrderRps": [1.0, 3.0, 2.0, 1.5, 0.5],
+      "runs": [
+        {
+          "runId": "02-37-44Z_rps-0.5_8beede1e",
+          "runPath": "results/loadgen/2026-09-01/02-37-44Z_rps-0.5_8beede1e/run.json",
+          "offeredRps": 0.5,
+          "measuredRequests": 5,
+          "successfulThroughputRps": 0.5,
+          "p50LatencyMs": 861.3180400000019,
+          "p95LatencyMs": 1070.4042870000012,
+          "p99LatencyMs": 1070.4042870000012
+        },
+        {
+          "runId": "02-35-26Z_rps-1_f048e029",
+          "runPath": "results/loadgen/2026-09-01/02-35-26Z_rps-1_f048e029/run.json",
+          "offeredRps": 1.0,
+          "measuredRequests": 20,
+          "successfulThroughputRps": 1.0,
+          "p50LatencyMs": 603.1847740000012,
+          "p95LatencyMs": 817.5183930000003,
+          "p99LatencyMs": 1026.0049169999984
+        },
+        {
+          "runId": "02-37-12Z_rps-1.5_20414876",
+          "runPath": "results/loadgen/2026-09-01/02-37-12Z_rps-1.5_20414876/run.json",
+          "offeredRps": 1.5,
+          "measuredRequests": 35,
+          "successfulThroughputRps": 1.5,
+          "p50LatencyMs": 587.9940319999987,
+          "p95LatencyMs": 2331.782061,
+          "p99LatencyMs": 2388.953743
+        },
+        {
+          "runId": "02-36-40Z_rps-2_16d30c34",
+          "runPath": "results/loadgen/2026-09-01/02-36-40Z_rps-2_16d30c34/run.json",
+          "offeredRps": 2.0,
+          "measuredRequests": 50,
+          "successfulThroughputRps": 2.0,
+          "p50LatencyMs": 2290.632396000001,
+          "p95LatencyMs": 5876.591386,
+          "p99LatencyMs": 6876.695215000002
+        },
+        {
+          "runId": "02-35-58Z_rps-3_df52457e",
+          "runPath": "results/loadgen/2026-09-01/02-35-58Z_rps-3_df52457e/run.json",
+          "offeredRps": 3.0,
+          "measuredRequests": 80,
+          "successfulThroughputRps": 2.1663817667543306,
+          "p50LatencyMs": 7138.156575999999,
+          "p95LatencyMs": 10914.265279,
+          "p99LatencyMs": 19599.172685
+        }
+      ]
+    },
+    {
+      "id": "stock-128",
+      "label": "Stock VisPruner (128 tokens)",
+      "servingPath": "stock",
+      "visualTokenNum": 128,
+      "executionOrderRps": [3.0, 0.5, 2.0, 1.0, 1.5],
+      "runs": [
+        {
+          "runId": "03-20-10Z_rps-0.5_9433ab38",
+          "runPath": "results/loadgen/2026-09-01/03-20-10Z_rps-0.5_9433ab38/run.json",
+          "offeredRps": 0.5,
+          "measuredRequests": 5,
+          "successfulThroughputRps": 0.5,
+          "p50LatencyMs": 652.1457120000014,
+          "p95LatencyMs": 860.7157550000011,
+          "p99LatencyMs": 860.7157550000011
+        },
+        {
+          "runId": "03-21-12Z_rps-1_7618f7bc",
+          "runPath": "results/loadgen/2026-09-01/03-21-12Z_rps-1_7618f7bc/run.json",
+          "offeredRps": 1.0,
+          "measuredRequests": 20,
+          "successfulThroughputRps": 1.0,
+          "p50LatencyMs": 492.1822350000002,
+          "p95LatencyMs": 767.322626000001,
+          "p99LatencyMs": 919.5217489999995
+        },
+        {
+          "runId": "03-21-43Z_rps-1.5_b9dbdc93",
+          "runPath": "results/loadgen/2026-09-01/03-21-43Z_rps-1.5_b9dbdc93/run.json",
+          "offeredRps": 1.5,
+          "measuredRequests": 35,
+          "successfulThroughputRps": 1.5,
+          "p50LatencyMs": 474.62413500000184,
+          "p95LatencyMs": 2333.053675000001,
+          "p99LatencyMs": 2489.2095530000006
+        },
+        {
+          "runId": "03-20-40Z_rps-2_37c21e40",
+          "runPath": "results/loadgen/2026-09-01/03-20-40Z_rps-2_37c21e40/run.json",
+          "offeredRps": 2.0,
+          "measuredRequests": 50,
+          "successfulThroughputRps": 2.0,
+          "p50LatencyMs": 1373.5095800000017,
+          "p95LatencyMs": 5376.414236999999,
+          "p99LatencyMs": 8009.136283999998
+        },
+        {
+          "runId": "03-19-29Z_rps-3_4742a956",
+          "runPath": "results/loadgen/2026-09-01/03-19-29Z_rps-3_4742a956/run.json",
+          "offeredRps": 3.0,
+          "measuredRequests": 80,
+          "successfulThroughputRps": 2.2493779074487503,
+          "p50LatencyMs": 7629.882889,
+          "p95LatencyMs": 10951.375145000002,
+          "p99LatencyMs": 13418.157296999998
+        }
+      ]
+    }
+  ]
+}

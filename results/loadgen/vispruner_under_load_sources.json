@@ -1,0 +1,418 @@
+{
+  "campaign": {
+    "name": "RunPod stock VisPruner A/B under serialized open-loop load",
+    "status": "exploratory",
+    "sourceHost": "RunPod",
+    "sourceRoot": "/workspace/GPU_Profiling",
+    "runDateUtc": "2026-09-01",
+    "gpu": "NVIDIA A40",
+    "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+    "gitDirty": true,
+    "workloadId": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "datasetRecordCount": 90,
+    "durationSecondsPerLevel": 30,
+    "warmupRequestsExcludedPerLevel": 10,
+    "importantRatio": 0.5,
+    "maxNewTokens": 64,
+    "batchSize": 1,
+    "serverConcurrency": "single Uvicorn worker; synchronous model.generate blocks the event loop and serializes requests",
+    "engineeringStatus": "No engineered serving implementation or post-engineering run is present in this campaign."
+  },
+  "campaignPath": "/Users/rithvik/Dev/Code/Projects/Group/GPU_Profiling/results/loadgen/2026-09-01/vispruner_stock_ab_campaign.json",
+  "campaignSha256": "5b7807cafd89f842abed25545e9448993a13b876be9df07842f97eb711015b5f",
+  "percentile": "p50",
+  "offeredRps": 3.0,
+  "visualTokenNum": 128,
+  "formula": "100 * (control_ms - pruned_ms) / control_ms",
+  "conditions": [
+    {
+      "label": "No pruning\n576 tokens",
+      "improvementPercent": 0.0,
+      "note": "Reference by definition",
+      "controlRunId": null,
+      "prunedRunId": null
+    },
+    {
+      "label": "Stock VisPruner\nNo load",
+      "improvementPercent": null,
+      "note": "Run required",
+      "controlRunId": null,
+      "prunedRunId": null
+    },
+    {
+      "label": "Stock VisPruner\nUnder load \u00b7 3 RPS",
+      "improvementPercent": -6.8887016944022985,
+      "note": "n=80/80 successful (control/pruned)",
+      "controlRunId": "02-35-58Z_rps-3_df52457e",
+      "prunedRunId": "03-19-29Z_rps-3_4742a956",
+      "controlLatencyMs": 7138.156575999999,
+      "prunedLatencyMs": 7629.882889
+    },
+    {
+      "label": "Optimized VisPruner\nUnder load \u00b7 3 RPS",
+      "improvementPercent": null,
+      "note": "Run required",
+      "controlRunId": null,
+      "prunedRunId": null
+    }
+  ],
+  "notes": [
+    "NVIDIA A40 | commit ae8eaf733863 (dirty worktree) | workload sha256:3933e73c4e08aa1c\u2026",
+    "Exploratory: one run per point; n=5\u201380 successful requests; 10 warmups excluded per campaign. No confidence intervals.",
+    "p99 has fewer than 1,000 successful samples at one or more points; tail estimates are unstable.",
+    "Some model/pruning settings exist only in the campaign; raw-run metadata cannot fully verify matching.",
+    "Serving (campaign): single Uvicorn worker; synchronous model.generate blocks the event loop and serializes requests."
+  ],
+  "series": [
+    {
+      "id": "stock-576",
+      "label": "No-drop control (576 tokens)",
+      "servingPath": "stock",
+      "visualTokenNum": 576,
+      "executionOrderRps": [
+        1.0,
+        3.0,
+        2.0,
+        1.5,
+        0.5
+      ],
+      "runs": [
+        {
+          "runId": "02-37-44Z_rps-0.5_8beede1e",
+          "runPath": "results/loadgen/2026-09-01/02-37-44Z_rps-0.5_8beede1e/run.json",
+          "offeredRps": 0.5,
+          "measuredRequests": 5,
+          "successfulThroughputRps": 0.5,
+          "p50LatencyMs": 861.3180400000019,
+          "p95LatencyMs": 1070.4042870000012,
+          "p99LatencyMs": 1070.4042870000012,
+          "successfulRequests": 5,
+          "failedRequests": 0,
+          "sha256": "dfe9c1ea42ccf84929e79506e04866df1a44c8a9d84a0c3aad7780ad1e8fd8ec",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "02-35-26Z_rps-1_f048e029",
+          "runPath": "results/loadgen/2026-09-01/02-35-26Z_rps-1_f048e029/run.json",
+          "offeredRps": 1,
+          "measuredRequests": 20,
+          "successfulThroughputRps": 1,
+          "p50LatencyMs": 603.1847740000012,
+          "p95LatencyMs": 817.5183930000003,
+          "p99LatencyMs": 1026.0049169999984,
+          "successfulRequests": 20,
+          "failedRequests": 0,
+          "sha256": "1264587ce21c1f9740c5ca0a4ddf7d26eb2936510593ced5662fb11c55588928",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "02-37-12Z_rps-1.5_20414876",
+          "runPath": "results/loadgen/2026-09-01/02-37-12Z_rps-1.5_20414876/run.json",
+          "offeredRps": 1.5,
+          "measuredRequests": 35,
+          "successfulThroughputRps": 1.5,
+          "p50LatencyMs": 587.9940319999987,
+          "p95LatencyMs": 2331.782061,
+          "p99LatencyMs": 2388.953743,
+          "successfulRequests": 35,
+          "failedRequests": 0,
+          "sha256": "a301e8a85a8b444abc809984308538c3f93e3071859c4c94319828b77decfe18",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "02-36-40Z_rps-2_16d30c34",
+          "runPath": "results/loadgen/2026-09-01/02-36-40Z_rps-2_16d30c34/run.json",
+          "offeredRps": 2,
+          "measuredRequests": 50,
+          "successfulThroughputRps": 2,
+          "p50LatencyMs": 2290.632396000001,
+          "p95LatencyMs": 5876.591386,
+          "p99LatencyMs": 6876.695215000002,
+          "successfulRequests": 50,
+          "failedRequests": 0,
+          "sha256": "ce08a2d3a83413a69a71bbe84af38c7a4bdce88144ddbd327fb8243a37220a70",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "02-35-58Z_rps-3_df52457e",
+          "runPath": "results/loadgen/2026-09-01/02-35-58Z_rps-3_df52457e/run.json",
+          "offeredRps": 3,
+          "measuredRequests": 80,
+          "successfulThroughputRps": 2.1663817667543306,
+          "p50LatencyMs": 7138.156575999999,
+          "p95LatencyMs": 10914.265279,
+          "p99LatencyMs": 19599.172685,
+          "successfulRequests": 80,
+          "failedRequests": 0,
+          "sha256": "9485eabd617019a4f1263fdcde83662e59f1c03da15c5716a6beb665143c5f85",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "stock-128",
+      "label": "Stock VisPruner (128 tokens)",
+      "servingPath": "stock",
+      "visualTokenNum": 128,
+      "executionOrderRps": [
+        3.0,
+        0.5,
+        2.0,
+        1.0,
+        1.5
+      ],
+      "runs": [
+        {
+          "runId": "03-20-10Z_rps-0.5_9433ab38",
+          "runPath": "results/loadgen/2026-09-01/03-20-10Z_rps-0.5_9433ab38/run.json",
+          "offeredRps": 0.5,
+          "measuredRequests": 5,
+          "successfulThroughputRps": 0.5,
+          "p50LatencyMs": 652.1457120000014,
+          "p95LatencyMs": 860.7157550000011,
+          "p99LatencyMs": 860.7157550000011,
+          "successfulRequests": 5,
+          "failedRequests": 0,
+          "sha256": "c58135b1e37c78c425f0b5c102d839d9dfb235879695d2865416bc1b50e245e9",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "03-21-12Z_rps-1_7618f7bc",
+          "runPath": "results/loadgen/2026-09-01/03-21-12Z_rps-1_7618f7bc/run.json",
+          "offeredRps": 1,
+          "measuredRequests": 20,
+          "successfulThroughputRps": 1,
+          "p50LatencyMs": 492.1822350000002,
+          "p95LatencyMs": 767.322626000001,
+          "p99LatencyMs": 919.5217489999995,
+          "successfulRequests": 20,
+          "failedRequests": 0,
+          "sha256": "a11b337b18f72bce3a1ff30ad82322c36d2558a94d97c29ac4ce320cf0979447",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "03-21-43Z_rps-1.5_b9dbdc93",
+          "runPath": "results/loadgen/2026-09-01/03-21-43Z_rps-1.5_b9dbdc93/run.json",
+          "offeredRps": 1.5,
+          "measuredRequests": 35,
+          "successfulThroughputRps": 1.5,
+          "p50LatencyMs": 474.62413500000184,
+          "p95LatencyMs": 2333.053675000001,
+          "p99LatencyMs": 2489.2095530000006,
+          "successfulRequests": 35,
+          "failedRequests": 0,
+          "sha256": "9d11692906f03af805422b51e67b6525b68d3899715395f0296a3b0db00a68e5",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "03-20-40Z_rps-2_37c21e40",
+          "runPath": "results/loadgen/2026-09-01/03-20-40Z_rps-2_37c21e40/run.json",
+          "offeredRps": 2,
+          "measuredRequests": 50,
+          "successfulThroughputRps": 2,
+          "p50LatencyMs": 1373.5095800000017,
+          "p95LatencyMs": 5376.414236999999,
+          "p99LatencyMs": 8009.136283999998,
+          "successfulRequests": 50,
+          "failedRequests": 0,
+          "sha256": "a2bdbe8a5d0fd0af8c691589acf70b7112457f7e689aab0c815f75cab098753a",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        },
+        {
+          "runId": "03-19-29Z_rps-3_4742a956",
+          "runPath": "results/loadgen/2026-09-01/03-19-29Z_rps-3_4742a956/run.json",
+          "offeredRps": 3,
+          "measuredRequests": 80,
+          "successfulThroughputRps": 2.2493779074487503,
+          "p50LatencyMs": 7629.882889,
+          "p95LatencyMs": 10951.375145000002,
+          "p99LatencyMs": 13418.157296999998,
+          "successfulRequests": 80,
+          "failedRequests": 0,
+          "sha256": "fa10ec0cf6bd8030602d2d84978bb2865d37aedee75187b6698d7a6d69b9cb7c",
+          "source": {
+            "gitCommit": "ae8eaf733863d4ce2878ca3dc513e834ed66ab87",
+            "gitDirty": true
+          },
+          "hardware": {
+            "gpuModels": [
+              "NVIDIA A40"
+            ],
+            "source": "local-nvidia-smi"
+          },
+          "benchmark": {
+            "modelId": null,
+            "checkpoint": null,
+            "pruningMethod": null,
+            "pruningRatio": null,
+            "tokenRemovalMode": null,
+            "batchSize": 1,
+            "maxOutputTokens": null
+          }
+        }
+      ]
+    }
+  ]
+}

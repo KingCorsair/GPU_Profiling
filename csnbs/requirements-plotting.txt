@@ -1,0 +1,2 @@
+# CPU-only reporting environment; matches the existing project Matplotlib pin.
+matplotlib==3.11.1
