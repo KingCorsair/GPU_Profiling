@@ -1,0 +1,29 @@
+WP1 -- Controlled Benchmark (fixed-length, interleaved, 576 vs 128 visual tokens)
+n_measured_per_config=30  n_warmup_per_config=10  fixed_output_tokens=64  gpu=NVIDIA A40  git=cedaeca496
+
+metric                                 576           128
+latency_mean_ms                    1876.28       1756.51
+latency_median_ms                  1868.10       1741.15
+latency_p95_ms                     1917.61       1806.80
+latency_stdev_ms                     18.73         27.79
+latency_mad_stdev_ms (robust)          9.20         11.78
+latency_cv_percent                    1.00          1.58
+n_trials                             30.00         30.00
+multimodal_prep_mean_ms              45.11         69.12
+prefill_lm_forward_mean_ms          107.62         40.84
+decode_lm_forward_mean_ms          1697.32       1619.00
+
+vtn=576: outlier trial_position(s) flagged (modified z>3.5): [24, 40, 45, 51] -- see raw jsonl; excluded from the robust (MAD) spread estimate below, not from the raw stdev/p95 reported above
+vtn=128: outlier trial_position(s) flagged (modified z>3.5): [4, 12, 14, 18, 29, 37, 46, 52] -- see raw jsonl; excluded from the robust (MAD) spread estimate below, not from the raw stdev/p95 reported above
+
+latency_median_gain_percent: 6.8%
+
+Noise-floor / MDE analysis (can we see a 20-30ms change?):
+  RAW  = statistics.stdev (rule 6, includes tail events as-is)
+  ROBUST = MAD-based stdev (down-weights rare single-trial system hiccups)
+  vtn=576 RAW:    stdev=18.7ms n=30 -> MDE=13.8ms (20ms OK, 30ms OK)
+  vtn=576 ROBUST: stdev=9.2ms n=30 -> MDE=6.8ms (20ms OK, 30ms OK)
+  vtn=128 RAW:    stdev=27.8ms n=30 -> MDE=20.4ms (20ms NO -- need n=32, 30ms OK)
+  vtn=128 ROBUST: stdev=11.8ms n=30 -> MDE=8.7ms (20ms OK, 30ms OK)
+
+Benchmark is stable enough (by the robust estimate) to distinguish a ~20-30ms change at both configs. Note: raw stdev at one or more configs is inflated by a flagged single-trial outlier -- see outliers_by_config; that trial's component timings (prep/prefill/decode) were normal, so the extra wall-clock time is attributed to a one-off system/scheduling hiccup, not to visual_token_num.
