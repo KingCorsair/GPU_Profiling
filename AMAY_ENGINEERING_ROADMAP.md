@@ -21,6 +21,398 @@ Every phase below that touches the 576-vs-128 comparison inherits this same disc
 
 ---
 
+## Recommended Execution Priority and Month-One Scope
+
+*Added 2026-09-07. This section sits ABOVE the phase specifications in §7 and does not
+replace them. §7 says what each phase is; this section says which ones to execute, in what
+order, and why the order changed. Where this section and §5/§11 disagree on priority, this
+section is current.*
+
+### Month-One Roadmap at a Glance
+
+| Order | Work package | In simple English | Why we are doing it | Expected time |
+|---|---|---|---|---|
+| **WP1** | Controlled benchmark | Build a stopwatch that actually works. Force every request to produce the same number of output words so timings stop jumping around. | Right now the measurement noise (±179 ms) is six times bigger than the biggest win available (~30 ms). Until this exists, we cannot tell if anything we do helped. | **0.5 day** |
+| **WP2** | FP16 vision tower | Flip the image encoder from 32-bit to 16-bit maths. It is one line — the code meant to do this is behind an `if` that never runs. | The image encoder is doing 75% of its work in the slow number format on a GPU built for the fast one. It is the cheapest real speed-up in the whole roadmap. | **2.5 days** |
+| **WP3** | Server diagnostic | Watch the server under load and find out where the time actually goes on a single request. | The GPU sits ~34% idle at maximum load. We think we know why, but we should prove it before writing any code to fix it. | **1.5 days** |
+| **WP4** | Request queue | Stop the server doing image decoding and inference in a single-file line. Let it prepare the next request while the GPU works on the current one. | This is the suspected reason the GPU idles. It is a small change and it is also required before batching is possible at all. | **2.5 days** |
+| **WP5** | Static batching | Let the server collect a few requests and run them through the GPU together in one go, instead of one at a time. | Running requests together is the only way to actually fill the idle GPU. This is the biggest and riskiest piece of the month. | **7–9 days** |
+| **WP6** | Final load benchmark | Run the full before/after test properly — all three server versions, both token settings, both short and natural-length answers, all shuffled together. | This is the result. It is also the run that makes the earlier load numbers trustworthy, because the originals were run in separate blocks. | **4 days** |
+| **WP7** | Writeup | Write down what we measured, what we calculated, and what we only guessed — kept clearly apart. | An unexplained number is not a result. This is what makes the month defensible. | **1.5 days** |
+| | | | **Total** | **19.5–21.5 working days** |
+
+### The month in one sentence
+
+**Build a reliable benchmark → take the clearest measured latency win → diagnose why the
+server wastes GPU capacity → fix the serving structure → add batching → prove the result
+under load → write it up.**
+
+### Day-12 decision rule
+
+**If WP5 has not begun by Day 12, cut batching from the month-one commitment and finish the
+project around the FP16 + server-structure result instead.** That is already a complete,
+reportable outcome: *the serving layer was not structured to use the GPU time the pruned
+configuration leaves idle, and here is how much of it structure alone recovers.*
+
+---
+
+### Governing objective
+
+This project measures two different things and they must never be conflated:
+
+1. **Isolated inference performance** — how fast one request completes with no contention.
+2. **Under-load serving performance** — sustained throughput and tail latency as arrival
+   rate rises.
+
+On a server with no batching these collapse into one measurement, because throughput is
+just `1 / service_time`. The evidence below shows they have already come apart, and that
+the gap between them — not per-request compute — is where the project's remaining headroom
+sits.
+
+### Evidence that changed the priority order
+
+**MEASURED** — `results/timing/ab_load_gain_table.json`, GPU utilisation sampled during
+each load level:
+
+| Offered RPS | achieved 576 | achieved 128 | GPU util 576 | GPU util 128 | p95 gain |
+|---|---|---|---|---|---|
+| 0.5 | 0.500 | 0.500 | 33.8% | 33.3% | +19.6% |
+| 1.0 | 1.000 | 1.000 | 48.4% | 39.5% | +6.1% |
+| 1.5 | 1.500 | 1.500 | 55.1% | 48.7% | −0.05% |
+| 2.0 | 2.000 | 2.000 | 79.0% | 70.1% | +8.5% |
+| 3.0 | 2.166 | 2.249 | 87.1% | **65.8%** | −0.34% |
+
+**Provisional-evidence caveat, applies to this whole table.** Per report §9.2, the two load
+sweeps behind these numbers were **not temporally interleaved** — they were run as separate
+blocks, so thermal drift and machine state are confounded with the configuration variable.
+Everything derived from this table is therefore **PROVISIONAL** until WP6's interleaved
+rerun reproduces it. State it descriptively, not causally:
+
+> "the existing measurements show a 21.3 percentage-point utilisation difference between
+> the two configurations at saturation"
+
+**not** "pruning freed 21 points of utilisation." The causal claim requires the controlled
+rerun. Any writing that skips this distinction is making a claim the data does not yet
+support.
+
+With that caveat held, four observations follow:
+
+1. **At saturation the 128 configuration shows ~34% idle GPU** while p50 latency is 7.6 s,
+   and the two configurations differ by 21.3 points of utilisation (87.1 vs 65.8) while
+   differing by only 3.8% in achieved throughput.
+2. **The pruned configuration's latency advantage is absent at the tail under load.** p95
+   gain is −0.05% at rps 1.5 and −0.34% at rps 3.0, against +24.3% p50 at rps 0.5.
+3. **GPU memory is flat at ~15.3 GB of 46 GB (33%)** at every load level and both configs.
+   No memory constraint on concurrency; paged KV remains unjustified (§5).
+4. **Single-request headroom is small.** `ab_noload_comparison.json` (n=10, warmup=10):
+   mean latency 887.6 ms @576 = prep 49.7 + prefill 111.5 + **decode 711.8**. Decode is
+   **80.2%** of request latency and nothing affordable in this roadmap touches it. The
+   entire prep path — everything VisPruner affects — is 5.6%.
+
+**Two corrections to earlier assumptions in this document, both code-verified:**
+
+- **Phase 3a is worth 1.85 ms.** `ab_trace_vtn576_isolated_stage_breakdown.txt`:
+  `kv_cache_legacy_rebuild` = 416 calls, **1.848 ms CPU, 0.000 ms CUDA** — 0.2% of request
+  latency. It is enabling work for 3b/Phase 4, not a latency optimization, and §11 should
+  not list it as Core on latency grounds.
+- **The R4 padding-waste premise does not hold for VisPruner.** `llava_arch.py:148-151`:
+  `visual_token_num` is a global scalar and `index_masks.scatter_` sets exactly `T` True per
+  row, so **every image in a batch retains an identical visual-token count**. Padding waste
+  comes only from text and output-length variance, not from pruning. R4 as framed in
+  `CLAUDE.md` describes per-image adaptive methods, not this one. Re-derive before
+  scheduling it.
+
+**MEASURED (code)** — two defects found while tracing the above, both cheap and both
+load-bearing:
+
+- `clip_encoder.py:29` calls `CLIPVisionModel.from_pretrained` with **no `torch_dtype`**
+  (defaults FP32), and the compensating `vision_tower.to(dtype=torch.float16)` at
+  `builder.py:155-156` sits behind `if device_map != 'auto'` — while `'auto'` is the
+  default at `builder.py:26`. The cast never runs. Confirmed in `prep_trace.json`:
+  **FP32 `ampere_sgemm_*` = 265.95 ms = 75.4% of prep-path kernel time**, against 6.18 ms
+  (1.8%) in the FP16 GEMM family, which is `mm_projector` alone.
+- `csnbs/server.py:91` — `async def _infer_model(...)` contains a blocking synchronous
+  `model.generate()` and **no `await`**. FastAPI does not offload `async def` handlers to a
+  threadpool, so all per-request CPU work (base64 decode `:176`, PIL decode `:106`,
+  `process_images` `:132`) serialises behind GPU work instead of overlapping with it.
+
+**Deployment topology — verified, and it supports the server-wide claim.**
+`scripts/start_model_server.sh:11` runs `exec python -m uvicorn csnbs.server:app --host …
+--port …` with **no `--workers` flag**, so uvicorn defaults to a single process with a
+single asyncio event loop. `csnbs/server.py:193` (`uvicorn.run(app, …)`) is the same. No
+gunicorn or other process manager exists in the repository; the Dockerfile `CMD` only
+stages SSH keys and keeps the container alive. `scripts/run_ab_load_sweep.py:177` starts
+the server via that same script, so the sweeps producing the table above ran on this
+topology, and it is recorded per-run in the `server_concurrency_model` metadata field.
+**One event loop, therefore one request's GPU work at a time, regardless of arrival
+concurrency.** If the deployment ever changes to `--workers N`, this analysis must be
+redone — N processes means N event loops and N independent model copies.
+
+**Why not just run `--workers 3` instead of building batching?** It would give 3-way
+overlap with no model changes, and should be named rather than ignored. Two reasons it is
+not the answer here: (a) each worker is a separate process loading its own ~14 GB of
+weights, so 3 workers is ~42 GB of 46 GB with almost nothing left for KV cache and
+activations; (b) separate processes time-slice the same SMs rather than aggregating work —
+it improves overlap but not compute efficiency, whereas batching combines requests into
+single larger kernel launches. Worth measuring as a cheap control if time permits; not a
+substitute for WP5.
+
+**Conclusion:** the largest measured headroom is in serving structure, not in per-request
+compute. Serving work moves ahead of Triton, KV-cache, and CUDA-Graph work.
+
+### Priority order
+
+| # | Work package | Problem attacked | MEASURED evidence | Days | Depends on | Single-request relevance | Throughput relevance | Why before the next |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **Controlled fixed-length dev benchmark** (`min_new_tokens == max_new_tokens`, 10 warmup discarded, 30 interleaved trials, CUDA events, p50/p95, no p99) | Nothing in this roadmap is currently measurable | stdev 565.1 ms on 887.6 ms mean, n=10 ⇒ SEM ±179 ms (20%); largest available win ≈30 ms | 0.5 | — | prerequisite | prerequisite | Rule 8. Every later A/B is uninterpretable without it |
+| 2 | **FP16 vision tower** — add `torch_dtype=torch.float16` at `clip_encoder.py:29` | ViT runs FP32 on tensor-core hardware | 75.4% of prep kernel time in `ampere_sgemm_*`; ViT = 43.888 of 48.270 ms prep CUDA | 2.5 | 1 | **2.3–3.4% E2E** (DERIVED) | small (shorter service time) | Re-baselines every phase-A number, so it must land before any other benchmark |
+| 3 | **Service-time diagnostic** — loop heartbeat + per-request server-side timestamps at rps 2.0 | Why is the ceiling ~2.2 rps with the GPU ~34% idle? | 65.8% util at saturation; 15.2% p50 gain → 3.8% throughput gain | 1.5 | — | none | **decides 4 and 5** | Proves or kills the event-loop hypothesis before any serving code is written |
+| 4 | **Request queue (state S1)** — threadpool prep → queue → single inference worker, **B=1** | CPU work cannot overlap GPU work | pending WP3 | 2.5 | 3 | none (may add queueing delay) | **large** | Isolates structural loss from batching gain; is also the precondition for 5 |
+| 5 | **Static batching MVP (state S2)** — micro-batch collector + batched `generate()` | Idle GPU at saturation | 21.3-point util difference; 33% memory used | 7–9 | 4 | negative for batched cohort | **large** | Only mechanism that aggregates GPU work into single launches |
+| 6 | **Final interleaved load sweep** — {S0,S1,S2} × {576,128} × {fixed-length, natural-EOS}, randomised trial order, p95 with ≥100 samples, p99 omitted | Report weaknesses §9.2, §9.5, §9.8 | — | 4.0 | 2,4,5 | reports both | reports both | The deliverable, and the run that lifts the PROVISIONAL caveat above |
+| 7 | **Writeup** — MEASURED / DERIVED / HYPOTHETICAL discipline | — | — | 1.5 | 6 | — | — | — |
+
+#### WP1 vs WP6: two different benchmarks, deliberately
+
+**WP1 is the *controlled* benchmark.** `min_new_tokens == max_new_tokens` fixes decode
+length, which removes the dominant variance term (decode is 28.2 ms/token, so a ±5-token
+swing is ±141 ms) and makes a 20–30 ms component effect resolvable. It is the correct
+instrument for the FP16 A/B and for iterating during development. **It is not a
+representative serving workload and must never be described as one.**
+
+**WP6 runs both output policies, explicitly labelled.** This matters specifically because
+of static batching: **a static batch runs until its longest sequence finishes.** Under a
+fixed 64-token workload every sequence in a batch ends together, which hides that
+behaviour entirely — the fixed-length sweep would systematically flatter WP5. Under
+natural EOS, a batch of 8 where one request generates 64 tokens and seven generate 10 makes
+those seven wait for the straggler. That interaction is the single most important
+tail-latency property of static batching and the main argument for continuous batching, so
+it must be measured, not assumed.
+
+Cost is small: at ~100 s per level for ≥100 p95 samples, 5 levels × 6 server/config cells ≈
+1 hour of GPU per output policy, plus model reloads. The second policy is **~1 extra hour**
+and is therefore committed month-one work, not a follow-up.
+
+#### WP5 scope, explicitly reduced
+
+**Included:** single image per request, fixed `BATCH_SIZE`, fixed max-wait window, greedy
+decoding, fixed `max_new_tokens=64`, left padding.
+**Excluded:** bucketing, length sorting, packed/varlen layout, continuous batching,
+multi-image requests, per-request generation parameters, preemption, priority scheduling,
+paged KV.
+
+The 7–9 day estimate is below §11's 9–14 for one code-verified reason: **the batched
+multimodal padding path already exists.** `llava_arch.py:350-379` builds the padded batch,
+`attention_mask`, and `position_ids` for arbitrary B, with a configurable padding side, and
+`encode_images()` is written with `B` throughout. §11's estimate predates that observation.
+The remaining work is the collector, output splitting, and validation:
+
+| Task | Days |
+|---|---|
+| B>1 shape-safety smoke (B ∈ 2,4,8 through the pruning path) | 1–2 |
+| Left-padding fix | 1 |
+| Micro-batch collector + futures/result routing | 1.5 |
+| Per-request output extraction (strip pad + prompt, per-sequence EOS) | 1 |
+| B=1 vs B>1 output-equivalence validation | 1.5 |
+| Integration + load-test debugging | 1.5–2 |
+
+**Two known landmines, both budgeted above:**
+
+- `llava_arch.py:360` reads `getattr(self.config, 'tokenizer_padding_side', 'right')`, which
+  is only ever set in `train.py:923` — never at inference. It therefore defaults to **right
+  padding**, which is wrong for batched decoder-only generation and fails silently on every
+  sequence shorter than the longest. Set `tokenizer_padding_side = "left"` at load.
+- **B>1 has never been executed through this pruning path in this repository** — every eval
+  script uses `batch_size=1`. See the Phase 0 note below.
+
+### Relationship to Phase 0
+
+Phase 0's `indexSelectSmallIndex: Assertion 'srcIndex < srcSelectDimSize' failed`
+(2,752 lines in `results/timing/concurrent_profile_run_log.txt`) has **no identified root
+cause**. Device-side asserts are asynchronous, so the reported location is unreliable
+without `CUDA_LAUNCH_BLOCKING=1` — which is why Phase 0's own step 1 is to reproduce under
+that flag. **It is not established whether the fault is thread-specific or a latent
+shape/indexing bug.**
+
+Consequently:
+
+- **WP4 (queue) does not require Phase 0.** One thread, B=1, tensor shapes identical to
+  today. The multi-threading hypothesis cannot apply.
+- **WP5 (batching) requires a narrow slice of it.** If the fault is a shape bug, B>1 is
+  precisely the untested regime that would expose it. The B>1 smoke is WP5's first task; if
+  it crashes, Phase 0 becomes month-one work and WP5 descopes to the S0-vs-S1 comparison.
+
+Separately, `llava_llama.py:176-177` assigns `self._timing_forward_events = []` and
+`self._timing_prepare_inputs_calls = []` on the **shared model instance** every
+`generate()` call. Safe with one worker; silently corrupts timing output under any
+concurrency. Remove or make thread-local before WP4.
+
+### Correctness gates for WP2 (FP16 vision tower)
+
+Phase 1a's acceptance criterion in §7 — per-category accuracy unchanged, with OCR
+specifically protected — **is retained unchanged.** The gates below are layered; the fast
+one does not replace the final one.
+
+**Layer 1 — local development gate (minutes, run on every iteration, no dependency):**
+
+| Check | Bar |
+|---|---|
+| Exact-text comparison, greedy, 90 dev images, both configs | Report % identical. Not expected to be 100% |
+| Token-selection equivalence — dump `selected_indices` from `encode_images()`, FP32 vs FP16, 20 fixed images | Report exact-match rate |
+| Cosine similarity of pre-projector `image_features` | > 0.999 |
+| Softmax dtype in the new trace | FP32 accumulate preserved; if it becomes `<half,half,half>`, stop |
+| Determinism — run twice, same seed | Byte-identical |
+
+**Layer 2 — local acceptance gate for OCR (~15 min GPU, no dependency):** official TextVQA
+VQA-accuracy on a fixed 1,000-question subsample of
+`eval/textvqa/llava_textvqa_val_v051_ocr.jsonl`, scored with the already-vendored
+`llava/eval/m4c_evaluator.py`, FP32 vs FP16 at 576. Run the full 5,000 if the subsample
+moves. **This is running an official vendored scorer, not designing scoring logic, so it is
+not in Sribhav's protected area under `CLAUDE.md`.** It gives the OCR protection Phase 1a
+asks for with real statistical power — the locked heterogeneous set has 15 OCR rows
+(SE ≈ 12 pp) and cannot detect a small regression.
+
+**Layer 3 — final locked accuracy gate (Sribhav, asynchronous):** per-category accuracy on
+the locked eval set, OCR broken out, before vs after. **This remains the formal Phase 1a
+acceptance criterion.** It is requested when the change lands and is not a blocker for
+landing it, because Layer 2 already provides a high-power OCR gate that Amay controls.
+Note when reporting it that per-category n = 15 gives low power; Layer 2 is the stronger
+evidence and Layer 3 is confirmation.
+
+**Rollback:** any OCR regression outside noise in Layer 2 or Layer 3 reverts the dtype
+change. Speed is not worth silent quality loss on the categories this project uses to argue
+pruning is safe.
+
+### Ownership boundary with Rithvik
+
+`CLAUDE.md` assigns "serving path" to Amay; `csnbs/` and the FastAPI server are Rithvik's.
+**This must be agreed explicitly before WP4 begins — it is not a default.**
+
+Proposed split:
+
+- **Amay writes** `vis_pruner_copy/llava/serve/batch_engine.py`, exposing
+  `submit(image_tensor, input_ids) -> Future`. It owns the queue, worker thread, micro-batch
+  collection, batched `generate()`, and output splitting. **Zero lines inside `csnbs/`.**
+- **Rithvik owns** `server.py`: HTTP layer, threadpool prep call, importing `batch_engine`,
+  and `BATCH_SIZE` / `MAX_WAIT_MS` / `VISUAL_TOKEN_NUM` env config.
+- **Rithvik owns all reportable numbers.** The S0/S1/S2 sweep runs on his harness, per
+  `CLAUDE.md`.
+- Integration is one function signature, agreed on day 1.
+
+If Rithvik prefers to own the queue as well, Amay's WP4+WP5 shrinks to ~4–5 days and the
+month gains slack.
+
+### Month-one commitment (20–22 working days)
+
+```
+WP1  controlled fixed-length dev benchmark   0.5
+WP2  FP16 vision tower (incl. TextVQA gate)  2.5
+WP3  service-time diagnostic                 1.5
+WP4  request queue (S1)                      2.5
+WP5  static batching MVP (S2)                7.0 – 9.0
+WP6  final interleaved sweep, both policies  4.0
+WP7  writeup                                 1.5
+                                            ----
+                                            19.5 – 21.5 days
+```
+
+**Day-12 decision gate.** If WP5 has not begun by day 12, it is cut. The S0-vs-S1
+comparison plus WP2 is already a complete, reportable project: *the serving layer was not
+structured to use the GPU time the pruned configuration leaves idle, and here is how much
+of it structure alone recovers.*
+
+### Stretch (only if committed scope lands by day 16)
+
+- Phase 0 proper — `CUDA_LAUNCH_BLOCKING=1` reproduction and root cause, as a documented
+  finding.
+- Batch-size sweep (B ∈ 2,4,8,16) to locate the throughput knee and the B at which p95
+  degrades unacceptably under natural EOS.
+- `--workers 3` control run, as the cheap alternative-hypothesis check described above.
+
+### Deferred
+
+| Deferred | Reason |
+|---|---|
+| Phase 2a (Triton diversity loop) | 5–9 days; worth 2.4% E2E and only on the 128 path. Month two, where it stays valuable because it is genuinely pruning-specific |
+| Phase 3a | Worth 1.85 ms. Enabling work only |
+| Phase 3b + Phase 4 (CUDA Graphs) | 12–19 days combined. Largest single-request prize (8–16%, DERIVED) but unfundable in a month |
+| Phase 1b | <1% E2E; its investigation half may honestly conclude "not worth pursuing" |
+| Phase 2b | Withdrawn to Optional in §5 — region is 0.2% of prep GPU busy |
+| Paged KV | 33% of GPU memory used at every load level. No supporting evidence |
+| Packed/varlen batching (R4) | Premise does not hold for this pruner — see corrections above |
+| vLLM port | Out of scope until the toy versions exist to compare against |
+
+### Re-ranking rule
+
+The order above is contingent on evidence and must change if the evidence does:
+
+- **If WP3 shows overlappable CPU work is <5% of service time**, the event-loop hypothesis
+  is dead. WP4 loses priority immediately, and the cause of the idle GPU must be found
+  before any serving code is written. Next suspects: per-request H2D transfer, image
+  preprocessing on the load-generator side, HTTP/base64 overhead.
+- **If the B>1 smoke crashes**, WP5 is blocked on Phase 0. Descope to S0-vs-S1 and promote
+  Phase 0.
+- **If S1 alone reaches ≥90% GPU utilisation at saturation**, batching's remaining headroom
+  is small; prefer the batch-size sweep for tail-latency characterisation over pushing B
+  higher.
+- **If WP2's vision-tower CUDA time drops <20%**, the ViT was not compute-bound as the trace
+  suggests; stop and re-profile before trusting any other trace-derived conclusion.
+- **If WP6's interleaved rerun does not reproduce the utilisation difference**, the entire
+  premise of this ordering is void — the original table was confounded by run order, and the
+  priority list must be rebuilt from the corrected numbers.
+
+**No throughput target is stated anywhere in this section, deliberately.** The utilisation
+headroom establishes that room exists; it does **not** imply proportional throughput
+scaling. Batch efficiency, right-padding waste, memory-bandwidth saturation at larger B,
+collation cost, and scheduling delay can all break that relationship. Any figure obtained
+by scaling throughput by a utilisation ratio is **HYPOTHETICAL** and must never appear as
+an expectation.
+
+### Month-end technical outcome
+
+**Artifacts:**
+
+1. Before/after ViT trace pair; FP32-sgemm share measured against the 75.4% baseline
+2. Exact-text comparison and TextVQA VQA-accuracy, FP32 vs FP16
+3. Loop-heartbeat trace and per-request server-side timestamp decomposition under load
+4. GPU-utilisation-vs-offered-rate curves for S0, S1, S2
+5. **The matrix: throughput and p50/p95 at {S0,S1,S2} × {576,128} × {fixed-length,
+   natural-EOS}**, interleaved — the run that lifts the PROVISIONAL caveat
+6. B=1 vs B>1 output-equivalence report
+7. All scripts in `scripts/`, git commit and GPU model recorded per run
+
+**Skills:** LLM inference and serving engineering — Amdahl and roofline reasoning tied to
+real traces, dtype/tensor-core behaviour, kernel-level profiler analysis, GPU utilisation
+under load, batching and queueing, open-loop load generation, tail-latency analysis.
+
+**Explicitly not gained this month:** GPU kernel authoring (Triton), CUDA-graph capture,
+KV-cache lifecycle internals. This is an **LLM inference/serving engineering** project, not
+a **GPU kernel engineering** project. Phase 2a in month two is the correction if kernel
+work is required.
+
+### Interview narrative
+
+Attribution must stay clean. Four separate claims:
+
+1. **Pruning reduces compute.** MEASURED: prefill 111.5 → 44.4 ms (−60.2%). The
+   utilisation difference at saturation is PROVISIONAL until WP6's interleaved rerun.
+2. **Pruning also costs something.** MEASURED: `multimodal_prep` 49.7 → 68.4 ms (+37.8%) —
+   the diversity-selection loop runs ~56 iterations at 128 and zero at 576. Pruning makes
+   the prep path slower. Report this alongside the gain, not beneath it.
+3. **FP16 is a generic inference optimization.** It helps 576 and 128 by a similar absolute
+   amount and must never appear inside a "VisPruner advantage" delta.
+4. **Queueing and batching are serving optimizations.** A throughput gain from batching is
+   **not** evidence that VisPruner improved. The honest framing: *the pruned configuration
+   leaves GPU time unused; batching is the mechanism that converts unused GPU time into
+   capacity.* Neither is sufficient alone — which the S0/S1/S2 × 576/128 matrix demonstrates
+   directly, because it contains the cells where each is present without the other.
+
+The story is a chain, not a list: **measured bottleneck → targeted intervention →
+controlled A/B → real latency or throughput result.** If any link fails to reproduce, the
+correct action is to report the failure, not to reorder the narrative around it.
+
+---
+
 ## 1. How This Roadmap Differs From Earlier Plans
 
 `AMAY_SPEED_PLAN.md` was written *before* the systematic profiling phase existed (per its own "Status (2026-08-29)" section, it reflects one profiling pass — `scripts/profile_multimodal_prep.py`, Experiment 1 in the profiling report). It is the right document to compare against, not to edit.
