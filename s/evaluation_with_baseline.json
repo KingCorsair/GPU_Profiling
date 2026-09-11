@@ -1,0 +1,47 @@
+{
+  "configuration": {
+    "input": "testfile.jsonl",
+    "nli_strategy": "net_normalized",
+    "threshold": 0.75,
+    "random_seed": 42
+  },
+  "normal_evaluation": {
+    "mean_bert_f1": 0.9064498504002889,
+    "mean_nli_score": 0.6450173404481676,
+    "mean_composite_score": 0.7135657813635994,
+    "bert_fraction_above_threshold": 1.0,
+    "nli_fraction_above_threshold": 0.4111111111111111,
+    "composite_fraction_above_threshold": 0.4111111111111111
+  },
+  "same_category_random_baseline": {
+    "eligible_examples": 90,
+    "skipped_singleton_category_examples": 0,
+    "trials": 100,
+    "summary": {
+      "mean_bert_f1": {
+        "mean_over_trials": 0.9042359210385217,
+        "std_over_trials": 0.0009478030288820857
+      },
+      "mean_nli_score": {
+        "mean_over_trials": 0.6246128737197982,
+        "std_over_trials": 0.01428723065816106
+      },
+      "mean_composite_score": {
+        "mean_over_trials": 0.6955622130320285,
+        "std_over_trials": 0.01475076888992627
+      },
+      "bert_fraction_above_threshold": {
+        "mean_over_trials": 0.9992222222222221,
+        "std_over_trials": 0.0028492488886249097
+      },
+      "nli_fraction_above_threshold": {
+        "mean_over_trials": 0.3653333333333333,
+        "std_over_trials": 0.01830039894568608
+      },
+      "composite_fraction_above_threshold": {
+        "mean_over_trials": 0.3871111111111111,
+        "std_over_trials": 0.013374422285383557
+      }
+    }
+  }
+}

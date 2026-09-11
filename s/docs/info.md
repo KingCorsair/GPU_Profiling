@@ -1,0 +1,1 @@
+Your job is an evaluator, you will be given two arrays, the first is an array of ground truths, and the second is a prediction. Based on the information, decide yes or no on whether the prediction agrees with the ground truth.
