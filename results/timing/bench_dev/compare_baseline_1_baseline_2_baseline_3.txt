@@ -1,0 +1,24 @@
+Noise floor across 3 runs: baseline_1, baseline_2, baseline_3
+
+region                   vtn  baseline_1  baseline_2  baseline_3    spread      %
+vision_tower_ms          576       33.96       33.90       33.91      0.07   0.2%
+vision_tower_ms          128       33.93       33.85       33.86      0.08   0.2%
+mm_projector_ms          576        0.33        0.33        0.33      0.00   0.4%
+mm_projector_ms          128        0.39        0.38        0.38      0.01   2.1%
+prep_other_ms            576        1.09        1.01        1.09      0.08   6.9%
+prep_other_ms            128       13.64       13.62       13.75      0.13   1.0%
+multimodal_prep_ms       576       35.34       35.26       35.31      0.08   0.2%
+multimodal_prep_ms       128       47.98       47.85       48.01      0.16   0.3%
+prep_wallclock_ms        576       35.40       35.32       35.37      0.09   0.2%
+prep_wallclock_ms        128       48.03       47.91       48.07      0.16   0.3%
+prefill_ms               576      110.17      110.29      110.30      0.13   0.1%
+prefill_ms               128       44.46       44.30       44.38      0.17   0.4%
+decode_ms                576      949.70      949.30      949.91      0.62   0.1%
+decode_ms                128      906.47      906.57      906.44      0.13   0.0%
+decode_per_token_ms      576       30.64       30.62       30.64      0.02   0.1%
+decode_per_token_ms      128       29.24       29.24       29.24      0.00   0.0%
+e2e_ms                   576     1112.70     1111.89     1115.76      3.87   0.3%
+e2e_ms                   128     1014.37     1015.42     1015.17      1.05   0.1%
+
+GATE vtn=576: vision_tower p50 spread <= 5 ms -> PASS
+GATE vtn=128: vision_tower p50 spread <= 5 ms -> PASS

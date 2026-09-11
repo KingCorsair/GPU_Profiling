@@ -1,0 +1,13 @@
+bench_dev run 'baseline_3' -- NVIDIA A40  git=469a07135b
+n_measured/config=40  warmup/config=10  output_tokens=32  images=20  regions=on  cpu_threads=4 (quota 7.65 CPUs)
+
+region                     576 p50     576 p95     128 p50     128 p95
+vision_tower_ms              33.91       34.42       33.86       34.85
+mm_projector_ms               0.33        0.33        0.38        0.40
+prep_other_ms                 1.09        1.38       13.75       21.93
+multimodal_prep_ms           35.31       36.22       48.01       57.46
+prep_wallclock_ms            35.37       36.32       48.07       57.57
+prefill_ms                  110.30      117.86       44.38       45.37
+decode_ms                   949.91      953.76      906.44      910.49
+decode_per_token_ms          30.64       30.77       29.24       29.37
+e2e_ms                     1115.76     1126.18     1015.17     1030.87

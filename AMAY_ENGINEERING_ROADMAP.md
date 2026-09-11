@@ -223,6 +223,26 @@ month gains real slack.
 
 **0.5 day. No dependencies. Nothing else in the month is measurable until this exists.**
 
+> **Status: DONE 2026-09-11.** Harness `scripts/bench_dev.py` (commit `469a071`); three
+> baseline runs and their comparison are in `results/timing/bench_dev/`
+> (`baseline_{1,2,3}.*`, `compare_baseline_1_baseline_2_baseline_3.*`). The §9 gate
+> passed: `vision_tower` p50 spread across the three runs is **0.07 ms (576) and 0.08 ms
+> (128)**, against the ~5 ms limit. Two findings from building it change numbers
+> elsewhere in this document:
+>
+> - **MEASURED — `vision_tower` is 33.9 ms, not 43.9 ms**, and identical at both configs
+>   (pruning happens after it). The 43.888 ms figure in WP2 §3 came from a profiler
+>   trace and includes profiler overhead. **DERIVED:** WP2's 20–30 ms estimate was built
+>   on ~45 ms. At the same 1.8–3× speedup it becomes **~15–23 ms**, and WP2's "drop by at
+>   least 20%" gate is ~6.8 ms. That is still ~85× the measured run-to-run spread.
+> - **MEASURED — the pod's CPU quota was throttling every request.** The container is
+>   CFS-capped at 7.65 CPUs, but torch defaults to 48 intra-op threads. That exhausted the
+>   quota once per request and froze the process for ~55–70 ms inside `multimodal_prep`:
+>   60 of 60 requests at the default, 0 of 60 at 4 threads
+>   (`results/timing/bench_dev/prep_stall_ab.txt`). The accepted
+>   `run_wp1_controlled_benchmark.py` data shows the same bimodal prep. The harness now
+>   pins 4 threads and records `nr_throttled` per trial. The server does not; see WP3 §3.
+
 ### 1. Problem
 
 We cannot currently measure whether any optimization worked.
@@ -567,6 +587,15 @@ One and a half days of measurement to de-risk ten days of implementation is the 
 - **HYPOTHETICAL** — per-request CPU work (base64 decode, PIL decode, `process_images`,
   tokenization) is serialising behind GPU work instead of overlapping with it, and that is
   what leaves the GPU idle.
+- **MEASURED in the WP1 harness, not yet checked in the server (2026-09-11)** — the pod's
+  container is CFS-capped at 7.65 CPUs and torch defaults to 48 intra-op threads. In
+  `bench_dev.py` that froze the whole process for ~55–70 ms once per request, with the GPU
+  waiting meanwhile: 60 of 60 requests, fixed by `torch.set_num_threads(4)`
+  (`results/timing/bench_dev/prep_stall_ab.txt`). Nothing in `csnbs/` or
+  `scripts/start_model_server.sh` sets a thread count, so the server very likely pays the
+  same stall, which is a direct competing explanation for the idle GPU. Read
+  `/sys/fs/cgroup/cpu/cpu.stat` `nr_throttled` before and after the rps 2.0 run, before
+  attributing idle time to the event loop.
 
 **Note on what is and is not in question.** That a blocking call inside an `async def` blocks
 the event loop is a certainty of asyncio semantics, not a hypothesis. What is genuinely
