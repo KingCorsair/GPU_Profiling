@@ -13,13 +13,8 @@ whole-request baseline, left untouched):
     accepted WP1 artifacts, and a --compare mode that computes the run-to-run
     noise floor across them.
 
-Ownership: the scaffold is Claude's; the three TODO(AMAY) blocks -- the code that
-actually creates and records CUDA events -- are Amay's (CLAUDE.md, "core timing
-and profiling code"). Until they're filled in, run with --no-regions.
-
 Usage (run from anywhere; paths are absolute):
-  python scripts/bench_dev.py --run-id smoke --quick --no-regions   # scaffold only
-  python scripts/bench_dev.py --run-id smoke --quick                # after the TODOs
+  python scripts/bench_dev.py --run-id smoke --quick                # smoke test
   python scripts/bench_dev.py --run-id baseline_1                   # full run, x3
   python scripts/bench_dev.py --compare results/timing/bench_dev/baseline_{1,2,3}.json
 
@@ -63,6 +58,17 @@ N_MEASURED_TRIALS_PER_CONFIG = 40  # standing protocol since 2026-09-07 (roadmap
 TRIAL_ORDER_SEED = 20260911   # same seed every run: only system noise varies between runs
 VISION_TOWER_SPREAD_GATE_MS = 5.0  # roadmap §WP1 §9
 
+# torch's intra-op CPU thread pool. The pod's container is CFS-capped at 7.65
+# CPUs (cpu.cfs_quota_us=765000 per 100 ms period), but torch sizes the pool
+# from the host: 48 threads. One 48-thread burst per request exhausts the quota
+# and the whole container is frozen for the rest of the period -- a ~55-70 ms
+# stall that lands inside multimodal_prep. Diagnosed 2026-09-11
+# (scripts/diagnose_prep_stall.py): 60/60 requests stalled and throttled at
+# the default, 0/60 at 4 threads, and prep dropped from ~88 ms to 35.3 ms at
+# 576 with a ±0.3 ms spread. --cpu-threads 0 keeps torch's default, to
+# reproduce it.
+TORCH_CPU_THREADS = 4
+
 OUT_DIR = f"{REPO}/results/timing/bench_dev"
 
 HOOKED_REGIONS = ("vision_tower", "mm_projector", "multimodal_prep")
@@ -88,14 +94,14 @@ REPORTED_FIELDS = [
 
 
 # ---------------------------------------------------------------------------
-# Event storage shared by the three TODO(AMAY) blocks
+# Event storage shared by the region-timing hooks
 # ---------------------------------------------------------------------------
 class RegionRecorder:
     """Holds the CUDA events recorded during ONE request.
 
-    Contract the TODO(AMAY) code has to meet: for every call of a region, append
-    exactly one (start_event, end_event) pair to self.pairs[region_name]. Nothing
-    else touches those events until read_ms().
+    Contract the hooks meet: for every call of a region, append exactly one
+    (start_event, end_event) pair to self.pairs[region_name]. Nothing else
+    touches those events until read_ms().
     """
 
     def __init__(self):
@@ -121,96 +127,86 @@ class RegionRecorder:
 
 
 # ---------------------------------------------------------------------------
-# TODO(AMAY) #1 -- vision_tower CUDA-event timing via forward hooks
-#
-# What has to happen: time one call of the vision tower module -- from just
-# before its forward() starts to just after it returns -- and leave a
-# (start, end) event pair in recorder.pairs["vision_tower"].
-#
-# Available:
-#   module   -- the CLIPVisionTower wrapper (clip_encoder.py:7). Hook THIS, not
-#               module.vision_tower (the inner HF CLIPVisionModel): the wrapper's
-#               forward includes the fp16->fp32 input cast and fp32->fp16 output
-#               cast (clip_encoder.py:64-70), which WP2 removes, so they belong in
-#               the region WP2 is judged on.
-#   recorder -- RegionRecorder above. recorder.pending is yours to use.
-#   handles  -- append every handle your registration calls return, so
-#               uninstall_region_timing() can remove the hooks afterwards.
-#
-# Rules: record events only. No elapsed_time() and no torch.cuda.synchronize()
-# in here -- see RegionRecorder.read_ms() for where reading happens and why.
-# Expected: exactly 1 call per request (single-image path). run_one() checks.
+# Region timing. Every hook below only *records* CUDA events -- it enqueues a
+# GPU timestamp on the current stream and returns. No elapsed_time() and no
+# torch.cuda.synchronize() in here: a sync would drain the pipeline mid-request
+# and inflate exactly the kernels being timed (rule 4). Reading happens once,
+# in RegionRecorder.read_ms(), after generate()'s own closing sync.
 # ---------------------------------------------------------------------------
+def _hook_module_region(module, region, recorder):
+    """Bracket every forward() of `module` with one (start, end) pair in
+    recorder.pairs[region]. The pre-hook parks the start event in
+    recorder.pending under the region's own name, so two hooked modules never
+    overwrite each other's start (and nesting would still be safe)."""
+
+    def record_start(_module, _args):
+        start = torch.cuda.Event(enable_timing=True)
+        start.record()
+        recorder.pending[region] = start
+
+    def record_end(_module, _args, _output):
+        end = torch.cuda.Event(enable_timing=True)
+        end.record()
+        recorder.pairs[region].append((recorder.pending.pop(region), end))
+
+    # Hooks see positional args only; kwargs (output_attentions=True for the
+    # vision tower) still pass straight through to forward().
+    return [
+        module.register_forward_pre_hook(record_start),
+        module.register_forward_hook(record_end),
+    ]
+
+
 def install_vision_tower_hooks(model, recorder):
+    # Hooks the CLIPVisionTower wrapper (clip_encoder.py:7), not the inner HF
+    # CLIPVisionModel: the wrapper's forward includes the fp16->fp32 input cast
+    # and fp32->fp16 output cast (clip_encoder.py:64-70), which WP2 removes, so
+    # they belong in the region WP2 is judged on. 1 call per request
+    # (single-image path); run_one() checks.
     module = model.get_model().get_vision_tower()
-    handles = []
-    # --- TODO(AMAY) #1 begins ---
-    raise NotImplementedError("TODO(AMAY) #1: vision_tower forward hooks")
-    # --- TODO(AMAY) #1 ends ---
-    return handles
+    return _hook_module_region(module, "vision_tower", recorder)
 
 
-# ---------------------------------------------------------------------------
-# TODO(AMAY) #2 -- mm_projector CUDA-event timing via forward hooks
-#
-# Same shape as #1, different module, pairs go in recorder.pairs["mm_projector"].
-#
-# Available:
-#   module   -- model.get_model().mm_projector, an nn.Sequential (Linear-GELU-
-#               Linear), already fp16. Called once per request at
-#               llava_arch.py:185, AFTER the pruning selection -- note it still
-#               runs on all 576 tokens at both configs (it projects before the
-#               gather happens), so don't expect it to differ between 576 and 128.
-#   recorder, handles -- as in #1.
-#
-# Watch for: if #1 and #2 both use recorder.pending, they need separate keys.
-# Expected: exactly 1 call per request. run_one() checks.
-# ---------------------------------------------------------------------------
 def install_mm_projector_hooks(model, recorder):
+    # nn.Sequential (Linear-GELU-Linear), already fp16, called once per request
+    # at llava_arch.py:185. It runs AFTER the pruning selection but BEFORE the
+    # gather, so it projects all 576 tokens at both configs -- don't expect it
+    # to differ between 576 and 128. run_one() checks the call count.
     module = model.get_model().mm_projector
-    handles = []
-    # --- TODO(AMAY) #2 begins ---
-    raise NotImplementedError("TODO(AMAY) #2: mm_projector forward hooks")
-    # --- TODO(AMAY) #2 ends ---
-    return handles
+    return _hook_module_region(module, "mm_projector", recorder)
 
 
-# ---------------------------------------------------------------------------
-# TODO(AMAY) #3 -- multimodal_prep CUDA-event timing
-#
-# prepare_inputs_labels_for_multimodal is a method, not an nn.Module, so there
-# are no forward hooks to register. Instead the scaffold below swaps a wrapper in
-# on the model INSTANCE: generate() and forward() both call
-# self.prepare_inputs_labels_for_multimodal(...), and Python checks the instance's
-# __dict__ before the class, so they find timed_prep without any edit to
-# llava_arch.py. uninstall_region_timing() deletes the instance attribute, which
-# brings the class method back.
-#
-# What has to happen: inside timed_prep, bracket the call to `original` so that a
-# (start, end) pair lands in recorder.pairs["multimodal_prep"], and return
-# original's result unchanged (6 values on its early-return path, 7 on the full
-# path -- pass it through, don't unpack it).
-#
-# Careful -- this fires more than once per request:
-#   - once from generate() with the full prompt. This is the real work: vision
-#     tower + VisPruner selection + projector + splice/pad. Its region contains
-#     the #1 and #2 regions, and that nesting is fine.
-#   - once more per decode step, from forward(), where input_ids.shape[1] == 1 and
-#     it returns immediately (llava_arch.py:194-195).
-# You can either record every call or only the real one -- the summary uses the
-# FIRST pair of each request and checks that there's at least one.
-#
-# Available: original (the bound method, captured before the swap, so calling it
-# can't recurse into timed_prep), recorder, and *args/**kwargs exactly as the
-# caller passed them.
-# ---------------------------------------------------------------------------
 def install_prep_wrapper(model, recorder):
+    """prepare_inputs_labels_for_multimodal is a method, not an nn.Module, so
+    there are no forward hooks to register. Instead a wrapper is swapped in on
+    the model INSTANCE: generate() and forward() both call
+    self.prepare_inputs_labels_for_multimodal(...), and Python checks the
+    instance's __dict__ before the class, so they find timed_prep without any
+    edit to llava_arch.py. uninstall_region_timing() deletes the instance
+    attribute, which brings the class method back.
+
+    Every call is recorded. Per request that's 1 + (decode steps) pairs:
+      - first, from generate() with the full prompt -- the real work (vision
+        tower + VisPruner selection + projector + splice/pad). It contains the
+        vision_tower and mm_projector regions; nesting is fine.
+      - then one per decode step from forward(), where input_ids.shape[1] == 1
+        and it returns immediately (llava_arch.py:194-195). ~Zero-length, but
+        the count is a free sanity check (multimodal_prep_calls per trial).
+    derive_region_fields() uses the first pair.
+    """
+    # Bound method captured before the swap, so calling it can't recurse.
     original = model.prepare_inputs_labels_for_multimodal
 
     def timed_prep(*args, **kwargs):
-        # --- TODO(AMAY) #3 begins ---
-        raise NotImplementedError("TODO(AMAY) #3: multimodal_prep timing")
-        # --- TODO(AMAY) #3 ends ---
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        start.record()
+        # 6 values on the early-return path, 7 on the full path -- pass it
+        # through untouched.
+        result = original(*args, **kwargs)
+        end.record()
+        recorder.pairs["multimodal_prep"].append((start, end))
+        return result
 
     model.prepare_inputs_labels_for_multimodal = timed_prep
 
@@ -224,16 +220,25 @@ def uninstall_region_timing(model, handles):
 # ---------------------------------------------------------------------------
 # Scaffold: environment checks, request loop, summaries, output
 # ---------------------------------------------------------------------------
-def git_dirty():
-    """True if tracked files differ from HEAD -- the recorded commit then doesn't
-    describe the code that ran. Untracked files (earlier results) don't count."""
+def git_dirty_files():
+    """Tracked files that differ from HEAD. Untracked files (earlier results)
+    don't count."""
     try:
         out = subprocess.check_output(
             ["git", "status", "--porcelain", "--untracked-files=no"], cwd=REPO
-        ).decode().strip()
-        return bool(out)
+        ).decode()
+        return [line[3:] for line in out.splitlines() if line.strip()]
     except Exception:
         return None
+
+
+def git_dirty(dirty_files):
+    """True if code differs from HEAD -- the recorded commit then doesn't
+    describe the code that ran. Docs-only (*.md) edits can't change what ran,
+    so they're recorded in git_dirty_files but don't make the run dirty."""
+    if dirty_files is None:
+        return None
+    return any(not path.endswith(".md") for path in dirty_files)
 
 
 def other_gpu_processes():
@@ -247,6 +252,39 @@ def other_gpu_processes():
         return [line for line in out.splitlines() if line.strip()]
     except Exception:
         return None
+
+
+def cgroup_cpu_quota():
+    """CPUs per CFS period this container may use, or None if uncapped/unknown.
+    Handles cgroup v1 (this pod) and v2."""
+    try:
+        with open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us") as f:
+            quota = int(f.read())
+        with open("/sys/fs/cgroup/cpu/cpu.cfs_period_us") as f:
+            period = int(f.read())
+    except OSError:
+        try:
+            with open("/sys/fs/cgroup/cpu.max") as f:
+                quota_str, period_str = f.read().split()
+        except (OSError, ValueError):
+            return None
+        if quota_str == "max":
+            return None
+        quota, period = int(quota_str), int(period_str)
+    return quota / period if quota > 0 else None
+
+
+def cgroup_throttle_count():
+    """Cumulative CFS throttle events for this container, or None if unreadable.
+    A trial that increments it lost part of its timed window to a frozen
+    container, not to anything the model did."""
+    for path in ("/sys/fs/cgroup/cpu/cpu.stat", "/sys/fs/cgroup/cpu.stat"):
+        try:
+            with open(path) as f:
+                return int(dict(line.split() for line in f)["nr_throttled"])
+        except (OSError, KeyError, ValueError):
+            continue
+    return None
 
 
 def load_items():
@@ -376,7 +414,8 @@ def format_table(report):
         f"n_measured/config={meta['n_measured_trials_per_config']}  "
         f"warmup/config={meta['n_warmup_per_config']}  "
         f"output_tokens={meta['fixed_output_tokens']}  images={meta['n_images']}  "
-        f"regions={'on' if meta['regions_enabled'] else 'OFF'}",
+        f"regions={'on' if meta['regions_enabled'] else 'OFF'}  "
+        f"cpu_threads={meta['torch_cpu_threads']} (quota {meta['cgroup_cpu_quota']} CPUs)",
         "",
         f"{'region':<22}" + "".join(f"{f'{c} p50':>12}{f'{c} p95':>12}" for c in CONFIGS),
     ]
@@ -389,6 +428,9 @@ def format_table(report):
         lines.append(f"{field:<22}" + "".join(cells))
     if not meta["fixed_length_held"]:
         lines += ["", "WARNING: fixed output length did not hold for every trial -- see raw trials."]
+    if meta["throttled_trial_positions"]:
+        lines += ["", (f"WARNING: {len(meta['throttled_trial_positions'])} trials were "
+                       "CPU-throttled (cgroup) -- see throttled_trial_positions.")]
     return "\n".join(lines)
 
 
@@ -408,6 +450,8 @@ def run_benchmark(args):
     n_warmup = 2 if args.quick else N_WARMUP_PER_CONFIG
     n_measured = 4 if args.quick else args.trials
     regions_enabled = not args.no_regions
+    if args.cpu_threads:
+        torch.set_num_threads(args.cpu_threads)
 
     disable_torch_init()
     tokenizer, model, image_processor, _ = load_pretrained_model(
@@ -454,14 +498,18 @@ def run_benchmark(args):
             model.visual_token_num = cfg
             item = items[k % len(items)]
             gpu_util = sample_gpu_util()
+            throttles_before = cgroup_throttle_count()
             result = run_one(item, tokenizer, model, image_processor, recorder,
                              regions_enabled, f"trial {pos} vtn={cfg}")
+            throttles_after = cgroup_throttle_count()
             trials.append({
                 "trial_position": pos,
                 "visual_token_num": cfg,
                 "repeat_index": k,
                 "question_id": item["question_id"],
                 "gpu_util_pct_pre_trial": gpu_util,
+                "cgroup_throttles": (None if throttles_before is None
+                                     else throttles_after - throttles_before),
                 **result,
             })
             if pos % 10 == 0 or pos == len(specs) - 1:
@@ -480,18 +528,27 @@ def run_benchmark(args):
     if bad_length:
         print(f"WARNING: {len(bad_length)} trials didn't produce {FIXED_OUTPUT_TOKENS} "
               f"tokens (trial positions {bad_length}); output length variance is back in.")
+    throttled = [t["trial_position"] for t in trials if t["cgroup_throttles"]]
+    if throttled:
+        print(f"WARNING: the container was CPU-throttled during {len(throttled)} trials "
+              f"(positions {throttled}); those timings include a frozen-container stall.")
 
+    dirty_files = git_dirty_files()
     report = {
         "metadata": {
             "run_id": args.run_id,
             "run_timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "git_commit": git_commit(),
-            "git_dirty": git_dirty(),
+            "git_dirty": git_dirty(dirty_files),
+            "git_dirty_files": dirty_files,
             "gpu": torch.cuda.get_device_name(0),
             "torch_version": torch.__version__,
             "transformers_version": __import__("transformers").__version__,
             "model_path": MODEL_PATH,
             "vision_tower_dtype": vision_tower_dtype,
+            "torch_cpu_threads": torch.get_num_threads(),
+            "cgroup_cpu_quota": cgroup_cpu_quota(),
+            "throttled_trial_positions": throttled,
             "important_ratio": IMPORTANT_RATIO,
             "configs": CONFIGS,
             "n_images": len(items),
@@ -531,12 +588,15 @@ def compare_runs(paths):
 
     warnings = []
     for key in ("git_commit", "gpu", "fixed_output_tokens", "n_measured_trials_per_config",
-                "vision_tower_dtype"):
-        if len({str(m[key]) for m in metas}) > 1:
-            warnings.append(f"runs differ on {key}: {[m[key] for m in metas]}")
+                "vision_tower_dtype", "torch_cpu_threads"):
+        if len({str(m.get(key)) for m in metas}) > 1:
+            warnings.append(f"runs differ on {key}: {[m.get(key) for m in metas]}")
     for m in metas:
         if m["git_dirty"]:
             warnings.append(f"{m['run_id']} ran on a dirty tree")
+        if m.get("throttled_trial_positions"):
+            warnings.append(f"{m['run_id']} had {len(m['throttled_trial_positions'])} "
+                            "CPU-throttled trials")
         if m["quick_smoke_test"]:
             warnings.append(f"{m['run_id']} is a --quick smoke run")
         if not m["regions_enabled"]:
@@ -604,8 +664,11 @@ def main():
                         help=f"Measured trials per config (default {N_MEASURED_TRIALS_PER_CONFIG}).")
     parser.add_argument("--quick", action="store_true",
                         help="Smoke test: 2 warm-up + 4 measured per config.")
+    parser.add_argument("--cpu-threads", type=int, default=TORCH_CPU_THREADS,
+                        help=f"torch intra-op CPU threads (default {TORCH_CPU_THREADS}; "
+                             "0 = torch's host-sized default, which gets cgroup-throttled).")
     parser.add_argument("--no-regions", action="store_true",
-                        help="Skip the TODO(AMAY) region timing; prefill/decode/e2e only.")
+                        help="Skip the region-timing hooks; prefill/decode/e2e only.")
     parser.add_argument("--overwrite", action="store_true",
                         help="Allow replacing an existing run with the same --run-id.")
     parser.add_argument("--allow-shared-gpu", action="store_true",
