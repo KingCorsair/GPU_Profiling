@@ -6,7 +6,7 @@ qwen_python="${QWEN_PYTHON:-/opt/qwen/bin/python}"
 
 if [[ ! -x "$qwen_python" ]]; then
   echo "Qwen runtime missing: $qwen_python" >&2
-  echo "Build and deploy this repository's updated Docker image first; see csnbs/QWEN_SETUP.md." >&2
+  echo "Qwen is optional: build/deploy csnbs/Dockerfile.qwen or set QWEN_PYTHON to an existing compatible runtime. See csnbs/QWEN_SETUP.md." >&2
   exit 1
 fi
 

@@ -4,35 +4,61 @@ The checkpoint is `Qwen/Qwen3-VL-8B-Instruct`. Downloaded weights alone do not
 provide a running server. The Qwen wrapper accepts the same request as LLaVA:
 `POST /infer {"image_b64": "...", "question": "..."}` and returns `{"answer": "..."}`.
 
-## 1. Build and deploy the updated image
+## 1. Download models only when needed
 
-The Dockerfile installs Qwen's Python 3.12 environment in `/opt/qwen`, with
-PyTorch 2.8.0 (CUDA 12.6) and Transformers 4.57.6. System Python retains LLaVA's
-PyTorch 2.2.2 and Transformers 4.37.2. No installation is needed on a running pod.
-
-Publish the reviewed Dockerfile, workflow, Qwen requirements, server, launcher,
-tests, and this guide to the repository. The existing GitHub Actions workflow
-builds `kingcorsair/gpu_profiling_project:<git-commit>` on changes to the Dockerfile
-or Qwen requirements. Wait for that build to succeed before deployment.
-
-During an agreed GPU downtime window, deploy the resulting immutable image tag
-on RunPod with the existing persistent `/workspace` storage. Merely restarting
-an already-created container does not prove it uses the new image. Confirm the
-configured image and verify `/opt/qwen/bin/python` after connecting. RunPod may
-assign a new SSH endpoint. Preserve the existing SSH public-key configuration.
-
-The model weights stay under `/workspace/GPU_Profiling/checkpoints/`.
-If they are absent on the deployed volume, download them there:
+The standard Docker image does not include Qwen's extra runtime or any model
+weights. The download script is tracked in Git; checkpoint directories are ignored.
+Run these commands inside the RunPod repository:
 
 ```bash
 cd /workspace/GPU_Profiling
-export HF_HOME=/workspace/.cache/huggingface
-/opt/qwen/bin/hf download Qwen/Qwen3-VL-8B-Instruct \
-  --revision 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b \
-  --local-dir checkpoints/Qwen3-VL-8B-Instruct
+bash scripts/download_models.sh all --check
 ```
 
-Keep the repository checkout on the reviewed commit containing `csnbs/qwen_server.py`.
+`--check` queries the pinned Hugging Face revisions and compares local file sizes;
+it downloads no model files. It is not a checksum verification. Select the weights
+you actually need:
+
+```bash
+bash scripts/download_models.sh llava
+bash scripts/download_models.sh qwen
+```
+
+Or request both with `bash scripts/download_models.sh all`. The script uses the
+existing Python downloader, installs no packages, and reuses completed downloads.
+Interrupted downloads can be resumed by rerunning the same command. Full checkpoints
+occupy about 12.6 GiB for LLaVA and 16.3 GiB for Qwen. LLaVA's CLIP vision encoder
+is fetched separately on first startup if it is not already cached.
+
+The defaults are:
+
+| Model | Revision | Destination |
+|---|---|---|
+| LLaVA | `4481d270cc22fd5c4d1bb5df129622006ccd9234` | `vis_pruner_copy/checkpoints/llava-v1.5-7b` |
+| Qwen | `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b` | `checkpoints/Qwen3-VL-8B-Instruct` |
+
+Downloading Qwen's weights does not install the software needed to execute it.
+The base LLaVA environment uses Transformers 4.37.2, which cannot load Qwen3-VL.
+
+### Optional Qwen runtime
+
+`csnbs/Dockerfile.qwen` is a separate, opt-in image recipe. The normal GitHub Actions
+workflow does not build it. It adds Python 3.12, PyTorch 2.8.0 (CUDA 12.6), and
+Transformers 4.57.6 under `/opt/qwen`, preserving LLaVA's system Python packages.
+Build it only when preparing to serve Qwen, on a machine/runner with Docker:
+
+```bash
+docker build --platform linux/amd64 -f csnbs/Dockerfile.qwen \
+  -t kingcorsair/gpu_profiling_project:qwen .
+```
+
+The default base is the standard `:latest` image. For a reportable experiment, pass
+`--build-arg BASE_IMAGE=kingcorsair/gpu_profiling_project:<published-commit>` and
+record the resulting image digest. Publish the optional image and deploy it on
+RunPod with the existing persistent storage during an agreed downtime window.
+This optional build/deployment is not performed by the download script. No packages
+are installed into a running pod. If a compatible Qwen runtime already exists,
+set `QWEN_PYTHON` to its Python executable instead.
 
 ## 2. Start Qwen on the pod
 
@@ -116,7 +142,7 @@ python -m unittest csnbs.test_qwen_server
 ```
 
 These checks inject a stub backend. They do not establish CUDA compatibility,
-model accuracy, or throughput. The image includes import checks for Qwen and
+model accuracy, or throughput. The optional Qwen image includes import checks for Qwen and
 checks that LLaVA's original system package versions remain installed. Verify
 the real GPU startup and image request above after deploying the image.
 

@@ -1,4 +1,4 @@
-# Installed only in /opt/qwen inside the Docker image.
+# Installed only in /opt/qwen inside the optional csnbs/Dockerfile.qwen image.
 # Docker installs the two CUDA wheels from the official PyTorch index first.
 torch==2.8.0+cu126
 torchvision==0.23.0+cu126

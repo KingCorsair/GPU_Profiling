@@ -1,0 +1,14 @@
+# Model files stay on the pod; never send them as Docker build context.
+**/checkpoints
+**/.venv
+**/venv
+**/venvs
+**/node_modules
+**/__pycache__
+**/.cache
+.git
+results
+ScienceQA/train
+ScienceQA/val
+ScienceQA/test
+ScienceQA/data/scienceqa/images

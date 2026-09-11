@@ -30,17 +30,6 @@ RUN git clone https://github.com/Theia-4869/VisPruner.git /opt/VisPruner && \
     git -C /opt/VisPruner checkout aefa01adc7c7ce6334e880c88225e90cede760d1 && \
     uv pip install --system --no-cache -e /opt/VisPruner --no-deps
 
-# Qwen3-VL needs a newer stack. Keep it out of LLaVA's system Python.
-# Build it into the image so restarting a pod does not require installation.
-COPY csnbs/requirements-qwen.txt /tmp/requirements-qwen.txt
-RUN uv venv --python /usr/bin/python3.12 /opt/qwen && \
-    uv pip install --python /opt/qwen/bin/python --no-cache \
-        --index-url https://download.pytorch.org/whl/cu126 \
-        torch==2.8.0+cu126 torchvision==0.23.0+cu126 && \
-    uv pip install --python /opt/qwen/bin/python --no-cache -r /tmp/requirements-qwen.txt && \
-    /opt/qwen/bin/python -c "from transformers import AutoProcessor, Qwen3VLForConditionalGeneration; import torch; assert torch.version.cuda == '12.6'" && \
-    python -c "import torch, transformers; assert torch.__version__.startswith('2.2.2'); assert transformers.__version__ == '4.37.2'"
-
 # SSH setup. RunPod injects your public key as $PUBLIC_KEY at runtime.
 RUN mkdir -p /var/run/sshd /root/.ssh && \
     chmod 700 /root/.ssh && \
