@@ -266,6 +266,77 @@ wrong with it. Don't generate a finished implementation of your own initiative.
 
 If Amay explicitly asks for the finished code outright, confirm once — e.g. "this is core timing/profiling code — the stuff you're supposed to be able to explain from memory. You want me to write it for you instead of walking you through it — sure?" — and if he still says yes, write it. One confirmation, not a renegotiation each time.
 
+### Protected-code workflow for Amay
+
+The protected areas above apply only to the core logic Amay is expected to
+understand and explain from memory. They do NOT mean Amay should write an
+entire file, harness, service, or feature from scratch when most of that file
+is unrelated boilerplate.
+
+When a task contains protected core logic:
+
+1. STOP before implementing the protected portion and tell Amay exactly which
+   small part is protected and why it matters for his learning.
+
+2. Ask Amay before doing the surrounding implementation. The default choices
+   should be:
+   - Claude scaffolds and implements all non-core code, leaving small
+     `TODO(AMAY)` gaps for the protected logic; or
+   - Claude first walks Amay through the protected concept before scaffolding.
+
+3. NEVER offer "write the whole file yourself" or require Amay to recreate an
+   entire file from scratch as a learning exercise. That is not the learning
+   objective and wastes time on unrelated boilerplate.
+
+4. If Amay chooses scaffolding, Claude should freely implement all non-core
+   work, including:
+   - model and dataset loading
+   - argument parsing and configuration
+   - ordinary loops and control flow
+   - file handling
+   - metadata
+   - serialization
+   - reporting and statistics plumbing
+   - setup and environment code
+   - error handling
+   - other ordinary scaffolding
+
+5. Leave only the smallest meaningful protected sections as `TODO(AMAY)` gaps.
+   Include enough surrounding code and context that Amay only needs to
+   implement the transferable systems concept itself.
+
+6. Before Amay fills a protected gap, explain:
+   - what that gap needs to accomplish;
+   - why it exists;
+   - what inputs/state are available there;
+   - what correctness constraints matter;
+   - what common mistakes to avoid.
+
+   Do not give the finished protected implementation unless Amay explicitly
+   asks for it.
+
+7. After Amay implements the protected gap, review it closely. Explain what is
+   correct, what is wrong, and why. Help debug it without unnecessarily
+   replacing his implementation.
+
+8. Only write the protected implementation itself if Amay explicitly asks for
+   the finished code after being reminded once that this is one of the concepts
+   he is expected to understand from memory.
+
+9. The goal is for Amay to personally implement and understand the small piece
+   that contains the important GPU/LLM systems concept. The goal is NOT for him
+   to manually reproduce unrelated boilerplate.
+
+Example for GPU profiling:
+
+Claude may create the benchmark file, load the model and dataset, construct the
+trial loop, handle warmups and interleaving, calculate/report statistics, write
+JSON outputs, handle CLI arguments, metadata, and file naming.
+
+Claude should stop before writing the protected CUDA timing logic itself, such
+as CUDA-event placement, synchronization-sensitive timing logic, timing hooks,
+or other core profiling logic. Those parts should be left as small
+`TODO(AMAY)` gaps unless Amay explicitly asks Claude to implement them.
 
 ---
 
