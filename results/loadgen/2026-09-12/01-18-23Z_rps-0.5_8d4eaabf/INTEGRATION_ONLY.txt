@@ -1,0 +1,1 @@
+Integration smoke check only. 20 requests total, first 10 excluded as warmups. Not a reportable performance benchmark. Model identity, checkpoint revision and configuration verified in run.json.

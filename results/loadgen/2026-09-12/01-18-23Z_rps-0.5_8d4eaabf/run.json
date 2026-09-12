@@ -1,0 +1,106 @@
+{
+  "schema": "loadgen-run",
+  "schemaVersion": 1,
+  "runId": "01-18-23Z_rps-0.5_8d4eaabf",
+  "runKind": "open-loop",
+  "recordedAtUtc": "2026-09-12T01:19:01.449Z",
+  "timing": {
+    "clock": "performance.now",
+    "performanceTimeOriginUnixMs": 1789175900022.339,
+    "plannedStartMs": 3006.942548,
+    "plannedEndMs": 43006.942548,
+    "finishedMs": 41426.031767,
+    "plannedStartAtUtc": "2026-09-12T01:18:23.029Z",
+    "plannedEndAtUtc": "2026-09-12T01:19:03.029Z",
+    "finishedAtUtc": "2026-09-12T01:19:01.448Z"
+  },
+  "config": {
+    "endpoint": "http://127.0.0.1:8002/infer",
+    "requestsPerSecond": 0.5,
+    "durationSeconds": 40,
+    "timeoutMs": 120000,
+    "datasetPath": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json"
+  },
+  "workload": {
+    "id": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "recordCount": 90,
+    "totalImageByteLength": 5530510
+  },
+  "source": {
+    "gitCommit": "e295fd000488e65ed7c9b98e8fadc3ec7d2b5ed6",
+    "gitDirty": true
+  },
+  "hardware": {
+    "gpuModels": [
+      "NVIDIA A40"
+    ],
+    "source": "local-nvidia-smi"
+  },
+  "server": {
+    "healthUrl": "http://127.0.0.1:8002/health",
+    "service": "csnbs-gemma-server",
+    "pid": 5980,
+    "modelId": "unsloth/gemma-3-4b-it",
+    "checkpointRevision": "bf46152c47f5dd20b896357cb51abc4c03b8ee8c",
+    "configuration": {
+      "model_id": "unsloth/gemma-3-4b-it",
+      "model_path": "/workspace/GPU_Profiling/checkpoints/gemma-3-4b-it",
+      "download_provenance": {
+        "model_id": "unsloth/gemma-3-4b-it",
+        "revision": "bf46152c47f5dd20b896357cb51abc4c03b8ee8c",
+        "original_model_id": "google/gemma-3-4b-it",
+        "original_revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+        "verified_weight_sha256": {
+          "model-00001-of-00002.safetensors": "eb5fd5e97ddd07b56778733e9653c07312529cb00980a318fc3e1c4e3b5a8f1f",
+          "model-00002-of-00002.safetensors": "fdde0e5aa5ced0fa203b3d50f4ab78168b7e3a3e08c6349f5cc9326666e1bb13"
+        }
+      },
+      "model_type": "gemma3",
+      "torch_version": "2.8.0+cu126",
+      "transformers_version": "4.57.6",
+      "gpu": "NVIDIA A40",
+      "dtype": "bfloat16",
+      "attention_backend": "sdpa",
+      "batch_size": 1,
+      "continuous_batching": false,
+      "pruning": false,
+      "max_new_tokens": 64,
+      "do_sample": false,
+      "use_cache": true,
+      "do_pan_and_scan": false,
+      "image_size": {
+        "height": 896,
+        "width": 896
+      }
+    },
+    "error": null
+  },
+  "summary": {
+    "totalRequests": 10,
+    "successfulRequests": 10,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 0.5000034914410468,
+    "completionRateRps": 0.5,
+    "successfulThroughputRps": 0.5,
+    "successfulRequestLatencyMs": {
+      "p50": 419.22370399999636,
+      "p95": 1837.7713609999992,
+      "p99": 1837.7713609999992
+    },
+    "dispatchLatenessMs": {
+      "p50": 0.004338999999163207,
+      "p95": 1.1944169999987935,
+      "p99": 1.1944169999987935
+    },
+    "plannedToCompleteMs": {
+      "p50": 420.0890619999991,
+      "p95": 1837.3853310000013,
+      "p99": 1837.3853310000013
+    }
+  },
+  "requests": {
+    "file": "requests.jsonl",
+    "schemaVersion": 2,
+    "count": 20
+  }
+}

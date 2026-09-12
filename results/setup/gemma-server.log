@@ -2,3 +2,34 @@ INFO:     Started server process [5337]
 INFO:     Waiting for application startup.
 INFO:     Started server process [5980]
 INFO:     Waiting for application startup.
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:30<00:30, 30.72s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:52<00:00, 25.69s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:52<00:00, 26.45s/it]
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8002 (Press CTRL+C to quit)
+INFO:     127.0.0.1:48258 - "GET /health HTTP/1.1" 200 OK
+The following generation flags are not valid and may be ignored: ['top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+INFO:     127.0.0.1:48268 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56524 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "POST /infer HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [5980]
