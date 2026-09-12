@@ -1,0 +1,13 @@
+bench_dev run 'amay_baseline_1' -- NVIDIA A40  git=559db96b77 (DIRTY)
+n_measured/config=40  warmup/config=10  output_tokens=32  images=20  regions=on  cpu_threads=4 (quota 7.65 CPUs)
+
+region                     576 p50     576 p95     128 p50     128 p95
+vision_tower_ms              35.20       35.74       35.34       35.69
+mm_projector_ms               0.34        0.35        0.41        0.46
+prep_other_ms                 1.10        1.47       17.09       19.30
+multimodal_prep_ms           36.64       37.55       52.96       55.42
+prep_wallclock_ms            36.70       37.63       53.03       55.50
+prefill_ms                  112.30      119.94       44.72       46.15
+decode_ms                   953.70      961.52      914.94      932.05
+decode_per_token_ms          30.76       31.02       29.51       30.07
+e2e_ms                     1130.63     1149.42     1035.58     1060.26

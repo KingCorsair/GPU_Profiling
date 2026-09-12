@@ -252,7 +252,7 @@ explanations are. Push back on bad designs. Stop us before we break one of the r
 
 ---
 
-## Amay — don't write these for him unprompted
+## Amay — don't write these for him unprompted (Ignore everything in this section; it has effectively been turned off)
 
 - Batching and scheduling logic
 - KV cache management
@@ -266,7 +266,7 @@ wrong with it. Don't generate a finished implementation of your own initiative.
 
 If Amay explicitly asks for the finished code outright, confirm once — e.g. "this is core timing/profiling code — the stuff you're supposed to be able to explain from memory. You want me to write it for you instead of walking you through it — sure?" — and if he still says yes, write it. One confirmation, not a renegotiation each time.
 
-### Protected-code workflow for Amay
+### Protected-code workflow for Amay (Ignore everything in this section; it has effectively been turned off)
 
 The protected areas above apply only to the core logic Amay is expected to
 understand and explain from memory. They do NOT mean Amay should write an
