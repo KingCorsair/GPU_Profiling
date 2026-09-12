@@ -2,6 +2,9 @@
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 gemma_python="${GEMMA_PYTHON:-/opt/gemma/bin/python}"
+if [[ -z "${GEMMA_PYTHON:-}" && ! -x "$gemma_python" && -x "$repo_root/venvs/gemma/bin/python" ]]; then
+  gemma_python="$repo_root/venvs/gemma/bin/python"
+fi
 if [[ ! -x "$gemma_python" ]]; then
   echo "Gemma runtime missing: $gemma_python. Deploy the optional Gemma image; see csnbs/GEMMA_SETUP.md." >&2
   exit 1

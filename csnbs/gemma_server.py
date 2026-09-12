@@ -44,7 +44,7 @@ class GemmaBackend:
         if self.max_new_tokens < 1:
             raise ValueError("GEMMA_MAX_NEW_TOKENS must be positive")
 
-        self.processor = AutoProcessor.from_pretrained(model_path, local_files_only=True)
+        self.processor = AutoProcessor.from_pretrained(model_path, local_files_only=True, use_fast=False)
         self.model = Gemma3ForConditionalGeneration.from_pretrained(
             model_path,
             local_files_only=True,

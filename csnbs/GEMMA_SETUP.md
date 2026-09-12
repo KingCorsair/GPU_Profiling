@@ -17,8 +17,15 @@ Docker workflow with `runtime=gemma`. It publishes the separate `:gemma` and
 `:gemma-<commit>` tags; deploy the immutable commit tag on RunPod with the existing
 `/workspace` volume. It includes Python 3.12, PyTorch 2.8.0/CUDA 12.6,
 Transformers 4.57.6 under `/opt/gemma`, and Node 24.13.0 under `/opt/node24`.
-The LLaVA system Python packages remain separate. No packages are installed into
-the running pod by these scripts.
+The LLaVA system Python packages remain separate.
+
+An explicitly approved development exception can use
+`bash csnbs/setup_gemma_runtime.sh` on an existing pod. It installs the same pinned
+Gemma packages into `/workspace/GPU_Profiling/venvs/gemma` and verified Node
+24.13.0 binaries into `venvs/node24`. Package caches and temporary downloads use
+`/workspace` too. This is an exception to the usual image-only environment rule;
+the Docker recipe remains the production deployment path. The server launcher
+detects this persistent environment when `/opt/gemma` is absent.
 
 No Hugging Face account or token is needed for this public mirror. Gemma's license
 still applies. Once weights are downloaded under `/workspace`, inference is
@@ -51,19 +58,29 @@ From a second pod terminal:
 
 ```bash
 curl --fail http://127.0.0.1:8002/health
-cd /workspace/GPU_Profiling/csnbs/measure
-npm ci
-npm run dev -- --endpoint http://127.0.0.1:8002/infer \
+cd /workspace/GPU_Profiling
+bash csnbs/run_gemma_loadgen.sh \
   --rps 1 --duration 20 --timeout 120000 --dataset /absolute/path/to/dev.json
 ```
 
 Replace the dataset path with the existing locked development workload. The short
 run above checks integration only; it is not a reportable performance result.
-Save the `/health` response as `server.json` beside that run's `run.json` and
-`requests.jsonl`. The existing generator does not automatically fetch server
-metadata. Health includes the checkpoint download revision, generation settings,
+The generator now fetches `/health` before timed requests and saves it in
+`run.json` under `server`: `modelId`, `checkpointRevision`, and `configuration`.
+Unavailable model metadata stays null, and failed health requests record an error.
+Health includes the checkpoint download revision, generation settings,
 GPU, precision, and library versions; an unmarked custom checkpoint has no asserted
 download revision.
+
+Use the existing randomized RPS sweep with the already-running Gemma server:
+
+```bash
+python csnbs/run_load_sweep.py --model gemma --reuse-server
+```
+
+Without `--reuse-server`, the sweep starts and stops its own Gemma process and
+requires port 8002 to be free. The default `--model llava` retains port 8000.
+The preset rates, durations, randomization, and loadgen measurement logic are unchanged.
 
 Default behavior: BF16, SDPA, greedy generation with natural EOS, at most 64 new
 tokens, caching enabled, pan-and-scan disabled, no pruning, synchronous batch one,
