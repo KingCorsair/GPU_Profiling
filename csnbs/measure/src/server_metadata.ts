@@ -1,5 +1,5 @@
 export type ServerMetadata = {
-  healthUrl: string;
+  healthUrl: string | null;
   service: string | null;
   pid: number | null;
   modelId: string | null;
@@ -16,13 +16,13 @@ function objectOrNull(value: unknown): Record<string, unknown> | null {
 
 /* Read server-reported provenance before timed requests. Missing data stays null. */
 export async function collectServerMetadata(endpoint: string): Promise<ServerMetadata> {
-  const healthUrl = new URL("/health", endpoint).href;
   const result: ServerMetadata = {
-    healthUrl, service: null, pid: null, modelId: null,
+    healthUrl: null, service: null, pid: null, modelId: null,
     checkpointRevision: null, configuration: null, error: null,
   };
   try {
-    const response = await fetch(healthUrl, { signal: AbortSignal.timeout(5000) });
+    result.healthUrl = new URL("/health", endpoint).href;
+    const response = await fetch(result.healthUrl, { signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error(`Health endpoint returned HTTP ${response.status}`);
     const health = objectOrNull(await response.json());
     if (health === null) throw new Error("Health response is not an object");

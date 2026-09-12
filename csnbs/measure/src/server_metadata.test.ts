@@ -49,3 +49,10 @@ test("unavailable metadata is recorded without inventing a model", async (t) => 
   assert.equal(result.modelId, null);
   assert.match(result.error ?? "", /HTTP 404/);
 });
+
+test("invalid endpoint metadata does not throw away the loadgen's error records", async () => {
+  const result = await collectServerMetadata("not-an-absolute-url");
+  assert.equal(result.healthUrl, null);
+  assert.equal(result.modelId, null);
+  assert.ok(result.error);
+});

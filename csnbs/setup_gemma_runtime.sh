@@ -22,7 +22,7 @@ if [[ ! -x "$node_root/bin/node" ]]; then
   curl -fSL --retry 3 https://nodejs.org/dist/v24.13.0/node-v24.13.0-linux-x64.tar.xz -o "$node_archive"
   echo "e798599612f4bb71333a3397ab0d095fd62214e115aea45aa858a145fc72d67e  $node_archive" | sha256sum --check -
   mkdir -p "$node_root"
-  tar -xJf "$node_archive" -C "$node_root" --strip-components=1
+  tar -xJf "$node_archive" -C "$node_root" --strip-components=1 --no-same-owner --no-same-permissions
 fi
 "$node_root/bin/node" --version
 echo "Ready: GEMMA_PYTHON=$gemma_env/bin/python bash csnbs/start_gemma_server.sh"
