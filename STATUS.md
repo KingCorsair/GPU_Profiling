@@ -2,124 +2,166 @@
 
 ## Current State
 
-* Current work package: none active. WP1 is closed, now including the 2026-09-11 addendum (component timing plus the three-run noise floor). WP2 has not been started (your instruction).
-* Status: Between work packages. Waiting for your go-ahead to begin WP2.
-* Main objective: establish a trustworthy latency baseline (576 vs 128 visual tokens) that later optimizations can be judged against. **Achieved, and WP1 now meets the roadmap's own §9 gate.**
-* Current blocker, if any: none. The "WP1 vs. the restructured roadmap" gap is closed; see the addendum below.
-* Last updated: 2026-09-11
-
-## Completed Work
-
-### Prior completed work (pre-WP structure — the profiling/evidence phase that motivated the engineering roadmap)
-
-* **VisPruner concurrency-crash discovery & repro.** Found the shared model instance is unsafe under concurrent access (CUDA device-side assert). Built a 2-thread reproduction harness.
-  Output: `scripts/repro_concurrent_crash.py`, `scripts/run_phase0_repro.sh`.
-  Completed: 2026-09-05 (commit `cedaeca`).
-* **Trace-driven profiling & bug-fixed baseline numbers.** Ran isolated and near-saturation profiler traces at both 576/128 visual-token configs, found and fixed a double-counting bug in the prep-path timing aggregate, and re-prioritized the speed plan off the corrected numbers.
-  Output: `AMAY_VISPRUNER_PROFILING_REPORT.md`, `AMAY_TRACE_PLAN.md`, `results/timing/ab_trace_vtn{576,128}_{isolated,near_saturation}*`, `results/timing/prep_trace.json` / `prep_summary.txt`.
-  Completed: 2026-09-02 → 2026-09-03 (commits `3daba72`, `c317688`).
-* **No-load A/B comparison (Part 1 of the original A/B experiment).** First single-request 576-vs-128 comparison, natural-EOS output, N=10, non-interleaved (block order). Superseded for baseline purposes by WP1 below, but still the reference for natural-EOS behavior.
-  Output: `scripts/run_noload_ab_comparison.py`, `results/timing/ab_noload_comparison.json` / `_table.txt`.
-  Completed: 2026-09-02.
-* **Load-sweep / matplotlib comparisons.** RPS sweeps at multiple load levels (0.5–3 rps) for both configs, with GPU-utilization monitoring and plotted comparisons.
-  Output: `scripts/run_ab_load_sweep.py`, `scripts/plot_*`, `results/loadgen/2026-08-29/`, `results/loadgen/2026-09-01/`.
-  Completed: 2026-08-29 → 2026-09-01.
-* **AMAY_ENGINEERING_ROADMAP.md written.** Full phase-by-phase roadmap (Phase 0 → Phase 6) mapping every proposed optimization to a category, with dependencies, success metrics, and the 576/128 validation formula.
-  Completed: 2026-09-05. **Restructured 2026-09-07** (commits `86a4063`, `46de55e`, `a884c18`) so the month-one plan is expressed natively as WP1–WP7; the old Phase 0–6 material is preserved under "Deferred / Month-Two Engineering Work and Reference".
-
-### WP1 — Controlled Benchmark
-
-**Part 1 — whole-request baseline (accepted 2026-09-07).**
-
-* Built `scripts/run_wp1_controlled_benchmark.py`, reusing the model-load-once / flip-`visual_token_num` pattern and the model's existing CUDA-event timing instrumentation (no model code changed).
-* Fixed the two things `run_noload_ab_comparison.py` couldn't answer: forced output length (`min_new_tokens == max_new_tokens`, not natural-EOS) and genuine trial-level interleaving/randomization between 576 and 128 (not block order).
-* Ran 10 warm-up + 30 measured trials per config, NVIDIA A40, 10 fixed requests, 64 output tokens.
-* Result: median latency 576=1868.1ms, 128=1741.2ms (6.8% gain). Robust (MAD) stdev 9.2ms / 11.8ms; raw stdev 18.7ms / 27.8ms.
-  Output: `results/timing/wp1_controlled_benchmark_{raw.jsonl,summary.json,table.txt}`. Accepted by Amay on 2026-09-07 for measuring ~30ms effects. Committed in `5ce804b` / `b8d2a26`; the run executed at `cedaeca`.
-* **Caveat found 2026-09-11:** this run's `multimodal_prep` is bimodal (576: ~34.7ms floor, 11/30 trials at 38–94ms; 128: ~46ms floor, 9/30 at 100–116ms). That is the CPU-throttling stall described below, not model behavior. Its whole-request outliers may share the cause (a stall landing outside prep); not verified.
-
-**Part 2 — addendum: component timing and three-run noise floor (2026-09-11).** Closes the gap against roadmap §WP1 §8/§9/§11.
-
-* `scripts/bench_dev.py` now times `vision_tower`, `mm_projector` and `multimodal_prep` with CUDA events:
-  * forward hooks on the `CLIPVisionTower` wrapper and on `mm_projector`;
-  * an instance-level wrapper on `prepare_inputs_labels_for_multimodal`, so there are no edits to model code;
-  * event records only, no syncs, read once after `generate()`'s own closing sync.
-
-  Validated: exactly 1 / 1 / 32 event pairs per request, and hooks on vs. off leave prefill and decode unchanged (110.17 vs 110.48ms; 30.77 vs 30.62ms per token).
-* Roadmap spec, plus the standing protocol:
-  * 20 fixed dev images, 32 forced output tokens;
-  * 10 warm-up + 40 measured per config, trial-interleaved with a fixed seed;
-  * per-region p50/p95, with git commit, GPU, CPU-thread count and cgroup throttle counts recorded.
-* **Three baseline runs**, each a separate process:
-  * commit `469a071`, NVIDIA A40, clean tree (only a docs-only `CLAUDE.md` edit outstanding);
-  * no other GPU processes, zero CPU-throttled trials, fixed length held on every trial.
-
-  Run-to-run noise floor (p50 of each run):
-
-  | Region | 576: three runs | 576 spread | 128: three runs | 128 spread |
-  |---|---|---|---|---|
-  | `vision_tower` | 33.96 / 33.90 / 33.91 | **0.07ms** | 33.93 / 33.85 / 33.86 | **0.08ms** |
-  | `mm_projector` | 0.33 / 0.33 / 0.33 | 0.00ms | 0.39 / 0.38 / 0.38 | 0.01ms |
-  | `multimodal_prep` | 35.34 / 35.26 / 35.31 | 0.08ms | 47.98 / 47.85 / 48.01 | 0.16ms |
-  | prefill | 110.17 / 110.29 / 110.30 | 0.13ms | 44.46 / 44.30 / 44.38 | 0.17ms |
-  | decode (31 steps) | 949.70 / 949.30 / 949.91 | 0.62ms | 906.47 / 906.57 / 906.44 | 0.13ms |
-  | end-to-end | 1112.70 / 1111.89 / 1115.76 | 3.87ms | 1014.37 / 1015.42 / 1015.17 | 1.05ms |
-
-* **§9 gate: PASS at both configs.** The gate is `vision_tower` spread ≤ ~5ms; measured 0.07 / 0.08ms.
-* **Noise-floor note (the §11 deliverable).** On this pod (A40, torch pinned to 4 CPU threads), a no-change rerun moves `vision_tower` p50 by at most 0.08ms and whole-request p50 by at most 3.9ms. Within a run:
-  * `vision_tower` stdev is 0.17–0.38ms, so a 40-vs-40 before/after comparison resolves a ~0.25ms change (two-sample MDE, α=0.05, power 0.80);
-  * whole-request stdev is 4.4–7.0ms, which gives an MDE of ≤ 4.4ms.
-
-  WP2's stop rule (`vision_tower` must drop ≥ 20%, i.e. ~6.8ms) is ~85× the run-to-run spread. **These numbers hold only with the CPU-thread pin.** Without it, a ~55–70ms throttling stall dominates prep (below). Compared with Part 1's 13.8 / 20.4ms raw MDE, most of the improvement is the removed stall; the output length also halved (64 → 32 tokens).
-* Other measurements, controlled benchmark only (not serving behavior):
-  * **576→128 end-to-end gain is 8.8%** at 32 output tokens, vs 6.8% at 64 in Part 1. Consistent with decode diluting the prefill saving as output grows.
-  * **DERIVED:** VisPruner's selection work (`prep_other`) costs 1.0–1.1ms at 576 and 13.6–13.8ms at 128. So at 128 the diversity loop gives back ~12.6ms of the 65.9ms prefill saving.
-* Output: `scripts/bench_dev.py` (commit `469a071`) and `results/timing/bench_dev/`:
-  * `baseline_{1,2,3}.{json,txt}`;
-  * `compare_baseline_1_baseline_2_baseline_3.{json,txt}`;
-  * stall diagnosis: `scripts/diagnose_prep_stall.py`, `results/timing/bench_dev/prep_stall_{ab.txt,threads48.json,threads4.json}`.
-
-## Current Work
-
-**No WP is being executed.** WP2 waits for your go-ahead.
-
-### Benchmark protocol (standing, applies to WP2 onward)
-
-* **Use `scripts/bench_dev.py` for before/after comparisons.** It writes per `--run-id` (refuses to overwrite without `--overwrite`), and `--compare` computes the spread and the `vision_tower` gate.
-* **40 measured trials per config, 10 warm-up** (unchanged since 2026-09-07).
-* **Keep torch pinned to 4 CPU threads** (`bench_dev.py` default, `--cpu-threads`). A run that reports any `throttled_trial_positions` is contaminated. Find out what else was using the container's CPU and rerun it.
-* **Compare only against baselines from the same pod.** The noise floor above was measured on this pod's host and CPU quota. On a new pod, rerun `baseline_{1,2,3}` first. (This session's pod needed the weights re-downloaded, and its decode runs ~30.6ms/token vs ~26.5ms in Part 1, so hosts do differ.)
-* Commit the harness before running; a dirty tree marks the run unattributable. Docs-only (`*.md`) edits don't count.
-* `run_wp1_controlled_benchmark.py` still writes to fixed paths and overwrites Part 1's accepted artifacts if re-run; it has no CPU-thread pin, so it will reproduce the stall. Treat it as historical.
-
-## Next
-
-* **WP3 heads-up, the most important finding here.** Nothing in `csnbs/` or `scripts/start_model_server.sh` sets a torch thread count, so the FastAPI server very likely takes the same ~55–70ms container-throttling stall on every request, with the GPU idle meanwhile. That competes directly with the event-loop hypothesis for the ~34% idle GPU. WP3 should read `/sys/fs/cgroup/cpu/cpu.stat` `nr_throttled` before and after its rps 2.0 run (roadmap WP3 §3 has the note). The fix is one line (`torch.set_num_threads` or `OMP_NUM_THREADS`), but it is in Rithvik's server, so it needs agreeing with him.
-* **WP2 re-estimate.** `vision_tower` is 33.9ms, not the trace's 43.9ms, so WP2's expected saving is ~15–23ms, not 20–30ms (roadmap WP1 status block). Its "before" can be `baseline_{1,2,3}` if WP2 runs on this same pod.
-* Suggested: add the CPU-throttling gotcha to `CLAUDE.md`'s "Gotchas already hit" list. Not done, because `CLAUDE.md` currently carries an uncommitted edit of yours.
-* Commits `469a071` and the addendum commit are local and **not pushed**.
-* Begin **WP2 — FP16 Vision Tower** only on your explicit go-ahead.
+* **Current work package: WP2 — FP16 Vision Tower. In progress, paused 2026-09-22.**
+* Done: the implementation, and the performance A/B (4 same-pod `bench_dev` runs plus an interleaved diagnostic). The ≥20% `vision_tower` gate passes by a wide margin.
+* Not done: profiler verification, Layer-1 correctness, Layer-2 TextVQA, a Layer-3 request to Sribhav, and re-baselining the numbers in the docs.
+* **Next task:** profiler verification with `scripts/profile_multimodal_prep.py`. The FP32 state is prepared on branch `wp2-profile-fp32`. See `HANDOFF.md`.
+* WP3 has not started.
+* Blockers: none.
+* Last updated: 2026-09-22
 
 ## Month-One Progress
 
-* [x] WP1 — Controlled Benchmark (whole-request baseline 2026-09-07; component timing + noise floor 2026-09-11)
-* [ ] WP2 — FP16 Vision Tower
+* [x] WP1 — Controlled Benchmark (2026-09-07; component timing and noise floor 2026-09-11)
+* [~] WP2 — FP16 Vision Tower: implementation and performance done; verification and correctness open
 * [ ] WP3 — Server Diagnostic
 * [ ] WP4 — Request Queue
 * [ ] WP5 — Static Batching MVP
 * [ ] WP6 — Final Load Benchmark
 * [ ] WP7 — Final Writeup
 
+## WP2 — FP16 Vision Tower
+
+### The change (commit `caf19fe`, parent `e295fd0`)
+
+One line changed: `clip_encoder.py:30`, where `CLIPVisionModel.from_pretrained(...)` gains `torch_dtype=torch.float16`.
+
+Why the tower was FP32:
+
+* The CLIP tower isn't in the LLaVA checkpoint. It loads separately from `openai/clip-vit-large-patch14-336`, whose config says float32.
+* The FP16 cast that was meant to fix this, at `builder.py:155-156`, sits behind `if device_map != 'auto'`. Every call site uses `device_map='auto'`, so the cast never ran.
+
+Nothing else changed. The wrapper's casts at `clip_encoder.py:64,70` follow `self.dtype`.
+
+### Performance A/B — same pod, NVIDIA A40
+
+**`bench_dev` runs.**
+
+* Execution order: FP32_1 (`e295fd0`) → FP16_1 (`caf19fe`) → FP16_2 (`caf19fe`) → FP32_2 (`e295fd0`). The reverse order in the second pair was deliberate, to counter run-order bias.
+* All four runs:
+  * clean tree;
+  * 40 measured and 10 warm-up trials per config;
+  * 4 CPU threads, no throttled trials, no other GPU process;
+  * fixed 32-token output;
+  * identical trial order.
+* Files: `results/timing/bench_dev/wp2_{fp32,fp16}_samepod_{1,2}.{json,txt}` and `compare_*`.
+
+| `vision_tower` p50 | FP32_1 | FP16_1 | FP16_2 | FP32_2 | Pooled change |
+|---|---|---|---|---|---|
+| vtn=576 | 33.93 | 14.29 | 14.41 | 34.04 | 33.98 → 14.35 ms, **−57.8%, 2.37×** |
+| vtn=128 | 33.94 | 13.79 | 13.57 | 34.07 | 34.00 → 13.68 ms, **−59.8%, 2.49×** |
+
+* Reproducibility: rerun-to-rerun p50 moved by at most 0.13 ms for FP32 and at most 0.21 ms for FP16.
+* Every FP32/FP16 pairing gives a 57.5–60.2% reduction (2.35–2.51×).
+* **Gate (≥20% reduction): PASS.** Even the slowest FP16 trial (19.86 ms) is 41% below the fastest FP32 trial (33.74 ms).
+* Prefill is unchanged (−0.7% / −0.8%). `mm_projector` is unchanged at its floor.
+
+**The FP16 runs had a problem: per-trial wander.**
+
+* FP16 tower time ranged 10.5–19.9 ms per trial (stdev 2.3–2.9 ms), against 0.10–0.17 ms for FP32.
+* `prep_other` and decode slowed in the same trials, even though the change never touches them.
+* In the bench_dev A/B, end-to-end latency went **−0.2%**, which is within FP32's own 5 ms run-to-run spread. So the end-to-end result from these runs is **not reportable**.
+
+**Interleaved diagnostic, `wp2_diag_1`** (`scripts/diag_wp2_fp16_jitter.py`, run at `02e749e`).
+
+* Design: one process, with both towers loaded and swapped per trial. vtn=128, 60 trials per arm, randomly interleaved.
+* Per trial it also records a CPU probe, the SM clock, and the tower's CPU issue time.
+* Files: `results/timing/wp2_diag/wp2_diag_1.{json,txt}`.
+* Results:
+  * **`vision_tower` p50: 34.20 → 11.02 ms, −67.8%, 3.10×.**
+  * FP16 tower CUDA-event time equals its CPU issue time (ratio **1.00**; FP32: 3.22). With FP16 the tower is **CPU/kernel-launch-bound**: the GPU waits for Python/HF to issue kernels.
+  * FP16 minus neighbouring FP32 trials: `prep_other` **+0.14 ms**, decode **−0.04 ms/token**. FP16 does not change any downstream work.
+  * SM clock held at 1740 MHz with no throttle reasons, so GPU clock changes are ruled out.
+  * End-to-end at 128: 1019.6 → 995.3 ms (−24.3 ms, −2.4%). That is roughly what Amdahl predicts: about 20 ms saved out of about 1.1 s.
+
+**Conclusion.**
+
+* The wander in the FP16 A/B came from **host CPU slowdowns** (neighbouring tenants and/or CPU frequency), not from FP16.
+* The slowdowns come in episodes lasting tens of seconds, with decode shifting in discrete steps (about +0.15 and +0.38 ms/token).
+* They hit FP32 runs too. The FP32 tower hid them, because 34 ms of GPU work always had more work queued behind it. The FP16 tower is launch-bound, so it exposes them.
+* The FP16 bench_dev runs happened to catch more of these episodes: 42–71% of their trials were in the slow state, against 0–5% for FP32.
+* Neither cgroup throttling nor steal time sees these slowdowns. `bench_dev`'s checks cannot detect them.
+
+### How to use these numbers
+
+| Result | Status |
+|---|---|
+| `vision_tower` −58% / −60% (2.4–2.5×), bench_dev 4-run p50 | **Official WP2 A/B component result** |
+| `vision_tower` 34.20 → 11.02 ms (3.10×), `wp2_diag_1` | Interleaved diagnostic: controls for host noise. Quote it *with* that label. |
+| ≥20% gate | **PASS** |
+| End-to-end ≈ −2% | **Indicative only**, from the diagnostic and from post-hoc fast-state filtering. The bench_dev A/B cannot resolve it. |
+| FP16 tower is launch-bound | Measured in the diagnostic (event time / CPU issue time = 1.00) |
+
+None of these are serving numbers. Reportable serving results come from WP6 and Rithvik's harness.
+
+### Remaining before WP2 can close
+
+1. **Profiler verification** (roadmap WP2 §5 step 6, §9 criterion 2). Produce an FP32 trace and an FP16 trace, and confirm:
+   * `ampere_sgemm_*` is gone, replaced by FP16 tensor-core GEMMs with FP32 accumulate;
+   * softmax and LayerNorm dtypes;
+   * softmax is not `<Half,Half,Half>`, i.e. it still accumulates in FP32;
+   * the tower's time in the trace is consistent with the benchmark.
+2. **Layer-1 correctness.** No script exists yet.
+   * exact-text match, greedy, 90 dev images, both configs (bar: ≥85%);
+   * token-selection equivalence;
+   * cosine similarity of pre-projector features > 0.999;
+   * determinism.
+
+   Note: `clip_encoder.forward` returns `image_attentions` without casting, so VisPruner now ranks tokens on FP16 attention. The selected tokens may differ; this check will show whether they do.
+3. **Layer-2 TextVQA.** 1,000-question subsample, FP32 vs FP16 at 576, scored with `m4c_evaluator.py`. Revert the change if it regresses beyond noise.
+4. **Layer 3.** Request per-category accuracy from Sribhav. Asynchronous; don't block on it.
+5. **Re-baseline** the vision-path numbers in `AMAY_ENGINEERING_ROADMAP.md` and `AMAY_TRACE_PLAN.md`. Then close WP2 here.
+6. Decide whether to report an end-to-end figure, or leave it to the WP6 load benchmark.
+
+## Completed Work
+
+### Pre-WP profiling and evidence phase (2026-08-29 → 2026-09-05)
+
+* **Concurrency crash:** a shared model instance is unsafe under concurrent access. Repro: `scripts/repro_concurrent_crash.py`. Still unfixed; it's WP3/WP4 territory.
+* **Trace-driven profiling**, including the prep-path double-counting fix: `AMAY_VISPRUNER_PROFILING_REPORT.md`, `AMAY_TRACE_PLAN.md`.
+* **Original prep trace:** `results/timing/prep_trace.json` / `prep_summary.txt`, taken at `c317688` on an older pod without the CPU-thread pin. This is the source of the "75.4% FP32 sgemm" figure. Keep it unchanged; WP2's traces go to `results/timing/wp2_profile/`.
+* **Load sweeps** (0.5–3 rps): `results/loadgen/2026-08-29/`, `2026-09-01/`.
+* `AMAY_ENGINEERING_ROADMAP.md`, restructured into WP1–WP7 on 2026-09-07.
+
+### WP1 — Controlled Benchmark (closed)
+
+* **Harness:** `scripts/bench_dev.py`.
+  * CUDA-event timing of `vision_tower`, `mm_projector` and `multimodal_prep`, with no syncs inside;
+  * 20 fixed images, fixed 32-token output;
+  * 10 warm-up + 40 measured trials per config, interleaved;
+  * records commit, GPU, CPU threads and throttle counts.
+* **Noise floor:** three baselines at `469a071`. Rerun spread: `vision_tower` p50 at most 0.08 ms; whole request at most 3.9 ms. §9 gate PASS.
+* **CPU-throttling fix.**
+  * The container is capped at 7.65 CPUs, but torch spawned 48 threads.
+  * Each request's burst exhausted the quota, causing a ~55–70 ms stall.
+  * Fix: pin torch to 4 threads. Diagnosed with `scripts/diagnose_prep_stall.py`.
+* **Part 1 whole-request baseline:** `results/timing/wp1_controlled_benchmark_*`, from 2026-09-07. Historical; its prep numbers include the stall.
+
+## Standing benchmark protocol (WP2 onward)
+
+* Use `scripts/bench_dev.py` with a fresh `--run-id`. Never use `--overwrite` or `--allow-shared-gpu`.
+* 40 measured and 10 warm-up trials per config. Torch pinned to 4 threads. Any throttled trial contaminates the run.
+* Compare only against baselines taken on the same pod. Commit the harness before running.
+* **New after WP2:**
+  * **Randomise run order across states** (e.g. ABBA), per rule 10.
+  * For short, launch-bound regions like the FP16 tower, **interleave both states in one process** when possible. Host CPU slowdowns aren't caught by the throttle check.
+* Code states used in WP2: FP32 = `e295fd0`, FP16 = `caf19fe`. They differ by one line.
+
 ## Important Decisions / Findings
 
-* **Container CPU throttling explains the prep-path "noise" (2026-09-11).**
-  * The pod's container is CFS-capped at 7.65 CPUs (`cpu.cfs_quota_us=765000` per 100ms), but torch sizes its intra-op pool from the host: 48 threads, with 96 inter-op.
-  * One 48-thread burst per request exhausts the quota, and the kernel freezes the whole container for the rest of the 100ms period.
-  * **Diagnosis** (`scripts/diagnose_prep_stall.py`): at default threads, 60 of 60 requests stalled, and every one incremented `nr_throttled` during prep. At 4 threads, 0 of 60 did. Prep at 576 fell from ~88ms to 35.3ms and its spread from ±10 to ±0.3ms. Garbage collection, allocator retries and OS preemption were ruled out first.
-  * The 4-thread cap costs nothing on the GPU path: prefill and decode are unchanged.
-* **`vision_tower` is 33.9ms under CUDA events (2026-09-11)**, identical at 576 and 128 because pruning happens after the tower. The roadmap's 43.888ms came from a profiler trace and includes its overhead; vision-path estimates derived from it are high by ~25%.
-* **Prep-path double-counting bug fixed (2026-09-03).** Two aggregates in `prep_summary.txt` were wrong; corrected before re-prioritizing the speed plan. See `AMAY_TRACE_PLAN.md`.
-* **Concurrency crash confirmed, not yet fixed.** Shared model instance is unsafe under real concurrent access; this is WP3/WP4 territory, still open.
-* **WP1 accepted; measured trials raised to 40 for all future before/after experiments (2026-09-07, your decision).** The robust-vs-raw MDE question from Part 1 is moot for `bench_dev.py`: with the thread pin its raw whole-request MDE is ≤ 4.4ms at n=40.
-* **Part 1 noise-floor finding (2026-09-07): raw stdev was outlier-sensitive at n=30, the robust (MAD) estimate was not.** A handful of trials ran 30–100ms+ slow. The watch item, "if outlier rates climb, that is a real system-level noise source worth chasing", turned out to be right: see the throttling finding above.
-* **Fixed-output-length off-by-one.** Requesting `max_new_tokens=64` yields `output_ids` of length 65 under this model's `generate()` override (HF's `generate` with `inputs_embeds` only). Harmless (constant across trials). `bench_dev.py` checks forced length via the forward-call count instead (32 calls for 32 requested tokens, on every trial).
+* **The FP16 vision tower is CPU-launch-bound (2026-09-22).** Any further vision-path win needs fewer kernel launches (CUDA graphs, `torch.compile`, fused attention), not faster GEMMs. From now on, host CPU speed shows up directly in its latency. That matters for WP3–WP5, where the server process competes for CPU.
+* **Host CPU slowdowns are invisible to the throttle check (2026-09-22).** They appear as discrete jumps in decode per token and as slowdowns in `prep_other` at 128. See the WP2 section above.
+* **Merged `origin/main` instead of rebasing (2026-09-21).** A rebase would have given new SHAs to commits that bench_dev JSONs record as `git_commit`.
+* **WP1 findings still hold:**
+  * the container CPU-throttling diagnosis and the 4-thread pin;
+  * `vision_tower` is 33.9 ms under CUDA events, not the trace's 43.9 ms, because the trace includes profiler overhead;
+  * the fixed-output-length off-by-one (`max_new_tokens=64` gives 65 `output_ids`), which is harmless.
+
+## Open carry-overs
+
+* **WP3.** Nothing in `csnbs/` or `scripts/start_model_server.sh` sets a torch thread count, so the server likely hits the ~55–70 ms throttling stall on every request.
+  * Now that the FP16 tower is CPU-bound, CPU contention in the server matters even more.
+  * Check `nr_throttled` before and after the rps 2.0 run.
+  * The fix is in Rithvik's server, so agree it with him.
+* **Git host key.** This pod's `~/.ssh/known_hosts` lacked GitHub's host key; it was added by hand on 2026-09-21. Add it to the Dockerfile's boot `CMD` so it survives pod restarts. Not done.
+* **`CLAUDE.md`.** Add two entries to "Gotchas already hit": the CPU-throttling stall and the missing `known_hosts` entry. Not done.
