@@ -1,0 +1,33 @@
+diag run 'wp2_diag_1' -- NVIDIA A40  git=02e749e3a3  cpu_threads=4
+vtn=128  60/arm interleaved  bad_length=[]  throttled=[]
+
+field                     fp32 p50    fp32 p95     fp32 sd    fp16 p50    fp16 p95     fp16 sd
+vision_tower_ms              34.20       34.50       0.161       11.02       15.42       1.518
+tower_cpu_issue_ms           10.63       17.89       2.565       11.03       15.42       1.952
+mm_projector_ms               0.40        0.45       0.023        0.37        0.44       0.022
+prep_other_ms                13.97       17.64       2.284       14.02       18.48       2.127
+prefill_ms                   44.73       46.13       1.426       44.05       45.10       1.355
+decode_per_token_ms          29.33       29.73       0.742       29.28       29.67       0.170
+e2e_ms                     1019.58     1054.10      29.638      995.26     1023.62      13.026
+cpu_probe_ms                 10.55       16.62       2.282        9.40       11.39       1.205
+
+tower CUDA-event time / CPU issue time (p50; ~1.0 => CPU-launch-bound):
+  fp32: 3.22
+  fp16: 1.00
+
+correlation with the CPU probe (H1 predicts: fp16 tower high, fp32 tower ~0,
+prep_other/decode similar in both arms):
+  fp32: vision_tower +0.57  prep_other +0.70  decode_per_token +0.46  e2e +0.57
+  fp16: vision_tower +0.59  prep_other +0.63  decode_per_token +0.50  e2e +0.58
+
+correlation with SM clock (H3 predicts strongly negative):
+  fp32: vision_tower +nan  prep_other +nan  decode_per_token +nan
+  fp16: vision_tower +nan  prep_other +nan  decode_per_token +nan
+  SM clock pre-trial: min 1740  p50 1740  max 1740 MHz; throttle reasons seen: ['0x0000000000000000']
+
+fp16 minus neighbouring fp32 trials (within +-3 positions), median over fp16 trials:
+  vision_tower_ms         -23.257  (n=59)
+  prep_other_ms            +0.137  (n=59)
+  decode_per_token_ms      -0.040  (n=59)
+  e2e_ms                  -26.226  (n=59)
+  cpu_probe_ms             -0.283  (n=59)

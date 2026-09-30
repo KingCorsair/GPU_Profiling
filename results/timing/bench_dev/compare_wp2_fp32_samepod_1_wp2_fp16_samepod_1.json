@@ -1,0 +1,165 @@
+{
+  "runs": [
+    "results/timing/bench_dev/wp2_fp32_samepod_1.json",
+    "results/timing/bench_dev/wp2_fp16_samepod_1.json"
+  ],
+  "warnings": [
+    "runs differ on git_commit: ['e295fd000488e65ed7c9b98e8fadc3ec7d2b5ed6', 'caf19fe4ea82268160296d188c8d7878fbf691ae']",
+    "runs differ on vision_tower_dtype: ['torch.float32', 'torch.float16']"
+  ],
+  "spreads": {
+    "576": {
+      "vision_tower_ms": {
+        "p50s_ms": [
+          33.92558288574219,
+          14.286992073059082
+        ],
+        "spread_ms": 19.638590812683105,
+        "spread_pct_of_median": 81.46667473979443
+      },
+      "mm_projector_ms": {
+        "p50s_ms": [
+          0.327552005648613,
+          0.42022399604320526
+        ],
+        "spread_ms": 0.09267199039459229,
+        "spread_pct_of_median": 24.78602955562227
+      },
+      "prep_other_ms": {
+        "p50s_ms": [
+          0.964176744222641,
+          1.740352138876915
+        ],
+        "spread_ms": 0.776175394654274,
+        "spread_pct_of_median": 57.398196004084035
+      },
+      "multimodal_prep_ms": {
+        "p50s_ms": [
+          35.19473648071289,
+          16.41913604736328
+        ],
+        "spread_ms": 18.77560043334961,
+        "spread_pct_of_median": 72.75408534066624
+      },
+      "prep_wallclock_ms": {
+        "p50s_ms": [
+          35.24536918848753,
+          16.49552211165428
+        ],
+        "spread_ms": 18.749847076833248,
+        "spread_pct_of_median": 72.47593385304462
+      },
+      "prefill_ms": {
+        "p50s_ms": [
+          111.29678726196289,
+          110.6705436706543
+        ],
+        "spread_ms": 0.6262435913085938,
+        "spread_pct_of_median": 0.5642664518939529
+      },
+      "decode_ms": {
+        "p50s_ms": [
+          949.0222406387329,
+          954.0460481643677
+        ],
+        "spread_ms": 5.023807525634766,
+        "spread_pct_of_median": 0.527969233179162
+      },
+      "decode_per_token_ms": {
+        "p50s_ms": [
+          30.613620665765577,
+          30.77567897304412
+        ],
+        "spread_ms": 0.1620583072785422,
+        "spread_pct_of_median": 0.5279692331791666
+      },
+      "e2e_ms": {
+        "p50s_ms": [
+          1110.7700122520328,
+          1107.0873765274882
+        ],
+        "spread_ms": 3.682635724544525,
+        "spread_pct_of_median": 0.33208949711334385
+      }
+    },
+    "128": {
+      "vision_tower_ms": {
+        "p50s_ms": [
+          33.93912124633789,
+          13.787231922149658
+        ],
+        "spread_ms": 20.151889324188232,
+        "spread_pct_of_median": 84.4476394542292
+      },
+      "mm_projector_ms": {
+        "p50s_ms": [
+          0.38707199692726135,
+          0.37751999497413635
+        ],
+        "spread_ms": 0.009552001953125,
+        "spread_pct_of_median": 2.498588019309737
+      },
+      "prep_other_ms": {
+        "p50s_ms": [
+          12.042879864573479,
+          16.635471671819687
+        ],
+        "spread_ms": 4.592591807246208,
+        "spread_pct_of_median": 32.028283086063404
+      },
+      "multimodal_prep_ms": {
+        "p50s_ms": [
+          46.354814529418945,
+          30.885647773742676
+        ],
+        "spread_ms": 15.46916675567627,
+        "spread_pct_of_median": 40.0545680189257
+      },
+      "prep_wallclock_ms": {
+        "p50s_ms": [
+          46.40607908368111,
+          30.95335979014635
+        ],
+        "spread_ms": 15.452719293534756,
+        "spread_pct_of_median": 39.95044307065878
+      },
+      "prefill_ms": {
+        "p50s_ms": [
+          44.48459243774414,
+          44.127952575683594
+        ],
+        "spread_ms": 0.3566398620605469,
+        "spread_pct_of_median": 0.8049421490072407
+      },
+      "decode_ms": {
+        "p50s_ms": [
+          905.7672166824341,
+          909.9933109283447
+        ],
+        "spread_ms": 4.2260942459106445,
+        "spread_pct_of_median": 0.46549026500443214
+      },
+      "decode_per_token_ms": {
+        "p50s_ms": [
+          29.21829731233658,
+          29.354622933172408
+        ],
+        "spread_ms": 0.13632562083582656,
+        "spread_pct_of_median": 0.46549026500442975
+      },
+      "e2e_ms": {
+        "p50s_ms": [
+          1011.92591432482,
+          1004.7335075214505
+        ],
+        "spread_ms": 7.192406803369522,
+        "spread_pct_of_median": 0.713299104990649
+      }
+    }
+  },
+  "vision_tower_gate_ms": 5.0,
+  "gate_passed": {
+    "576": false,
+    "128": false
+  }
+}

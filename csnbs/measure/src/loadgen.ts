@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { collectServerMetadata, type ServerMetadata } from "./server_metadata.js";
 
 type DatasetRecord = {
   image: string; // path relative to dev.json
@@ -104,6 +105,7 @@ type RunManifest = {
   workload: WorkloadMetadata;
   source: SourceMetadata;
   hardware: HardwareMetadata;
+  server: ServerMetadata;
   summary: LoadSummary;
   requests: {
     file: "requests.jsonl";
@@ -501,6 +503,7 @@ async function main(): Promise<void> {
   const source = collectSourceMetadata();
   const hardware = collectHardwareMetadata();
   const workload = describeWorkload(payloads);
+  const server = await collectServerMetadata(config.endpoint);
  
   const runId = makeRunId(
     new Date().toISOString(),
@@ -538,6 +541,7 @@ async function main(): Promise<void> {
     workload,
     source,
     hardware,
+    server,
     summary,
     requests: {
       file: "requests.jsonl",
@@ -551,4 +555,3 @@ async function main(): Promise<void> {
 }
 
 await main();
-

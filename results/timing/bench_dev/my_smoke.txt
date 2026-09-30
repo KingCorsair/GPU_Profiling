@@ -1,0 +1,13 @@
+bench_dev run 'my_smoke' -- NVIDIA A40  git=559db96b77
+n_measured/config=4  warmup/config=2  output_tokens=32  images=20  regions=on  cpu_threads=4 (quota 7.65 CPUs)
+
+region                     576 p50     576 p95     128 p50     128 p95
+vision_tower_ms              34.77       34.88       34.72       34.78
+mm_projector_ms               0.34        0.34        0.39        0.39
+prep_other_ms                 1.00        1.07       12.93       13.70
+multimodal_prep_ms           36.14       36.25       48.05       48.87
+prep_wallclock_ms            36.19       36.32       48.10       48.93
+prefill_ms                  111.27      117.22       44.60       45.66
+decode_ms                   949.69      950.13      906.26      908.03
+decode_per_token_ms          30.64       30.65       29.23       29.29
+e2e_ms                     1113.25     1120.83     1018.13     1019.81

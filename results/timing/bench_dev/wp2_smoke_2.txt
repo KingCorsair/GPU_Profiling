@@ -1,0 +1,13 @@
+bench_dev run 'wp2_smoke_2' -- NVIDIA A40  git=e295fd0004 (DIRTY)
+n_measured/config=4  warmup/config=2  output_tokens=32  images=20  regions=on  cpu_threads=4 (quota 7.65 CPUs)
+
+region                     576 p50     576 p95     128 p50     128 p95
+vision_tower_ms              11.18       11.71       11.88       14.05
+mm_projector_ms               0.36        0.43        0.38        0.42
+prep_other_ms                 1.20        1.44       15.29       16.82
+multimodal_prep_ms           12.79       13.51       27.55       31.29
+prep_wallclock_ms            12.85       13.57       27.60       31.37
+prefill_ms                  110.37      116.50       44.01       44.76
+decode_ms                   948.28      948.37      904.73      904.80
+decode_per_token_ms          30.59       30.59       29.18       29.19
+e2e_ms                     1092.94     1100.01      995.71      998.81
