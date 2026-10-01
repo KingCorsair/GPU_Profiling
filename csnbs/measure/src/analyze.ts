@@ -3,7 +3,11 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { percentile, summarizeRun, runQualityReasons, type LoadRun, type RequestResult, type RunManifest } from './loadgen.js';
 
-export type VerifiedRun = { manifest: RunManifest; requests: RequestResult[]; directory: string };
+export type VerifiedResources = {
+  file: 'resources.jsonl'; count: number; sha256: string; scope: string | null;
+  samples: Record<string, unknown>[];
+};
+export type VerifiedRun = { manifest: RunManifest; requests: RequestResult[]; directory: string; resources?: VerifiedResources };
 export type ComparisonMetric = 'successfulThroughputWithinWindowRps' | 'successfulThroughputIncludingDrainRps' | 'p50' | 'p95' | 'p99';
 export type RunPair = { baseline: VerifiedRun; candidate: VerifiedRun; blockId: string };
 export type PairComparison = {
@@ -75,6 +79,7 @@ export async function readVerifiedRun(directory: string): Promise<VerifiedRun> {
   invariant(phases.warmup.length === manifest.config.warmupRequests, 'Warmup budget/raw outcome count mismatch');
   invariant(phases.warmup.length === manifest.warmup.completed, 'Warmup manifest count mismatch');
   invariant(phases.warmup.filter((row) => row.outcome === 'success').length === manifest.warmup.successful, 'Warmup success count mismatch');
+  invariant(manifest.workload.orderSeed === manifest.config.seed, 'Workload seed differs from requested configuration');
   const questionIds = phases.measurement.map((row) => row.questionId);
   invariant(JSON.stringify(questionIds) === JSON.stringify(manifest.workload.measuredQuestionIds), 'Measured workload sequence mismatch');
   invariant(hash(JSON.stringify(questionIds)) === manifest.workload.measuredOrderHash, 'Measured order hash mismatch');
@@ -99,7 +104,34 @@ export async function readVerifiedRun(directory: string): Promise<VerifiedRun> {
   const qualityReasons = runQualityReasons(manifest);
   invariant(manifest.quality.reportable === (qualityReasons.length === 0), 'Reportability contradicts provenance/outcomes');
   invariant(stable(manifest.quality.reasons) === stable(qualityReasons), 'Quality reasons contradict provenance/outcomes');
-  return { manifest, requests, directory: resolve(directory) };
+  const resourceDescriptor = (manifest as unknown as Record<string, unknown>).resourceSamples;
+  const resources = resourceDescriptor === undefined || resourceDescriptor === null ? undefined : await readVerifiedResources(directory, resourceDescriptor);
+  return { manifest, requests, directory: resolve(directory), ...(resources ? { resources } : {}) };
+}
+
+export async function readVerifiedResources(directory: string, descriptor: unknown): Promise<VerifiedResources> {
+  invariant(descriptor !== null && typeof descriptor === 'object' && !Array.isArray(descriptor), 'Invalid resource descriptor');
+  const metadata = descriptor as Record<string, unknown>;
+  invariant(metadata.file === 'resources.jsonl', 'Unsupported resource file; expected resources.jsonl');
+  invariant(Number.isSafeInteger(metadata.count) && (metadata.count as number) >= 0, 'Invalid resource sample count');
+  invariant(typeof metadata.sha256 === 'string', 'Missing resource SHA-256');
+  const bytes = await readFile(join(directory, 'resources.jsonl'));
+  invariant(hash(bytes) === metadata.sha256, 'Resource sample SHA-256 mismatch');
+  const lines = bytes.toString('utf8').trim().split('\n').filter(Boolean);
+  invariant(lines.length === metadata.count, 'Resource sample count mismatch');
+  const samples = lines.map((line) => {
+    const parsed: unknown = JSON.parse(line);
+    invariant(parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed), 'Invalid resource sample record');
+    const row = parsed as Record<string, unknown>;
+    invariant(typeof row.recordedAtUtc === 'string' && Number.isFinite(Date.parse(row.recordedAtUtc)), 'Invalid resource sample timestamp');
+    if (row.kind === 'sampled-device') {
+      invariant(Array.isArray(row.fields) && row.fields.every((key) => typeof key === 'string') && new Set(row.fields).size === row.fields.length, 'Invalid resource fields');
+      invariant(Array.isArray(row.values) && row.values.length === row.fields.length && row.values.every((value) => typeof value === 'string' || typeof value === 'number'), 'Invalid resource values');
+    } else invariant(typeof row.error === 'string', 'Unknown resource record kind');
+    return row;
+  });
+  return { file: 'resources.jsonl', count: metadata.count as number, sha256: metadata.sha256,
+    scope: typeof metadata.scope === 'string' ? metadata.scope : null, samples };
 }
 
 function stable(value: unknown): string {
@@ -177,10 +209,20 @@ export function baselineRepeatability(runs: VerifiedRun[], metric: ComparisonMet
   const values = runs.map((run) => valueFor(run, metric)).filter((value): value is number => value !== null && Number.isFinite(value));
   const median = percentile(values, 0.5);
   const absoluteDeviations = median === null ? [] : values.map((value) => Math.abs(value - median));
+  const reasons = runs.length < 5 ? ['Fewer than five baseline repetitions; provisional spread only'] : [];
+  const reference = runs[0]?.manifest;
+  for (const run of runs) {
+    if (!run.manifest.quality.reportable) reasons.push('Some baseline trials fail run-quality checks; spread is descriptive only');
+    if (reference) {
+      // Repetition seeds may shuffle the same complete workload; all scientific controls still match.
+      reasons.push(...comparabilityReasons(reference, run.manifest).filter((reason) => reason !== 'Unmatched measured request order'));
+      if (stable(reference.server.configuration) !== stable(run.manifest.server.configuration)) reasons.push('Baseline effective configurations differ');
+    }
+  }
   return { metric, trialCount: runs.length, validTrialCount: values.length, median,
     min: values.length ? Math.min(...values) : null, max: values.length ? Math.max(...values) : null,
     relativeRangePercent: median && values.length ? (Math.max(...values) - Math.min(...values)) / Math.abs(median) * 100 : null,
     medianAbsoluteDeviationPercent: median ? percentile(absoluteDeviations, 0.5)! / Math.abs(median) * 100 : null,
-    reasons: runs.length < 5 ? ['Fewer than five baseline repetitions; provisional spread only'] : [],
+    reasons: [...new Set(reasons)],
     note: 'Observed trial spread is a pilot noise estimate, not a promised detection threshold.' };
 }

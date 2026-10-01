@@ -8,11 +8,11 @@ import { baselineRepeatability, comparePairs, comparabilityReasons, readVerified
 import { classifyCapacity } from './capacity.js';
 import { buildWorkloadOrder, describeWorkload, runQualityReasons, summarizeRun, type DatasetPayload, type LoadConfig, type LoadRun, type RequestResult, type RunManifest } from './loadgen.js';
 
-function fixture(id: string, latency = 20, serial = false): VerifiedRun {
+function fixture(id: string, latency = 20, serial = false, seed = 7): VerifiedRun {
   const payloads: DatasetPayload[] = Array.from({ length: 12 }, (_, index) => ({ image_b64: 'eA==', question: `Q${index}`, workloadIndex: index, questionId: `q${index}`, category: index % 2 ? 'ocr' : 'count', sourceDataset: 'fixture' }));
   const config: LoadConfig = { endpoint: 'http://localhost/infer', requestsPerSecond: 2, durationSeconds: 120, measuredRequests: 240, timeoutMs: 120000,
-    datasetPath: 'fixture.json', warmupRequests: 10, seed: 7, settleMs: 0, runKind: 'open-loop', outputDir: '/tmp', runDeadlineMs: null };
-  const workload = describeWorkload(payloads, 240, 7), order = buildWorkloadOrder(payloads, 240, 7);
+    datasetPath: 'fixture.json', warmupRequests: 10, seed, settleMs: 0, runKind: 'open-loop', outputDir: '/tmp', runDeadlineMs: null };
+  const workload = describeWorkload(payloads, 240, seed), order = buildWorkloadOrder(payloads, 240, seed);
   let previousEnd = 0;
   const makeRow = (phase: 'warmup' | 'measurement', sequence: number): RequestResult => {
     const index = phase === 'measurement' ? order[sequence]! : sequence % 12;
@@ -141,4 +141,108 @@ test('capacity screens delivery errors and growing backlog without declaring sus
   assert.equal(classifyCapacity(undelivered).classification, 'delivery-invalid');
   const isolated = fixture('isolated'); isolated.manifest.runKind = 'isolated';
   assert.equal(classifyCapacity(isolated).classification, 'inconclusive');
+});
+
+test('optional resource artifacts are verified by exact hash, count, format and safe filename', async (t) => {
+  const {readVerifiedResources}=await import('./analyze.js');
+  const run=fixture('resources'),directory=await save(t,run);
+  const sample={recordedAtUtc:'2026-10-01T12:00:00Z',kind:'sampled-device',fields:['uuid','memory_mib'],values:['GPU-fixture','15000']};
+  const bytes=JSON.stringify(sample)+'\n';
+  const descriptor={file:'resources.jsonl',count:1,sha256:`sha256:${createHash('sha256').update(bytes).digest('hex')}`,scope:'sampled whole-device memory, not exact KV cache'};
+  await writeFile(join(directory,'resources.jsonl'),bytes);
+  Object.assign(run.manifest,{resourceSamples:descriptor});
+  await writeFile(join(directory,'run.json'),JSON.stringify(run.manifest));
+  const verified=await readVerifiedRun(directory);
+  assert.equal(verified.resources!.count,1);assert.deepEqual(verified.resources!.samples[0],sample);
+  await assert.rejects(readVerifiedResources(directory,{...descriptor,file:'../resources.jsonl'}),/Unsupported resource file/);
+  await assert.rejects(readVerifiedResources(directory,{...descriptor,count:2}),/count mismatch/);
+  await writeFile(join(directory,'resources.jsonl'),bytes.replace('15000','1'));
+  await assert.rejects(readVerifiedRun(directory),/Resource sample SHA-256 mismatch/);
+  await rm(join(directory,'resources.jsonl'));
+  await assert.rejects(readVerifiedRun(directory),/ENOENT/);
+});
+
+function rateFixture(id:string,rate:number,overloaded=false):VerifiedRun {
+  const run=fixture(id),m=run.manifest,start=m.timing.plannedStartMs;
+  m.config.requestsPerSecond=rate;m.config.durationSeconds=m.config.measuredRequests/rate;
+  const end=start+m.config.durationSeconds*1000;let previous=start;
+  for(const row of run.requests.filter(row=>row.phase==='measurement')){
+    row.scheduledAtMs=start+row.sequence*1000/rate;row.sentAtMs=row.scheduledAtMs;
+    const service=overloaded?1500:20;
+    row.completedAtMs=(overloaded?Math.max(row.sentAtMs,previous):row.sentAtMs)+service;
+    previous=row.completedAtMs;row.latencyMs=row.completedAtMs-row.sentAtMs;row.dispatchLatenessMs=0;
+    row.plannedToCompleteMs=row.latencyMs;row.serverMetrics!.service_ms=service;row.unattributedClientMs=row.latencyMs-service;
+  }
+  m.timing.plannedEndMs=end;m.timing.finishedMs=Math.max(end,previous);
+  m.timing.plannedEndAtUtc=new Date(end).toISOString();m.timing.finishedAtUtc=new Date(m.timing.finishedMs).toISOString();
+  m.summary=summarizeRun({plannedStartMs:start,plannedEndMs:end,finishedMs:m.timing.finishedMs,
+    results:run.requests.filter(row=>row.phase==='measurement'),warmupResults:run.requests.filter(row=>row.phase==='warmup'),status:'complete',stopReason:null});
+  return run;
+}
+
+test('repeated capacity screens bracket only complete monotonic prescribed rates', async () => {
+  const {summarizeCapacityBracket}=await import('./capacity.js');
+  const low=[rateFixture('low1',1),rateFixture('low2',1)];
+  const high=[rateFixture('high1',3,true),rateFixture('high2',3,true)];
+  const bracket=summarizeCapacityBracket([...low,...high],{expectedRates:[1,3],expectedTrialsPerRate:2});
+  assert.equal(bracket.status,'screen-bracketed');assert.deepEqual(bracket.screenBracketRps,[1,3]);
+  assert.equal(bracket.sustainableCapacityEstablished,false);assert.equal(bracket.highestAllPassRate,1);assert.equal(bracket.lowestAllFailRate,3);
+  assert.equal(summarizeCapacityBracket(low).status,'unbounded-above');
+  assert.equal(summarizeCapacityBracket(high).status,'unbounded-below');
+  const missing=summarizeCapacityBracket(low,{expectedRates:[1,3],expectedTrialsPerRate:2});
+  assert.equal(missing.status,'inconclusive');assert.equal(missing.points[1]!.trialCount,0);
+  const incomplete=summarizeCapacityBracket([...low,...high],{expectedRates:[1,3],expectedTrialsPerRate:3});
+  assert.equal(incomplete.status,'inconclusive');assert.equal(incomplete.highestAllPassRate,null);
+});
+
+test('mixed, nonmonotonic, duplicate or incomparable capacity trials remain inconclusive', async () => {
+  const {summarizeCapacityBracket}=await import('./capacity.js');
+  const mixed=summarizeCapacityBracket([rateFixture('mix1',2),rateFixture('mix2',2,true)]);
+  assert.equal(mixed.status,'inconclusive');assert.equal(mixed.points[0]!.classification,'mixed');
+  const nonmonotonic=summarizeCapacityBracket([rateFixture('fail1',1,true),rateFixture('fail2',1,true),rateFixture('pass1',3),rateFixture('pass2',3)]);
+  assert.equal(nonmonotonic.status,'inconclusive');assert.equal(nonmonotonic.nonmonotonic,true);assert.equal(nonmonotonic.screenBracketRps,null);
+  const duplicate=rateFixture('same',1);
+  assert.equal(summarizeCapacityBracket([duplicate,duplicate]).status,'inconclusive');
+  const changed=rateFixture('changed',1);changed.manifest.server.configuration!.visual_token_num=128;
+  assert.equal(summarizeCapacityBracket([rateFixture('original',1),changed]).status,'inconclusive');
+});
+
+test('workload characterization preserves category/source counts and observed actual tokens only', async () => {
+  const {characterizeWorkload}=await import('./report.js');
+  const run=fixture('characters');
+  const first=run.requests.find(row=>row.phase==='measurement')!;
+  first.serverMetrics!.generated_text_tokens=7;
+  first.serverMetrics!.prompt_text_tokens=11;
+  const characterized=characterizeWorkload(run.requests);
+  assert.equal(characterized.measuredRequests,240);
+  assert.deepEqual(characterized.categoryCounts,{ocr:120,count:120});
+  assert.equal(characterized.sourceDatasetCounts.fixture,240);
+  assert.equal(characterized.generatedTextTokens.observedCount,1);assert.equal(characterized.generatedTextTokens.median,7);
+  assert.equal(characterized.promptTextTokens.median,11);assert.equal(characterized.visualTokens.observedCount,0);
+  assert.equal(characterized.outputCharacters.observedCount,0);assert.match(characterized.outputCharacters.reason,/do not retain/);
+});
+
+test('baseline reports combine both identical legs for latency spread and never narrate A/A noise as an optimization', async (t) => {
+  const {planCampaign}=await import('./campaign.js');
+  const {buildReport}=await import('./report.js');
+  for(const repetitions of [3,5]){
+    const campaign=planCampaign({campaignId:`sham-${repetitions}`,purpose:'baseline',endpoint:'http://localhost/infer',datasetPath:'fixture.json',rates:[2],
+      repetitions,measuredRequests:240,warmupRequests:10,seed:7,timeoutMs:120000,startupTimeoutMs:1000,gpuExclusive:true,
+      variants:[{id:'A',command:['unused'],expected:{model_id:'llava',visual_token_num:576}},{id:'B',command:['unused'],expected:{model_id:'llava',visual_token_num:576}}]});
+    const directory=await mkdtemp(join(tmpdir(),'sham-report-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+    for(const trial of campaign.trials){
+      const run=fixture(`${trial.trialId}-${repetitions}`,trial.variantIndex===0?20:10,false,7+trial.repetition);
+      trial.status='complete';trial.runDirectory=await save(t,run);
+    }
+    const campaignPath=join(directory,'campaign.json');await writeFile(campaignPath,JSON.stringify(campaign));
+    const report=await buildReport(campaignPath,join(directory,'report'));
+    assert.equal(report.repeatability[0]!.trialCount,repetitions*2);
+    assert.equal(report.repeatability[0]!.latencyP50.validTrialCount,repetitions*2);
+    assert.equal(report.repeatability[0]!.independentPairedBlocks,repetitions);
+    assert.equal(report.repeatability[0]!.latencyP50.relativeRangePercent,100);
+    assert.equal(report.comparisons[0]!.latency.effectPercent,50);
+    assert.equal(report.comparisons[0]!.latency.conclusion,'inconclusive');
+    assert.ok(report.comparisons[0]!.latency.reasons.some(reason=>reason.includes('sham')));
+    assert.equal(report.capacityBrackets[0]!.points[0]!.expectedTrialCount,repetitions);
+  }
 });
