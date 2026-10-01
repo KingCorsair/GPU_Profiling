@@ -36,6 +36,22 @@ npm --prefix csnbs/measure run campaign -- campaigns/llava-baseline-pilot.json -
 
 A campaign stores an immutable schedule and mutable trial statuses. Re-running the identical specification skips completed trials and puts retries in new attempt directories. A failed trial stops the campaign; retain and diagnose it. After a hard crash, the runner recovers only a stale same-host lock whose recorded process is dead. Inspect and stop any surviving owned server first; an occupied endpoint prevents reuse. Do not remove a lock belonging to an active runner.
 
+## Portable artifact export
+
+After collection stops, copy the whole campaign directory from the pod, including every attempt and raw artifact. Export that local copy into a new destination. If the saved trial paths are absolute pod paths, supply their exact original campaign root with `--source-root`; the exporter maps only that root to the copied tree.
+
+```sh
+python csnbs/export_campaign.py /tmp/copied-pod-campaign results/campaigns/2026-10-01/llava-baseline-pilot \
+  --source-root /workspace/rithvik-results/llava-baseline-pilot
+npm --prefix csnbs/measure run report -- results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
+python csnbs/plot_campaign.py --report results/campaigns/2026-10-01/llava-baseline-pilot/report/report.json
+DATABASE_URL=postgresql://... npm --prefix csnbs/measure run ingest -- results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
+```
+
+Choose an unused destination; existing directories are never overwritten. `campaign.source.json` preserves the original manifest bytes. The portable `campaign.json` changes only trial and attempt artifact paths to relative paths; specification, hash, schedule, statuses and all raw run/request/resource bytes stay unchanged. `export-provenance.json` records the original/exported hashes, file inventory and path mappings. Rebuild the report from the portable manifest to verify the moved evidence and refresh report links before importing that finalized snapshot. Importing the identical snapshot twice is a no-op; importing a different snapshot under an existing campaign ID is rejected.
+
+Active locks, running trials/attempts, escaping paths, symlinks and missing completed-run artifacts are rejected. A stopped failed campaign can be exported with its partial attempt journals and `campaignComplete:false`; export alone does not establish successful completion or reportability.
+
 ## Interpretation
 
 `successfulThroughputWithinWindowRps` counts successful completions within the predeclared measurement window. `successfulThroughputIncludingDrainRps` uses final drain as part of its denominator. Neither alone proves sustainable capacity. Capacity screens check client delivery, failures, and outstanding-work growth; repeated longer boundary trials are still required.

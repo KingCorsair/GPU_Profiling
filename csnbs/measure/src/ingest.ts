@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, realpath, stat } from "node:fs/promises";
+import { lstat, readFile, realpath, stat } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
@@ -177,6 +177,34 @@ export async function readRunBundle(runDirectory: string): Promise<RunBundle> {
   return { runId, manifest, requests, resources, artifacts, sha256: bundleHash };
 }
 
+function stoppedCampaignTrials(manifest: JsonObject): JsonObject[] {
+  const checkStatus = (record: JsonObject, label: string): void => {
+    if (record.status === "running" || record.status === "active") {
+      throw new Error(`${label} is active; import only a finalized, stopped campaign snapshot`);
+    }
+  };
+  checkStatus(manifest, "Campaign");
+  if (!Array.isArray(manifest.trials)) throw new Error("Campaign trials must be an array");
+  return manifest.trials.map((value) => {
+    const trial = object(value, "trial");
+    checkStatus(trial, "Campaign trial");
+    if (trial.attempts !== undefined) {
+      if (!Array.isArray(trial.attempts)) throw new Error("Trial attempts must be an array");
+      for (const attempt of trial.attempts) checkStatus(object(attempt, "attempt"), "Campaign attempt");
+    }
+    return trial;
+  });
+}
+
+async function requireUnlockedCampaign(directory: string): Promise<void> {
+  try { await lstat(join(directory, ".campaign.lock")); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error("Campaign lock exists; verify runner cleanup before importing an immutable snapshot");
+}
+
 /** Accept a run directory, run.json, or a finalized campaign.json snapshot. */
 export async function readImportBundle(inputPath: string): Promise<ImportBundle> {
   const input = resolve(inputPath);
@@ -189,8 +217,8 @@ export async function readImportBundle(inputPath: string): Promise<ImportBundle>
   }
   checkVersion(manifest, "loadgen-campaign", input);
   requiredString(manifest.campaignId, "campaignId");
-  if (!Array.isArray(manifest.trials)) throw new Error("Campaign trials must be an array");
-  const trials = manifest.trials.map((trial) => object(trial, "trial"));
+  await requireUnlockedCampaign(dirname(input));
+  const trials = stoppedCampaignTrials(manifest);
   const trialIds = new Set<string>();
   const runs = new Map<string, RunBundle>();
   const importedTrials: JsonObject[] = [];
@@ -212,6 +240,8 @@ export async function readImportBundle(inputPath: string): Promise<ImportBundle>
     }
     importedTrials.push({ ...trial, runId });
   }
+  await requireUnlockedCampaign(dirname(input));
+  if (!(await readFile(input)).equals(bytes)) throw new Error("Campaign changed while reading; import a finalized snapshot after collection stops");
   return { campaign: { manifest, sha256: sha256(bytes), trials: importedTrials }, runs: [...runs.values()] };
 }
 
@@ -282,6 +312,10 @@ async function insertRun(client: pg.Client, run: RunBundle): Promise<boolean> {
 
 /** One transaction for the whole import. An identity conflict rolls back every new row. */
 export async function ingestBundle(client: pg.Client, bundle: ImportBundle): Promise<ImportResult> {
+  if (bundle.campaign !== null) {
+    stoppedCampaignTrials(bundle.campaign.manifest);
+    stoppedCampaignTrials({ trials: bundle.campaign.trials });
+  }
   const campaignId = bundle.campaign === null ? null : requiredString(bundle.campaign.manifest.campaignId, "campaignId");
   const result: ImportResult = { insertedRuns: 0, existingRuns: 0, campaignId };
   await client.query("BEGIN");

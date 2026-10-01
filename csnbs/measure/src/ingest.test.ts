@@ -172,6 +172,45 @@ test("campaigns resolve relative directories, preserve failed trials, and reject
   await assert.rejects(readImportBundle(path), /Duplicate trial/);
 });
 
+test("active campaign, trial, attempt, and lock cannot become an immutable import snapshot", async (t) => {
+  const root = await temp(t);
+  const path = join(root, "campaign.json");
+  const stopped = { schema: "loadgen-campaign", schemaVersion: 2, campaignId: "stopped", trials: [
+    { trialId: "failed", status: "failed", runDirectory: null, attempts: [{ status: "interrupted" }] },
+    { trialId: "not-executed", status: "pending", runDirectory: null },
+  ] };
+  await writeFile(path, JSON.stringify(stopped));
+  assert.equal((await readImportBundle(path)).campaign?.trials.length, 2, "stopped failure snapshots retain pending trials");
+  await assert.rejects(ingestBundle(new pg.Client(), {
+    campaign: { manifest: stopped, sha256: "a".repeat(64), trials: [{ ...stopped.trials[0], status: "running" }] }, runs: [],
+  }), /active.*finalized/, "direct API checks inserted trial metadata as well as the original manifest");
+  for (const status of ["running", "active"]) {
+    const activeSnapshots = [
+      { ...stopped, status },
+      { ...stopped, trials: [{ ...stopped.trials[0], status }] },
+      { ...stopped, trials: [{ ...stopped.trials[0], attempts: [{ status }, { status: "complete" }] }] },
+    ];
+    for (const manifest of activeSnapshots) {
+      await writeFile(path, JSON.stringify(manifest));
+      await assert.rejects(readImportBundle(path), /active.*finalized/);
+      await assert.rejects(ingestBundle(new pg.Client(), {
+        campaign: { manifest, sha256: "a".repeat(64), trials: manifest.trials }, runs: [],
+      }), /active.*finalized/, "direct API also rejects active metadata before opening a transaction");
+    }
+  }
+  await writeFile(path, JSON.stringify({ ...stopped, trials: [{ ...stopped.trials[0], attempts: {} }] }));
+  await assert.rejects(readImportBundle(path), /attempts must be an array/);
+  await writeFile(path, JSON.stringify(stopped));
+  const lock = join(root, ".campaign.lock");
+  await writeFile(lock, JSON.stringify({ pid: 1, hostname: "other-host" }));
+  await assert.rejects(readImportBundle(path), /Campaign lock exists/);
+  await rm(lock);
+  await symlink(join(root, "missing-lock-target"), lock);
+  await assert.rejects(readImportBundle(path), /Campaign lock exists/, "dangling lock symlink is not evidence of an unlocked campaign");
+  await rm(lock);
+  assert.equal((await readImportBundle(path)).campaign?.manifest.campaignId, "stopped");
+});
+
 test("real Postgres: campaign import is idempotent, preserves values, and rolls back conflicts", {
   skip: !process.env.DATABASE_URL ? "Set DATABASE_URL to run real PostgreSQL integration" : false,
 }, async (t) => {
@@ -199,6 +238,11 @@ test("real Postgres: campaign import is idempotent, preserves values, and rolls 
   ] };
   await writeFile(path, JSON.stringify(campaign));
   const bundle = await readImportBundle(path);
+  const active = structuredClone(bundle);
+  (active.campaign!.manifest.trials as Record<string, unknown>[])[0]!.status = "running";
+  await assert.rejects(ingestBundle(client, active), /active.*finalized/);
+  assert.equal((await client.query("SELECT count(*)::int AS count FROM benchmark.campaigns WHERE campaign_id=$1", [prefix])).rows[0].count, 0,
+    "rejected active import must not reserve the immutable campaign identity");
   assert.deepEqual(await ingestBundle(client, bundle), { insertedRuns: 2, existingRuns: 0, campaignId: prefix });
   assert.deepEqual(await ingestBundle(client, bundle), { insertedRuns: 0, existingRuns: 2, campaignId: prefix });
   assert.equal((await client.query("SELECT count(*)::int AS count FROM benchmark.request_outcomes WHERE run_id LIKE $1", [prefix + "%"])).rows[0].count, 4);
