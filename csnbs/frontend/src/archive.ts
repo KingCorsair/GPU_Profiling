@@ -1,4 +1,15 @@
 export type Percentiles = { p50: number | null; p95: number | null; p99: number | null };
+export type LengthObservations = { observedCount: number; min: number | null; max: number | null };
+export type WorkloadCharacterization = {
+  scope: 'measurement-phase' | 'unavailable';
+  measuredRecords: number | null;
+  successfulRecords: number | null;
+  categoryCounts: { label: string; count: number }[];
+  sourceDatasetCounts: { label: string; count: number }[];
+  outputCharacters: LengthObservations & { unit: string; reason: string | null };
+  actualTokens: { generated_text_tokens: LengthObservations; prompt_text_tokens: LengthObservations; visual_tokens: LengthObservations };
+  limitations: string[];
+};
 export type ArchivedRun = {
   runId: string;
   sourcePath: string;
@@ -13,6 +24,7 @@ export type ArchivedRun = {
   status: string | null;
   notes: string[];
   campaign: string | null;
+  workloadCharacterization: WorkloadCharacterization | null;
   modelId: string | null;
   visualTokenNum: number | null;
   tokenSource: 'server' | 'campaign' | null;
@@ -44,14 +56,21 @@ export type ArchivedRun = {
     drainMs: number | null;
   };
 };
-export type RunArchive = { schemaVersion: 1; generatedAtUtc: string; runs: ArchivedRun[]; issues: { sourcePath: string; message: string }[] };
+export type CapacityBracket = {
+  variant: string; status: 'screen-bracketed' | 'unbounded-above' | 'unbounded-below' | 'inconclusive';
+  sustainableCapacityEstablished: false; highestAllPassRate: number | null; lowestAllFailRate: number | null;
+  points: { offeredRps: number; trialCount: number; expectedTrialCount: number | null; classification: string; reasons: string[] }[];
+  reasons: string[];
+};
+export type CampaignReport = { campaignId: string; purpose: string; sourcePath: string; sha256: string; downloadPath: string; runCount: number; capacityBrackets: CapacityBracket[]; limitations: string[] };
+export type RunArchive = { schemaVersion: 1; generatedAtUtc: string; runs: ArchivedRun[]; campaignReports: CampaignReport[]; issues: { sourcePath: string; message: string }[] };
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 const nullableNumber = (value: unknown) => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const strings = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === 'string');
 
 export function parseArchive(input: unknown): RunArchive {
   const invalid = () => { throw new Error('Incomplete or incompatible run archive'); };
-  if (!object(input) || input.schemaVersion !== 1 || typeof input.generatedAtUtc !== 'string' || !Array.isArray(input.runs) || !Array.isArray(input.issues)) return invalid();
+  if (!object(input) || input.schemaVersion !== 1 || typeof input.generatedAtUtc !== 'string' || !Array.isArray(input.runs) || !Array.isArray(input.campaignReports) || !Array.isArray(input.issues)) return invalid();
   const hashes = new Set<string>();
   for (const run of input.runs) {
     if (!object(run) || !object(run.summary) || !strings(run.notes) || !strings(run.gpuModels)) return invalid();
@@ -70,6 +89,33 @@ export function parseArchive(input: unknown): RunArchive {
     for (const field of ['latencyMs', 'dispatchLatenessMs', 'scheduledToCompleteMs', 'serverServiceMs', 'serverQueueMs']) {
       const percentiles = run.summary[field];
       if (!object(percentiles) || !['p50', 'p95', 'p99'].every((key) => nullableNumber(percentiles[key]))) return invalid();
+    }
+    const characterization = run.workloadCharacterization;
+    if (characterization !== null) {
+      if (!object(characterization) || !['measurement-phase', 'unavailable'].includes(String(characterization.scope)) || !strings(characterization.limitations)) return invalid();
+      if (!nullableNumber(characterization.measuredRecords) || !nullableNumber(characterization.successfulRecords) || !object(characterization.outputCharacters) || !object(characterization.actualTokens)) return invalid();
+      if (characterization.scope === 'measurement-phase' && (characterization.measuredRecords !== run.summary.measuredRequests || characterization.successfulRecords !== run.summary.successfulRequests)) return invalid();
+      if (characterization.scope === 'unavailable' && (characterization.measuredRecords !== null || characterization.successfulRecords !== null)) return invalid();
+      for (const field of ['categoryCounts', 'sourceDatasetCounts']) {
+        const counts = characterization[field];
+        if (!Array.isArray(counts) || !counts.every((row) => object(row) && typeof row.label === 'string' && Number.isSafeInteger(row.count) && Number(row.count) > 0)) return invalid();
+        if (new Set(counts.map((row) => row.label)).size !== counts.length || characterization.scope === 'unavailable' && counts.length > 0) return invalid();
+        if (characterization.scope === 'measurement-phase' && counts.reduce((total, row) => total + Number(row.count), 0) !== characterization.measuredRecords) return invalid();
+      }
+      for (const observations of [characterization.outputCharacters, ...['generated_text_tokens', 'prompt_text_tokens', 'visual_tokens'].map((key) => (characterization.actualTokens as Record<string, unknown>)[key])]) {
+        if (!object(observations) || !Number.isSafeInteger(observations.observedCount) || Number(observations.observedCount) < 0 || !nullableNumber(observations.min) || !nullableNumber(observations.max)) return invalid();
+        if (Number(observations.observedCount) > Number(characterization.successfulRecords ?? 0)) return invalid();
+        if (observations.observedCount === 0 && (observations.min !== null || observations.max !== null)) return invalid();
+        if (Number(observations.observedCount) > 0 && (observations.min === null || observations.max === null || Number(observations.min) > Number(observations.max))) return invalid();
+      }
+      if (typeof characterization.outputCharacters.unit !== 'string' || !(characterization.outputCharacters.reason === null || typeof characterization.outputCharacters.reason === 'string')) return invalid();
+    }
+  }
+  for (const report of input.campaignReports) {
+    if (!object(report) || !['campaignId', 'purpose', 'sourcePath'].every((field) => typeof report[field] === 'string') || typeof report.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(report.sha256) || report.downloadPath !== `/data/archive/${report.sha256}.json` || !Number.isSafeInteger(report.runCount) || Number(report.runCount) < 0 || !Array.isArray(report.capacityBrackets) || !strings(report.limitations)) return invalid();
+    for (const bracket of report.capacityBrackets) {
+      if (!object(bracket) || typeof bracket.variant !== 'string' || bracket.sustainableCapacityEstablished !== false || !['screen-bracketed', 'unbounded-above', 'unbounded-below', 'inconclusive'].includes(String(bracket.status)) || !nullableNumber(bracket.highestAllPassRate) || !nullableNumber(bracket.lowestAllFailRate) || !strings(bracket.reasons) || !Array.isArray(bracket.points)) return invalid();
+      if (!bracket.points.every((point) => object(point) && typeof point.offeredRps === 'number' && nullableNumber(point.offeredRps) && Number.isSafeInteger(point.trialCount) && Number(point.trialCount) >= 0 && nullableNumber(point.expectedTrialCount) && typeof point.classification === 'string' && strings(point.reasons))) return invalid();
     }
   }
   if (!input.issues.every((issue) => object(issue) && typeof issue.sourcePath === 'string' && typeof issue.message === 'string')) return invalid();

@@ -5,7 +5,8 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { archiveRun, syncArchive } from './archive.mjs';
+import { archiveRun, archiveReport, syncArchive } from './archive.mjs';
+import { characterizeRecords } from './workload.mjs';
 import { comparisonWarnings, parseArchive } from '../src/archive.ts';
 
 const sourcePath = 'results/loadgen/2026-09-01/02-37-44Z_rps-0.5_8beede1e/run.json';
@@ -13,7 +14,7 @@ const bytes = readFileSync(new URL(`../../../${sourcePath}`, import.meta.url));
 const raw = JSON.parse(bytes.toString());
 const options = { sourcePath, sha256: createHash('sha256').update(bytes).digest('hex') };
 const entry = () => archiveRun(structuredClone(raw), options);
-const archive = () => ({ schemaVersion: 1, generatedAtUtc: '2026-10-01T00:00:00Z', runs: [entry()], issues: [] });
+const archive = () => ({ schemaVersion: 1, generatedAtUtc: '2026-10-01T00:00:00Z', runs: [entry()], campaignReports: [], issues: [] });
 const v2 = () => ({
   ...structuredClone(raw), schemaVersion: 2, status: 'complete', stopReason: null,
   quality: { reportable: false, reasons: ['Synthetic test only'], percentileConvention: 'nearest-rank' },
@@ -114,8 +115,10 @@ test('archive imports campaign runs, verifies V2 request hashes, and surfaces pa
     const frontend = path.join(repository, 'frontend');
     await mkdir(directory, { recursive: true });
     await mkdir(interrupted, { recursive: true });
-    const records = '{"phase":"measurement"}\n';
+    const records = '{"phase":"measurement","outcome":"success","category":"OCR","sourceDataset":"TEXT_VQA"}\n';
     const saved = v2();
+    saved.summary.totalRequests = 1;
+    saved.summary.successfulRequests = 1;
     saved.requests = { file: 'requests.jsonl', schemaVersion: 3, count: 1, sha256: `sha256:${createHash('sha256').update(records).digest('hex')}` };
     await writeFile(path.join(directory, 'run.json'), JSON.stringify(saved));
     await writeFile(path.join(directory, 'requests.jsonl'), records);
@@ -133,4 +136,86 @@ test('archive imports campaign runs, verifies V2 request hashes, and surfaces pa
   } finally {
     await rm(repository, { recursive: true, force: true });
   }
+});
+
+test('workload counts use measured outcomes only and never fabricate output lengths', () => {
+  const saved = v2();
+  saved.summary = { ...saved.summary, totalRequests: 3, successfulRequests: 2, failedRequests: 1 };
+  const records = [
+    { phase: 'warmup', outcome: 'success', category: 'Warmup only', sourceDataset: 'Warmup source', answer: 'never measured' },
+    { phase: 'measurement', outcome: 'success', category: ' OCR ', sourceDataset: 'TEXT_VQA', serverMetrics: { generated_text_tokens: null } },
+    { phase: 'measurement', outcome: 'success', category: 'counting', sourceDataset: 'GQA' },
+    { phase: 'measurement', outcome: 'timeout', category: 'OCR', sourceDataset: null },
+  ];
+  const characterization = characterizeRecords(saved, records);
+  assert.equal(characterization.measuredRecords, 3);
+  assert.deepEqual(characterization.categoryCounts, [{ label: 'counting', count: 1 }, { label: 'OCR', count: 2 }]);
+  assert.equal(characterization.sourceDatasetCounts.find((row) => row.label === 'Not recorded')?.count, 1);
+  assert.equal(characterization.outputCharacters.observedCount, 0);
+  assert.equal(characterization.outputCharacters.min, null);
+  assert.equal(characterization.actualTokens.generated_text_tokens.observedCount, 0);
+  assert.ok(!JSON.stringify(characterization.categoryCounts).includes('Warmup'));
+});
+
+test('actual token observations never substitute for unrecorded character lengths', () => {
+  const saved = v2();
+  saved.summary = { ...saved.summary, totalRequests: 1, successfulRequests: 1, failedRequests: 0 };
+  const characterization = characterizeRecords(saved, [{ phase: 'measurement', outcome: 'success', category: 'OCR', sourceDataset: 'TEXT_VQA', serverMetrics: { generated_text_tokens: 4, prompt_text_tokens: 12, visual_tokens: 128 } }]);
+  assert.equal(characterization.outputCharacters.observedCount, 0);
+  assert.equal(characterization.outputCharacters.min, null);
+  assert.match(characterization.outputCharacters.reason ?? '', /No output character counts/);
+  assert.deepEqual(characterization.actualTokens.generated_text_tokens, { observedCount: 1, min: 4, max: 4 });
+  assert.throws(() => characterizeRecords(saved, []), /count differs/);
+  assert.equal(characterizeRecords(raw, []).scope, 'unavailable');
+});
+
+test('optional server character counts preserve partial coverage and remain distinct from tokens', () => {
+  const saved = v2();
+  saved.summary = { ...saved.summary, totalRequests: 3, successfulRequests: 2, failedRequests: 1 };
+  const characterization = characterizeRecords(saved, [
+    { phase: 'measurement', outcome: 'success', serverMetrics: { output_characters: 0, generated_text_tokens: 1 } },
+    { phase: 'measurement', outcome: 'success', serverMetrics: { output_characters: -1, generated_text_tokens: null } },
+    { phase: 'measurement', outcome: 'timeout', serverMetrics: { output_characters: 100 } },
+  ]);
+  assert.deepEqual(characterization.outputCharacters, { observedCount: 1, min: 0, max: 0, unit: 'Unicode code points', reason: 'Only some successful responses include a recorded character count.' });
+  assert.equal(characterization.actualTokens.generated_text_tokens.min, 1);
+});
+
+test('portable campaign identity comes from its manifest despite nested date/run paths', async () => {
+  const repository = await mkdtemp(path.join(tmpdir(), 'frontend-portable-'));
+  try {
+    const campaignRoot = path.join(repository, 'results/campaigns/renamed-export');
+    const directory = path.join(campaignRoot, 'trial-attempt/runs/2026-10-01/example');
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(campaignRoot, 'campaign.json'), JSON.stringify({ schema: 'loadgen-campaign', schemaVersion: 2, campaignId: 'canonical-id', spec: { purpose: 'integration' }, trials: [{ runDirectory: 'trial-attempt/runs/2026-10-01/example' }] }));
+    const saved = v2();
+    saved.summary = { ...saved.summary, totalRequests: 1, successfulRequests: 1, failedRequests: 0 };
+    saved.quality = { reportable: true, reasons: [], percentileConvention: 'nearest-rank' };
+    const records = '{"phase":"measurement","outcome":"success","category":"OCR","sourceDataset":"TEXT_VQA"}\n';
+    saved.requests = { file: 'requests.jsonl', schemaVersion: 3, count: 1, sha256: `sha256:${createHash('sha256').update(records).digest('hex')}` };
+    await writeFile(path.join(directory, 'run.json'), JSON.stringify(saved));
+    await writeFile(path.join(directory, 'requests.jsonl'), records);
+    const index = await syncArchive(repository, path.join(repository, 'frontend'), { series: [] });
+    assert.equal(index.issues.length, 0);
+    assert.equal(index.runs[0].campaign, 'canonical-id');
+    assert.equal(index.runs[0].evidence, 'integration');
+    assert.deepEqual(index.runs[0].workloadCharacterization.categoryCounts, [{ label: 'OCR', count: 1 }]);
+    assert.equal(parseArchive(index).runs.length, 1);
+  } finally { await rm(repository, { recursive: true, force: true }); }
+});
+
+test('saved campaign screens must match raw journals and summaries and cannot claim sustainable capacity', () => {
+  const hash = 'a'.repeat(64);
+  const evidence = [{ runId: raw.runId, campaign: 'canonical-id', requestsSha256: hash, rawSummary: raw.summary, evidence: 'integration' }];
+  const report = { schema: 'measurement-report', schemaVersion: 1, campaignId: 'canonical-id', purpose: 'integration', runs: [{ runId: raw.runId, requestsSha256: `sha256:${hash}`, summary: raw.summary }], limitations: ['Integration only'], capacityBrackets: [{ variant: 'A', status: 'inconclusive', sustainableCapacityEstablished: false, highestAllPassRate: null, lowestAllFailRate: null, points: [{ offeredRps: 1, trialCount: 1, expectedTrialCount: 5, classification: 'inconclusive', reasons: ['Missing trials'] }], reasons: ['Longer confirmation required'] }] };
+  const saved = archiveReport(report, evidence, 'results/campaigns/export/report/report.json', hash);
+  assert.equal(parseArchive({ ...archive(), campaignReports: [saved] }).campaignReports.length, 1);
+  assert.equal(saved.capacityBrackets[0].sustainableCapacityEstablished, false);
+  const stale = structuredClone(report);
+  stale.runs[0].summary.successfulThroughputRps = 123;
+  assert.throws(() => archiveReport(stale, evidence, '', hash), /does not match/);
+  const optimistic = structuredClone(report);
+  optimistic.capacityBrackets[0].sustainableCapacityEstablished = true;
+  assert.throws(() => archiveReport(optimistic, evidence, '', hash), /Unsupported capacity/);
+  assert.throws(() => archiveReport({ ...report, purpose: 'benchmark' }, evidence, '', hash), /integration-only/);
 });

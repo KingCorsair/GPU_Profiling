@@ -81,12 +81,14 @@ missing experiments.
 
 `scripts/archive.mjs` scans `results/loadgen/**/run.json` and
 `results/campaigns/**/run.json` at data-sync/build time. It supports manifest
-versions 1 and 2. Campaign-directory names group new trials; the historical
-campaign retains its explicit source mapping. Model identity is never guessed
+versions 1 and 2. Nested portable exports retain their canonical campaign ID
+from the nearest `campaign.json`, even when the destination folder is renamed;
+directory names are the fallback. The historical campaign retains its explicit
+source mapping. Model identity is never guessed
 from a directory or token count. Values supplied only by historical campaign
 metadata are marked as such.
 
-Version 1 runs remain **Exploratory**. An `INTEGRATION_ONLY.txt` marker, smoke
+Version 1 runs remain **Exploratory**. An integration campaign purpose, `INTEGRATION_ONLY.txt` marker, smoke
 run kind, or fake server marks a run **Integration only**. Version 2 quality
 reasons remain visible; successful complete run checks are labeled **Run checks
 passed**, which does not establish campaign significance or sustainable
@@ -103,9 +105,27 @@ The archive is a static snapshot; rerun `npm run sync-data` (and refresh the pag
 or rebuild after saving new results. Synthetic records appear only in automated
 tests, never in the generated dashboard data.
 
+V2 run details count task categories and source datasets directly from the
+hash-verified measured request records, including failures and excluding warmups.
+Actual token ranges use only values recorded by the server for successful
+requests. Output character lengths use only an optional explicit
+`serverMetrics.output_characters` count (Unicode code points). Older records do
+not preserve this count or the answer text, so those lengths remain unavailable.
+Configured output caps and visual-token budgets never substitute for actual
+lengths. These descriptions do not establish workload sensitivity or broad
+dataset coverage.
+
+Optional `results/campaigns/**/report.json` files add saved repeated capacity
+screens when their run IDs, request hashes, and summaries match the indexed raw
+evidence. The dashboard preserves report limitations and individual tested
+rates; it does not interpolate a boundary or claim sustainable capacity. Reports
+are available as original-byte downloads. Older reports without repeated
+capacity screens retain an explicit unavailable message.
+
 Tests cover the historical evidence contract plus archive quality labels,
 unknown metadata, null metrics, incompatible comparisons, campaign discovery,
-partial results, and request-record tampering.
+partial results, request-record tampering, portable nested exports, raw workload
+counts, missing output lengths, and report/evidence mismatches.
 
 ## Interpretation
 

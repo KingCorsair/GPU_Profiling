@@ -150,6 +150,10 @@ table a:hover { text-decoration: underline; }
 .archive-provenance dd { margin: 7px 0 0; line-height: 1.7; }
 .archive-provenance code { display: block; overflow-wrap: anywhere; }
 .archive-provenance a { color: var(--blue); }
+.workload-details { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); }
+.workload-details h3 { font-size: 18px; font-weight: 400; margin: 0; }
+.workload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px; }
+.workload-grid table { white-space: normal; align-self: start; }
 @media (max-width: 700px) {
   .site-header, main, .site-footer { padding-left: 23px; padding-right: 23px; }
   .site-header { min-height: 75px; }
@@ -184,6 +188,7 @@ table a:hover { text-decoration: underline; }
   .archive-count { align-items: flex-start; flex-direction: column; }
   .detail-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
   .provenance-grid { grid-template-columns: repeat(2, 1fr); }
+  .workload-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 380px) {
   .site-header, main, .site-footer { padding-left: 18px; padding-right: 18px; }

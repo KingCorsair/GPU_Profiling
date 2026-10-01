@@ -2,6 +2,8 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { characterizeRecords } from './workload.mjs';
+import { isDeepStrictEqual } from 'node:util';
 
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const number = (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
@@ -46,7 +48,7 @@ export function archiveRun(raw, { sourcePath, sha256, campaign = null, integrati
   if (raw.source?.gitDirty === true) notes.push('Uncommitted source changes were present.');
   if (!text(raw.source?.gitCommit)) notes.push('Source revision was not recorded.');
   if (failed > 0) notes.push('Some requests failed. Latency percentiles describe successful requests only.');
-  const integration = Boolean(integrationNote) || raw.runKind === 'smoke' || server.mode === 'fake';
+  const integration = Boolean(integrationNote) || campaign?.purpose === 'integration' || raw.runKind === 'smoke' || server.mode === 'fake';
   if (integrationNote) notes.unshift(integrationNote);
   if (raw.runKind === 'isolated') notes.push('Isolated requests are sequential. Configured RPS is not an offered open-loop arrival rate.');
   const percentile = (field) => Object.fromEntries(['p50', 'p95', 'p99'].map((key) => [key, number(summary[field]?.[key])]));
@@ -64,6 +66,7 @@ export function archiveRun(raw, { sourcePath, sha256, campaign = null, integrati
     status: text(raw.status),
     notes,
     campaign: campaign?.name ?? null,
+    workloadCharacterization: null,
     modelId,
     visualTokenNum: number(config.visual_token_num) ?? campaign?.visualTokenNum ?? null,
     tokenSource: number(config.visual_token_num) !== null ? 'server' : number(campaign?.visualTokenNum) !== null ? 'campaign' : null,
@@ -97,16 +100,48 @@ export function archiveRun(raw, { sourcePath, sha256, campaign = null, integrati
   };
 }
 
-async function runFiles(directory) {
+async function runFiles(directory, kind = 'runs') {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const fullPath = path.join(directory, entry.name);
     // Do not follow symlinks outside the results directory.
-    if (entry.isDirectory()) files.push(...await runFiles(fullPath));
-    else if (entry.isFile() && (entry.name === 'run.json' || entry.name === 'run.partial.json' && !entries.some((sibling) => sibling.name === 'run.json'))) files.push(fullPath);
+    if (entry.isDirectory()) files.push(...await runFiles(fullPath, kind));
+    else if (entry.isFile() && (kind === 'reports' ? entry.name === 'report.json' : entry.name === 'run.json' || entry.name === 'run.partial.json' && !entries.some((sibling) => sibling.name === 'run.json'))) files.push(fullPath);
   }
   return files.sort();
+}
+
+export function archiveReport(report, evidence, sourcePath, sha256) {
+  if (report.schema !== 'measurement-report' || report.schemaVersion !== 1 || !text(report.campaignId) || !text(report.purpose) || !Array.isArray(report.runs)) throw new Error('Unsupported campaign report');
+  const seen = new Set();
+  for (const run of report.runs) {
+    const saved = evidence.find((entry) => entry.runId === run.runId && entry.campaign === report.campaignId && `sha256:${entry.requestsSha256}` === run.requestsSha256);
+    if (!saved || seen.has(run.runId) || !isDeepStrictEqual(saved.rawSummary, run.summary)) throw new Error('Campaign report does not match the indexed raw run evidence');
+    if (saved.evidence === 'integration' && report.purpose !== 'integration') throw new Error('Campaign report omits the integration-only purpose of its raw evidence');
+    seen.add(run.runId);
+  }
+  const brackets = report.capacityBrackets ?? [];
+  const strings = (values) => Array.isArray(values) && values.every((value) => typeof value === 'string');
+  const nullableNumber = (value) => value === null || number(value) !== null;
+  if (!Array.isArray(brackets) || !brackets.every((bracket) => object(bracket) && typeof bracket.variant === 'string' && bracket.sustainableCapacityEstablished === false && ['screen-bracketed', 'unbounded-above', 'unbounded-below', 'inconclusive'].includes(bracket.status) && nullableNumber(bracket.highestAllPassRate) && nullableNumber(bracket.lowestAllFailRate) && Array.isArray(bracket.points) && strings(bracket.reasons) && bracket.points.every((point) => object(point) && number(point.offeredRps) !== null && Number.isSafeInteger(point.trialCount) && point.trialCount >= 0 && nullableNumber(point.expectedTrialCount) && typeof point.classification === 'string' && strings(point.reasons)))) throw new Error('Unsupported capacity-screen report');
+  if (!strings(report.limitations ?? [])) throw new Error('Unsupported report limitations');
+  return { campaignId: report.campaignId, purpose: report.purpose, sourcePath, sha256, downloadPath: `/data/archive/${sha256}.json`, runCount: report.runs.length, capacityBrackets: brackets, limitations: report.limitations ?? [] };
+}
+
+async function campaignContext(filename, repository) {
+  const boundary = path.join(repository, 'results/campaigns');
+  if (!filename.startsWith(`${boundary}${path.sep}`)) return null;
+  let directory = path.dirname(filename);
+  while (directory !== boundary && directory.startsWith(`${boundary}${path.sep}`)) {
+    try {
+      const manifest = JSON.parse(await readFile(path.join(directory, 'campaign.json'), 'utf8'));
+      if (manifest.schema !== 'loadgen-campaign' || manifest.schemaVersion !== 2 || typeof manifest.campaignId !== 'string') throw new Error('Unsupported enclosing campaign manifest');
+      return { name: manifest.campaignId, purpose: manifest.spec?.purpose };
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    directory = path.dirname(directory);
+  }
+  return null;
 }
 
 export async function syncArchive(repository, frontend, source) {
@@ -118,7 +153,8 @@ export async function syncArchive(repository, frontend, source) {
   }])));
   const output = path.join(frontend, 'public/data/archive');
   await mkdir(output, { recursive: true });
-  const archive = { schemaVersion: 1, generatedAtUtc: new Date().toISOString(), runs: [], issues: [] };
+  const archive = { schemaVersion: 1, generatedAtUtc: new Date().toISOString(), runs: [], campaignReports: [], issues: [] };
+  const evidence = [];
   const seenHashes = new Set();
   const files = [];
   for (const root of ['results/loadgen', 'results/campaigns']) {
@@ -135,7 +171,8 @@ export async function syncArchive(repository, frontend, source) {
       try { integrationNote = (await readFile(path.join(path.dirname(filename), 'INTEGRATION_ONLY.txt'), 'utf8')).trim(); }
       catch (error) { if (error.code !== 'ENOENT') throw error; }
       const campaignName = sourcePath.startsWith('results/campaigns/') ? sourcePath.split('/')[2] : null;
-      const entry = archiveRun(raw, { sourcePath, sha256: hash(bytes), campaign: selected.get(sourcePath) ?? (campaignName ? { name: campaignName } : null), integrationNote });
+      const context = selected.get(sourcePath) ?? await campaignContext(filename, repository) ?? (campaignName ? { name: campaignName } : null);
+      const entry = archiveRun(raw, { sourcePath, sha256: hash(bytes), campaign: context, integrationNote });
       if (seenHashes.has(entry.sha256)) throw new Error('Duplicate run bytes already indexed from another path');
       // Copies retain the exact original bytes and downloadable SHA-256 identity.
       await writeFile(path.join(output, `${entry.sha256}.json`), bytes);
@@ -144,6 +181,9 @@ export async function syncArchive(repository, frontend, source) {
           const records = await readFile(path.join(path.dirname(filename), 'requests.jsonl'));
           entry.requestsSha256 = hash(records);
           if (raw.schemaVersion === 2 && raw.requests.sha256 !== `sha256:${entry.requestsSha256}`) throw new Error('V2 request-record hash does not match the run manifest');
+          const rows = records.toString('utf8').split('\n').filter((line) => line.trim()).map((line) => JSON.parse(line));
+          if (rows.length !== raw.requests.count) throw new Error('Request-record count differs from the saved manifest');
+          entry.workloadCharacterization = characterizeRecords(raw, rows);
           entry.requestDownloadPath = `/data/archive/${entry.requestsSha256}.jsonl`;
           await writeFile(path.join(output, `${entry.requestsSha256}.jsonl`), records);
         } catch (error) {
@@ -154,10 +194,23 @@ export async function syncArchive(repository, frontend, source) {
       }
       else if (raw.schemaVersion === 2) throw new Error('V2 request-record reference is missing');
       seenHashes.add(entry.sha256);
+      evidence.push({ ...entry, rawSummary: raw.summary });
       archive.runs.push(entry);
     } catch (error) {
       archive.issues.push({ sourcePath, message: error.message });
     }
+  }
+  let reports = [];
+  try { reports = await runFiles(path.join(repository, 'results/campaigns'), 'reports'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  for (const filename of reports) {
+    const sourcePath = path.relative(repository, filename).split(path.sep).join('/');
+    try {
+      const bytes = await readFile(filename);
+      const report = archiveReport(JSON.parse(bytes), evidence, sourcePath, hash(bytes));
+      archive.campaignReports.push(report);
+      await writeFile(path.join(output, `${report.sha256}.json`), bytes);
+    } catch (error) { archive.issues.push({ sourcePath, message: error.message }); }
   }
   archive.runs.sort((a, b) => (b.recordedAtUtc ?? '').localeCompare(a.recordedAtUtc ?? '') || a.sourcePath.localeCompare(b.sourcePath));
   await writeFile(path.join(frontend, 'public/data/archive.json'), `${JSON.stringify(archive, null, 2)}\n`);
