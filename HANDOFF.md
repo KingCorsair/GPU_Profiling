@@ -1,53 +1,112 @@
-# VisPruner / GPU Profiling — Handoff Notes
+# Handoff — resume point (paused 2026-09-22)
 
-## Goal
-1. Download the ~12GB evaluation dataset needed to run VisPruner benchmarks.
-2. Get the local VisPruner code copy (`vis_pruner_copy/`) properly committed into our own repo (`github.com/KingCorsair/GPU_Profiling`) as plain tracked files — not as a broken nested-git reference.
+The full detail is in `STATUS.md`. This file covers only what's needed to pick up again. The previous handoff, about fixing the `vis_pruner_copy` submodule and download, is resolved; it's in git history before this commit.
 
-## Environment
-- Running on a RunPod pod (GPU: NVIDIA A40).
-- Container disk (`/`, `/root`) is only **30GB**, ~8.5G free — too small for large downloads.
-- RunPod network volume mounted at **`/workspace`** has **242T free** and is writable.
-  → Any large dataset downloads should go to `/workspace`, not `/root`.
+## Where we are
 
-## What happened (timeline)
+**WP2 — FP16 Vision Tower, in progress.** The implementation and the performance A/B are done. Verification and correctness are open. WP3 has not started.
 
-1. `vis_pruner_copy/` (inside `~/gpu_profiling`) was originally cloned as a **nested git repo**, with its own `.git` pointing at the upstream `Theia-4869/VisPruner` repo. We don't have push access to that repo (GitHub account `KingCorsair` got a 403: `Permission to Theia-4869/VisPruner.git denied`).
-2. Because it had its own `.git`, git tracked `vis_pruner_copy` in the outer `gpu_profiling` repo as a **gitlink** (submodule-style reference, mode `160000`) rather than as real files.
-3. Attempted fix, run from `~/gpu_profiling`:
-   ```bash
-   git rm --cached vis_pruner_copy   # untrack the gitlink
-   rm -rf vis_pruner_copy/.git       # remove nested repo history
-   git add vis_pruner_copy           # re-add as plain files
-   git commit -m "Add VisPruner reference as plain files"
-   git push
-   ```
-4. **This got interrupted (Ctrl+C) partway through**, before `git add` finished staging the plain files. The commit that went through (`ab26d3f`, pushed to `KingCorsair/GPU_Profiling`) only recorded **deleting the old gitlink** — it did NOT add the actual code back. Net effect at that point: `vis_pruner_copy` was untracked entirely (not a submodule, not plain files), though the files were still on disk.
-5. Re-ran the sequence:
-   - Confirmed `vis_pruner_copy/.git` was already gone (good, no need to `rm -rf` again).
-   - Ran `git add vis_pruner_copy` — **this hung and timed out after 2 minutes.**
+## What WP2 changed
 
-## What got interrupted / blocked
+* Commit `caf19fe`, parent `e295fd0`. One line: `clip_encoder.py:30`, `CLIPVisionModel.from_pretrained(..., torch_dtype=torch.float16)`.
+* Why it was needed: the CLIP tower loads separately from the LLaVA checkpoint, using a float32 config. The intended FP16 cast (`builder.py:155`) is gated on `device_map != 'auto'`, so it never ran.
+* Code states: FP32 = `e295fd0`, FP16 = `caf19fe`. They differ only by that line.
 
-- Root cause of the hang: `vis_pruner_copy/checkpoints/llava-v1.5-7b/` contains real model weight files:
-  - `pytorch_model-00001-of-00002.bin` — **9.3GB**
-  - `pytorch_model-00002-of-00002.bin` — **3.3GB**
-- `git add` was trying to hash these multi-GB files (slow), and **even if it succeeded, GitHub rejects pushes containing files over 100MB** — so this approach would fail regardless.
-- Nothing is currently staged/committed from this step. The repo is in a safe state: `vis_pruner_copy` shows as untracked, no partial/broken commit exists.
+## Measured results (NVIDIA A40, same pod)
 
-## What's pending — next steps
+* **`bench_dev` A/B**, 4 runs in order FP32 → FP16 → FP16 → FP32. `vision_tower` p50:
+  * vtn=576: 33.98 → 14.35 ms (**−57.8%, 2.37×**)
+  * vtn=128: 34.00 → 13.68 ms (**−59.8%, 2.49×**)
+  * Rerun spread: at most 0.21 ms.
+  * **The ≥20% gate passes.**
+* **Interleaved diagnostic `wp2_diag_1`**, vtn=128: **34.20 → 11.02 ms (−67.8%, 3.10×)**.
+* Prefill and `mm_projector` are unchanged.
 
-1. Add a `.gitignore` entry for `checkpoints/` (or specifically `vis_pruner_copy/checkpoints/`) so model weights are never staged.
-2. Then run, from `~/gpu_profiling`:
-   ```bash
-   git add vis_pruner_copy
-   git status   # sanity check: should show many "new file:" entries, NOT a single 160000 gitlink
-   git commit -m "Add VisPruner reference as plain files"
-   git push
-   ```
-3. Separately: download the ~12GB VisPruner eval dataset (see `VisPruner/EVAL.md` for per-benchmark download links, starting with `eval.zip`) into **`/workspace`**, not `/root`, and symlink it into `vis_pruner_copy/playground/data/eval` (or wherever the code expects it) if the code needs a fixed relative path.
+## What the jitter diagnostic established
 
-## Key facts for reference
-- Repo: `https://github.com/KingCorsair/GPU_Profiling`
-- Last pushed commit at time of writing: `ab26d3f` (only contains the gitlink deletion, not the file re-add)
-- Model checkpoints (`llava-v1.5-7b`, ~13GB total) must **not** be committed to git — keep them out via `.gitignore`, store on `/workspace` or another artifact store if they need to be shared.
+* **The FP16 tower is CPU/kernel-launch-bound.** Its CUDA-event time equals its CPU issue time (ratio 1.00; FP32: 3.22).
+* **The FP16 runs' per-trial wander came from host CPU slowdowns** that lasted tens of seconds. FP16's launch-bound tower exposes them; FP32's GPU-bound tower hid them.
+* **FP16 does not change downstream work.** Against neighbouring FP32 trials in the same process: `prep_other` +0.14 ms, decode −0.04 ms/token.
+* **No GPU clock effect:** the SM clock held at 1740 MHz with no throttle reasons.
+* The throttle check can't see these slowdowns.
+
+## What's reportable
+
+* **Official WP2 component result:** the bench_dev 4-run p50, −58% / −60% (2.4–2.5×).
+* **The 3.10× figure:** a diagnostic that controls for host noise. Always quote it with that label.
+* **End-to-end ≈ −2%: indicative only.** The bench_dev A/B shows −0.2%, which is inside run-to-run noise.
+* None of these are serving numbers; those come from WP6 and Rithvik's harness.
+
+## Remaining before WP2 can close
+
+1. **Profiler verification — the next task.**
+2. **Layer-1 correctness.** A script is still to be written.
+   * exact-text match on 90 dev images (≥85%);
+   * token-selection equivalence;
+   * pre-projector cosine > 0.999;
+   * determinism.
+
+   Watch-out: `image_attentions` isn't cast back to FP16's input dtype, so VisPruner now ranks tokens on FP16 attention.
+3. **Layer-2 TextVQA:** 1,000-question subsample, FP32 vs FP16 at 576, `m4c_evaluator.py`.
+4. **Layer 3:** request per-category accuracy from Sribhav (asynchronous).
+5. **Re-baseline** the vision-path numbers in `AMAY_ENGINEERING_ROADMAP.md` and `AMAY_TRACE_PLAN.md`, then close WP2 in `STATUS.md`.
+
+## Next task: profiler verification (prepared, not yet run)
+
+**Goal:** show that the FP32 `ampere_sgemm_*` vision kernels were replaced by FP16 tensor-core GEMMs (names containing `s16816gemm`, `xmma`, `f16f16_f16f32` or `tensorop_f16`), with FP32 accumulate.
+
+Also check:
+
+* softmax and LayerNorm dtypes, including that softmax is **not** `<c10::Half, c10::Half, c10::Half>`;
+* any FP16-accumulate GEMMs (`h16816`), which the script flags;
+* whether the tower's time in the trace matches the benchmark (FP32 ≈ 34 ms, FP16 ≈ 11 ms).
+
+**Script:** `scripts/profile_multimodal_prep.py`, commit `71010a5`.
+
+* It now takes `--run-id` and writes to `results/timing/wp2_profile/<run-id>_{prep_trace.json, prep_summary.txt, tower_trace.json, tower_kernels.txt}`. It refuses to overwrite.
+* It adds a **tower-only** profile. This is needed because VisPruner's selection loop runs FP16 matmuls in both states.
+* The old `results/timing/prep_trace.json` / `prep_summary.txt` (`c317688`, older pod, no thread pin) must stay unchanged.
+
+**States:**
+
+| Run | Branch | Commit | Model state |
+|---|---|---|---|
+| FP32 | `wp2-profile-fp32` (local) | `945abe6` = `e295fd0` + the profiler-script commit, cherry-picked | FP32 tower |
+| FP16 | `main` | contains `caf19fe` and the same profiler script | FP16 tower |
+
+The two states differ in model code only by the one `clip_encoder.py:30` line. The profiler script is identical in both.
+
+If the branch is ever lost, recreate it:
+
+```bash
+git checkout -b wp2-profile-fp32 e295fd0 && git cherry-pick 71010a5
+```
+
+**Before each run:**
+
+* the tracked tree is clean;
+* `nvidia-smi` shows no compute apps;
+* no python, server or load-generator process is running;
+* the run ID is unused.
+
+**Commands.** Run FP32 first, then validate, then run FP16:
+
+```bash
+cd /workspace/GPU_Profiling
+git checkout wp2-profile-fp32
+python scripts/profile_multimodal_prep.py --run-id wp2_profile_fp32
+# validate, then:
+git checkout main
+python scripts/profile_multimodal_prep.py --run-id wp2_profile_fp16
+```
+
+**Expect:**
+
+* FP32: `vision_tower dtype=torch.float32`, `ampere_sgemm_*`, `softmax_warp_forward<float, float, float…>`, `vectorized_layer_norm_kernel<float, float>`.
+* FP16: `torch.float16`, `ampere_fp16_s16816gemm_*` or `sm80_xmma_gemm_f16f16_f16f32_*`, `softmax_warp_forward<c10::Half, c10::Half, float…>`.
+
+## Open carry-overs (not WP2)
+
+* **WP3:** the server sets no torch thread count, so it likely hits the throttling stall. This matters more now that the FP16 tower is CPU-bound. It needs Rithvik.
+* **Git host key:** add GitHub's host key to `~/.ssh/known_hosts` in the Dockerfile's boot `CMD`, so pushes work after a pod restart.
+* **`CLAUDE.md`:** add two gotchas, the CPU-throttling stall and the missing `known_hosts` entry.

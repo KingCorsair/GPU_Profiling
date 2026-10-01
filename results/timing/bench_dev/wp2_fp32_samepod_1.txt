@@ -1,0 +1,13 @@
+bench_dev run 'wp2_fp32_samepod_1' -- NVIDIA A40  git=e295fd0004
+n_measured/config=40  warmup/config=10  output_tokens=32  images=20  regions=on  cpu_threads=4 (quota 7.65 CPUs)
+
+region                     576 p50     576 p95     128 p50     128 p95
+vision_tower_ms              33.93       34.10       33.94       34.15
+mm_projector_ms               0.33        0.34        0.39        0.39
+prep_other_ms                 0.96        1.06       12.04       13.81
+multimodal_prep_ms           35.19       35.44       46.35       48.15
+prep_wallclock_ms            35.25       35.50       46.41       48.21
+prefill_ms                  111.30      118.96       44.48       45.51
+decode_ms                   949.02      952.07      905.77      908.88
+decode_per_token_ms          30.61       30.71       29.22       29.32
+e2e_ms                     1110.77     1120.85     1011.93     1019.54

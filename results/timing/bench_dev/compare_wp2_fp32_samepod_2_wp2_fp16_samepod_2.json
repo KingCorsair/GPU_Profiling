@@ -1,0 +1,165 @@
+{
+  "runs": [
+    "results/timing/bench_dev/wp2_fp32_samepod_2.json",
+    "results/timing/bench_dev/wp2_fp16_samepod_2.json"
+  ],
+  "warnings": [
+    "runs differ on git_commit: ['e295fd000488e65ed7c9b98e8fadc3ec7d2b5ed6', 'caf19fe4ea82268160296d188c8d7878fbf691ae']",
+    "runs differ on vision_tower_dtype: ['torch.float32', 'torch.float16']"
+  ],
+  "spreads": {
+    "576": {
+      "vision_tower_ms": {
+        "p50s_ms": [
+          34.039615631103516,
+          14.408463954925537
+        ],
+        "spread_ms": 19.63115167617798,
+        "spread_pct_of_median": 81.03995800832115
+      },
+      "mm_projector_ms": {
+        "p50s_ms": [
+          0.32814399898052216,
+          0.44472000002861023
+        ],
+        "spread_ms": 0.11657600104808807,
+        "spread_pct_of_median": 30.16727424166398
+      },
+      "prep_other_ms": {
+        "p50s_ms": [
+          1.010703220963478,
+          1.889023780822754
+        ],
+        "spread_ms": 0.8783205598592758,
+        "spread_pct_of_median": 60.57953450916106
+      },
+      "multimodal_prep_ms": {
+        "p50s_ms": [
+          35.443504333496094,
+          16.689295768737793
+        ],
+        "spread_ms": 18.7542085647583,
+        "spread_pct_of_median": 71.94782757872498
+      },
+      "prep_wallclock_ms": {
+        "p50s_ms": [
+          35.49398388713598,
+          16.763975843787193
+        ],
+        "spread_ms": 18.73000804334879,
+        "spread_pct_of_median": 71.68289056744584
+      },
+      "prefill_ms": {
+        "p50s_ms": [
+          111.64974212646484,
+          110.69923400878906
+        ],
+        "spread_ms": 0.9505081176757812,
+        "spread_pct_of_median": 0.8549696375463329
+      },
+      "decode_ms": {
+        "p50s_ms": [
+          949.2861404418945,
+          960.6466064453125
+        ],
+        "spread_ms": 11.360466003417969,
+        "spread_pct_of_median": 1.1896194797364634
+      },
+      "decode_per_token_ms": {
+        "p50s_ms": [
+          30.622133562641757,
+          30.988600207913308
+        ],
+        "spread_ms": 0.3664666452715508,
+        "spread_pct_of_median": 1.1896194797364745
+      },
+      "e2e_ms": {
+        "p50s_ms": [
+          1115.7628344371915,
+          1115.1835806667805
+        ],
+        "spread_ms": 0.5792537704110146,
+        "spread_pct_of_median": 0.051928972071166375
+      }
+    },
+    "128": {
+      "vision_tower_ms": {
+        "p50s_ms": [
+          34.070417404174805,
+          13.573855876922607
+        ],
+        "spread_ms": 20.496561527252197,
+        "spread_pct_of_median": 86.03997969000018
+      },
+      "mm_projector_ms": {
+        "p50s_ms": [
+          0.38552001118659973,
+          0.40854400396347046
+        ],
+        "spread_ms": 0.023023992776870728,
+        "spread_pct_of_median": 5.799026863726956
+      },
+      "prep_other_ms": {
+        "p50s_ms": [
+          12.146432906389236,
+          17.39188824594021
+        ],
+        "spread_ms": 5.245455339550972,
+        "spread_pct_of_median": 35.51627265815211
+      },
+      "multimodal_prep_ms": {
+        "p50s_ms": [
+          46.743600845336914,
+          31.106751441955566
+        ],
+        "spread_ms": 15.636849403381348,
+        "spread_pct_of_median": 40.17155720934034
+      },
+      "prep_wallclock_ms": {
+        "p50s_ms": [
+          46.801273711025715,
+          31.19046427309513
+        ],
+        "spread_ms": 15.610809437930584,
+        "spread_pct_of_median": 40.031956823706
+      },
+      "prefill_ms": {
+        "p50s_ms": [
+          44.61016082763672,
+          44.22403335571289
+        ],
+        "spread_ms": 0.3861274719238281,
+        "spread_pct_of_median": 0.8693217189022486
+      },
+      "decode_ms": {
+        "p50s_ms": [
+          905.7181911468506,
+          916.0391225814819
+        ],
+        "spread_ms": 10.320931434631348,
+        "spread_pct_of_median": 1.1330742417615396
+      },
+      "decode_per_token_ms": {
+        "p50s_ms": [
+          29.216715843446792,
+          29.549649115531675
+        ],
+        "spread_ms": 0.3329332720848832,
+        "spread_pct_of_median": 1.133074241761543
+      },
+      "e2e_ms": {
+        "p50s_ms": [
+          1013.200668618083,
+          1017.0669201761484
+        ],
+        "spread_ms": 3.8662515580654144,
+        "spread_pct_of_median": 0.38086127950863535
+      }
+    }
+  },
+  "vision_tower_gate_ms": 5.0,
+  "gate_passed": {
+    "576": false,
+    "128": false
+  }
+}

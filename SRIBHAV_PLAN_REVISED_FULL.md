@@ -1,230 +1,702 @@
-# The plan in full — ScienceQA hand-check + pod smoke-test run-book
+# Problem Statement
 
-**Context recap.** An earlier 20-sample ScienceQA hand-check was already flagged in `sribhav/work.md` as the open first step. Evidence I've gathered from the repo:
+VisPruner is typically evaluated using aggregate task accuracy. However, a small change in aggregate accuracy can hide much larger per-example instability.
 
-- **Ground truth** lives in two places: `ScienceQA/data/scienceqa/problems.json` (21,208 problems; `question`, `choices`, `answer` index, `image`; the 4,241 eval rows all resolve) and `eval/scienceqa/llava_test_CQM-A.json` (the exact prompts the model saw, with the official `gpt` letter answer).
-- **Model outputs** already exist for every budget at r=0.5: `eval/scienceqa/answers/llava_test_CQM-A/llava-v1.5-7b/n_{576,288,144,128,64}/r_0.5.jsonl` (4,241 rows each, fields `question_id / prompt / text / answer_id / model_id / metadata`).
-- **Existing scorer** `vis_pruner_copy/llava/eval/eval_science_qa.py` parses three ways: raw letter ("B"), `"X. …"`, or `"The answer is (X)."`; everything else is `FAILED`. That's the exact-match logic the hand-check will pit against your judgment — not a new scorer.
-- **Current numbers** (already scored): n576 = **70.24%**, n288 = 69.51, n144 = 69.68, n128 = 69.98, n64 = 69.84 — near-flat, itself a finding.
-- **Where exact match actually bites** (n576 preds): 3,960/4,241 are clean single letters; ~248 are `"B. …"`; the divergent strata are **11 bare `"A."`**, **~26 explanatory sentences** ("To compare the motion of the three ships, we need to determine…"), and **2 embedded-letter sentences**. Those ~39 rows are where scorer-vs-human disagreement lives, and they're the preview of what free-text scoring will face on the heterogeneous set.
-- **Local constraint:** no ScienceQA image files exist on this Mac (only `vispruner_eval_dataset/images` for the heterogeneous set). So the hand-check here is text-led; image-dependent rows (maps, OCR) get flagged for a visual pass on the pod.
+In our current ScienceQA results, aggressive pruning changed roughly one in nine image-based answers even though the overall accuracy difference remained small. Some correct answers became wrong, while some wrong answers became correct. This suggests that **net accuracy alone may not adequately describe the reliability of visual-token pruning at the request level.**
 
----
+The central problem is therefore:
 
-## Deliverable A — ScienceQA 20-sample hand-check (`sribhav/`, no GPU needed)
+> **Can we characterize the per-example instability introduced by visual-token pruning, understand what predicts that instability, and use inexpensive runtime signals to selectively allocate more visual tokens only to requests that are likely to be harmed by aggressive pruning?**
 
-### A.1 Design decisions (the reasoning)
+The project has three connected questions.
 
-1. **Sample 20 with stratified oversampling, not uniform random.** This tool's goal is *discovery of where exact match gets it wrong*, not an unbiased accuracy estimate. So: **all 11 bare-`"A."` rows** (tiny stratum, exhaust it) + **7 of the ~26 long-form rows** (seeded random) + **2 embedded-letter rows** + **5 randomly drawn clean single-letter rows** (calibration: confirms the scorer agrees with you on the easy 99%). The sampled JSONL's header records the stratum composition so we never mislabel the sample as a 4,241-representative slice.
-2. **Judge = you, not a model.** The tool only *surfaces*; it never decides. Per project rules I will not write scoring logic; I'll build the comparison scaffolding, and the correct/incorrect judgment column is yours to fill.
-3. **Show both the file `text` and the parsed letter**, so a disagreement can be attributed to *parse failure* vs *genuinely wrong answer*.
-4. **Reuse the exact existing parser** from `eval_science_qa.py`, reproduced (not importing the repo module) so the hand-check measures the same logic that produced the published numbers.
-5. **No new dependencies.** Cohen's kappa implemented inline (sklearn isn't installed in your local Python; it's pinned only on the pod image). Everything runs on stdlib + the already-present `json`.
+## Question A — Measurement
 
-### A.2 The three small scripts (all in `sribhav/`)
+**How much instability does VisPruner introduce that aggregate accuracy hides?**
 
-**`sqa_handcheck_build.py`** — build the 20-row set.
-- Inputs: `eval/scienceqa/llava_test_CQM-A.json` (prompts + official letter), `ScienceQA/data/scienceqa/problems.json` (ground-truth index, choices, image filename), `eval/scienceqa/answers/llava_test_CQM-A/llava-v1.5-7b/n_576/r_0.5.jsonl` (model preds).
-- Reproduces the parser; tags each row `form ∈ {clean, dotted, bare_A_dot, long_form, embedded}` and `image_dependent` from the question text ({map, figure, diagram, chart, read, identify on image…} heuristics — heuristic only, editable).
-- Applies the stratified draw above with `--seed` (default fixed so it's reproducible; `--count`, `--answers-file`, and `--seed` flags for re-runs on other budgets).
-- Writes `sribhav/outputs/sqa_handcheck_n576.jsonl`, one object per row with fields:
-  `question_id, prompt, choices, gt_index, gt_letter, model_text, parsed_letter, exact_match (bool), form, image_dependent, image (path or null), human_verdict (blank), human_notes (blank)`.
-- Prints a compact summary: stratum counts drawn, how many exact-match rows are `FAILED`.
+Instead of measuring only:
 
-**`sqa_handcheck_render.py`** — render `sqa_handcheck_n576.html` (self-contained, no server):
-- One card per row: question+choices, model's raw text quoted, ground-truth letter, a chip for the exact-match verdict, and two controls — a **Correct/Incorrect** toggle and a **notes** text box.
-- A toolbar at top: progress (n/20), "lock & export" button that writes your verdicts back into the JSONL (`human_verdict`, `human_notes`).
-- Image shown **when a local file exists**; otherwise a placeholder chip reads `[image not available locally — check on pod if image_dependent]`.
+`accuracy@576 − accuracy@64`
 
-**`sqa_handcheck_compare.py`** — analyze the filled set.
-- Loads the JSONL; computes: agreement table (counts of both-correct, both-incorrect, and both disagreement directions), % agreement, **Cohen's kappa inline**, disagreeing rows only, and a final "what exact match got wrong" summary split by `form` (e.g. "3 of 11 bare-A rows were actually the right letter; 0 of 5 clean rows disagreed").
-- Exits 0 always (it's a report), prints to stdout, optionally `--json` for a machine-readable copy.
+measure individual answer transitions:
 
-**Usage flow:** `python3 sribhav/sqa_handcheck_build.py` → open the HTML → judge + export → `python3 sribhav/sqa_handcheck_compare.py`.
+* correct → correct
+* correct → wrong
+* wrong → correct
+* wrong → wrong
+* unchanged answer
+* changed answer
 
-### A.3 What evidence A gives us
+This establishes whether there is actually a deployment-relevant reliability problem.
 
-- Whether exact-match scoring is trustworthy on the clean 4000-row bulk (expect near-100% agreement on the 5 calibration rows) and **where precisely it fails** (the parse-failure strata) — with an exact list of the rows.
-- Whether the long-form/`"A."` preds contain recoverable letters (→ a safe extractor improvement), or genuinely scramble (→ real quality loss that will look far worse in free-text).
-- A validated floor for the strategy that then transfers to the heterogeneous set's free-text scoring (`question_type`-keyed max-over-references), per H2/H3.
+## Question B — Explanation / Prediction
 
----
+**Why are some requests sensitive to pruning while others are unaffected, and can that sensitivity be predicted cheaply?**
 
-## Deliverable B — Pod smoke-test run-book (`sribhav/docs/pod_smoke_runbook.md`)
+Candidate signals include:
 
-A copy-paste doc for the RunPod pod (no new code; the runner `model_vqa_heterogeneous.py` already exists, untested).
+* retained attention mass
+* attention entropy
+* output logit margin
+* selected-token spatial distribution
+* token-selection stability
+* hidden-state / representation drift
 
-1. **Preflight:** `nvidia-smi`; `cd /workspace/GPU_Profiling && git pull`; `uv pip sync --system requirements.txt`.
-2. **Checkout sanity:** checkpoint present at `vis_pruner_copy/checkpoints/llava-v1.5-7b`; dev.json present.
-3. **Smoke #1 (unpruned baseline, 5 rows):**
-   ```bash
-   cd /workspace/GPU_Profiling/vis_pruner_copy
-   python llava/eval/model_vqa_heterogeneous.py \
-     --question-file ../4_vispruner_eval_dataset/dev.json
-   ```
-   *(actual paths verified in the script defaults: `vispruner_eval_dataset` sits next to `llava/`, so run from `vis_pruner_copy/` and the default paths resolve; template will contain the exact verified commands.)*
-4. **Success criteria checklist** (each is a pass/fail line in the run-book):
-   - exit 0 and no CUDA OOM;
-   - `/tmp/smoke_het.jsonl` has 5 lines, each containing all of `question_id, category, source_dataset, question_type, answers, image, text` with non-empty `text`;
-   - timing sidecar JSON written with `question_count/model_load_s/generation_s`, and model-load time separated (rules 1–4 upheld);
-   - `--limit` respected, shuffle=False, deterministic order.
-5. **Smoke #2 (pruned path):** same command with `--visual_token_num 144 --important_ratio 0.5 --answers-file /tmp/smoke_het_n144.jsonl --limit 5`. Verifies the real-removal knob actually changes the tensor path.
-6. **Cleanup and hand-back:** remove `/tmp` files; note the command + commit hash at the top of the run-book (rule 7).
+The objective is not simply to correlate random metrics with accuracy.
 
-**Why smoke before any full sweep:** the scaffolded runner was never run on a GPU; a bug here costs 5 minutes, not a 40-minute rerun (rule 19). It also double-checks that **576 is genuinely unpruned** (masks all-True) before the budgets own any claim.
+The engineering question is:
+
+> Can information already available during inference tell us whether aggressive pruning is risky?
+
+## Question C — Engineering
+
+**Can we exploit that signal to create adaptive token-budget routing?**
+
+Rather than giving every request 576 visual tokens or every request 64 tokens:
+
+1. Start with a low token budget.
+2. Estimate pruning risk.
+3. Keep the cheap result when risk is low.
+4. Retry with 128/288/576 tokens when risk is high.
+
+The final system should attempt to preserve near-baseline accuracy while substantially reducing average visual-token processing.
 
 ---
 
-## Sequencing, effort, evidence
+# Core Milestone — Complete Within One Month
 
-| # | Step | Effort | Evidence it yields | Blocks |
-|---|---|---|---|---|
-| 1 | Build A scripts + generate the 20-row HTML | small | Disagreement list, exact-match error pattern | — |
-| 2 | You fill the 20 judgments + I discuss disagreements with you | small (your time) | Scorer trust decision | 4, 5 |
-| 3 | Write Pod run-book; (on pod) run Smokes 1+2 | small | Runner verified, 576=unpruned confirmed | 5, 6 |
-| 4 | Design the `question_type`-keyed scorer (your call; I review) | medium | Correct free-text metric | 6 |
-| 5 | 3-budget dev sweep (n576/288/144, r=0.5), 90 questions | medium (pod) | Per-category accuracy-vs-tokens curve | 7 |
-| 6 | Random-answer baseline on the heterogeneous outputs (rule 17) | small | Scorer discrimination sanity | 7 |
-| 7 | Second-scorer agreement on a sample (rule 13) | small | Scorer reliability | 8 |
-| 8 | Per-category accuracy report (rule 14) | small | R6 result material | — |
+The first four phases constitute the required milestone.
 
-**Boundaries I'm holding to:** nothing touches `test.json` (rule 11 — all A/B work is dev-only); the hand-check and smoke are in `sribhav/` + `sribhav/docs/` only, no code in Amay's or Rithvik's slices; the scoring *judgment* and *conclusion* stay yours — the tooling only surfaces the comparison; the final reportable numbers still flow through Rithvik's harness, and this work feeds him R6.
+At the end of Phase 4, the project should already be complete and résumé-worthy.
 
-## The load-bearing sequencing logic
+---
 
-> You can't validate a *quality signal* without a trustworthy benchmark, and you can't design a *quality gate* without a validated signal.
+# Phase 1 — Build a Trustworthy Evaluation System
 
-That decides the order of everything downstream:
+## Question answered
 
+**Is the apparent accuracy stability of VisPruner actually hiding substantial per-example answer instability?**
+
+## Work
+
+First repair the evaluation methodology.
+
+The current heterogeneous evaluation set has known problems that must be resolved before making claims, including class imbalance and insufficient samples in some categories.
+
+Build a reproducible evaluation framework supporting several token budgets, for example:
+
+* 576
+* 288
+* 144/128
+* 64
+
+For every example record:
+
+* dataset
+* task/category
+* ground-truth answer
+* answer at each token budget
+* correctness at each budget
+* answer changed?
+* correctness transition
+* token count
+* configuration
+
+Calculate:
+
+* aggregate accuracy
+* accuracy delta
+* answer-change/churn rate
+* correct → wrong rate
+* wrong → correct rate
+* wrong → wrong rate
+* confidence intervals
+* McNemar tests where appropriate
+* per-category breakdowns
+
+## Tools
+
+### PyTorch
+
+Already part of the model/evaluation path.
+
+**Why it belongs:** running and instrumenting LLaVA/VisPruner inference.
+
+### Hugging Face Datasets
+
+Where appropriate for standardized dataset loading and preprocessing.
+
+**Why it belongs:** reproducible dataset ingestion rather than hand-written ad-hoc loaders.
+
+### Pandas / NumPy
+
+For per-example result analysis.
+
+**Why it belongs:** the core problem requires joining and comparing outputs from multiple pruning configurations.
+
+### SciPy / statsmodels
+
+For significance testing and confidence intervals.
+
+**Why it belongs:** we need to distinguish real accuracy effects from benchmark noise.
+
+### MLflow or Weights & Biases
+
+Introduce experiment tracking here if the number of configurations warrants it.
+
+Track:
+
+* dataset version
+* model version
+* pruning budget
+* accuracy
+* churn
+* artifacts
+* configuration
+* run IDs
+
+**Why it belongs:** comparisons across many datasets/configurations need reproducibility.
+
+## Deliverable
+
+A benchmark report answering:
+
+> How different does VisPruner look when evaluated using per-example stability rather than only aggregate accuracy?
+
+---
+
+# Phase 2 — Identify What Makes Pruning Unsafe
+
+## Question answered
+
+**Can we explain or predict which requests will become unstable under aggressive pruning?**
+
+Instrument the inference path.
+
+For every example collect inexpensive internal signals such as:
+
+### Retained attention mass
+
+$$
+R=
+\frac{\sum_{i \in selected} a_i}
+{\sum_i a_i}
+$$
+
+Interpretation:
+
+If the selected tokens contain almost all the model's visual attention, aggressive pruning may be safe.
+
+If the attention distribution is diffuse and 64 selected tokens capture relatively little attention mass, the request may be more sensitive.
+
+### Attention entropy
+
+Measure how concentrated or diffuse the visual attention distribution is.
+
+### Output confidence
+
+For example:
+
+* top-1 versus top-2 logit margin
+* entropy of answer-token probabilities
+
+### Spatial properties
+
+Measure whether selected visual tokens are:
+
+* tightly clustered
+* distributed throughout the image
+* concentrated in one region
+
+### Token-selection stability
+
+Compare which tokens survive at different budgets.
+
+## Create the prediction target
+
+For each example:
+
+```text
+target = 1 if aggressive pruning produces an unsafe change
+target = 0 otherwise
 ```
-[A: ScienceQA hand-check] ──► [Benchmark steps 4–8, dev only] ──► data foundation
-                                                                       │
-[B: pod smoke run-book] ──► [Step 5: 3-budget dev sweep]             ▼
-                                                                  [Step 9: AI grader candidates]
-                                                                          │
-                                                              [Step 11: validate the grader] ──► [Step 14: runtime quality gate]
-                                                                          │
-                                                    [Step 12: error analysis] [Step 13: frontier] ◄── team's timing (Amay/Rithvik)
-                                                                          │
-                                                                  [Step 16/17: success criteria + deliverables + writeup]
+
+Initially define several possible targets and compare them:
+
+### Instability target
+
+Did the answer change relative to 576?
+
+### Regression target
+
+Did a correct 576-token answer become incorrect?
+
+The second target is more directly useful but requires ground truth during training/evaluation.
+
+## Modeling
+
+Start simple.
+
+### Logistic regression
+
+Use as an interpretable baseline.
+
+### Decision tree / Random Forest
+
+Useful for nonlinear thresholds and feature importance.
+
+### XGBoost / LightGBM
+
+Only introduce if simpler models leave meaningful predictive performance on the table.
+
+Do not use XGBoost merely to add XGBoost to the project.
+
+The question is:
+
+> Does a nonlinear model materially improve our ability to predict unsafe pruning?
+
+## Tools
+
+* **PyTorch hooks / model instrumentation**
+* **scikit-learn**
+* **XGBoost or LightGBM**, conditionally
+* **MLflow/W&B** for experiment comparison
+* **SHAP**, optionally, if the stronger model needs interpretability
+
+## Metrics
+
+Measure:
+
+* ROC-AUC
+* precision
+* recall
+* PR-AUC
+* false-negative rate
+* calibration
+* performance by task type
+
+False negatives matter particularly strongly:
+
+> A false negative means the router considered pruning safe when it actually damaged the answer.
+
+## Deliverable
+
+A result answering:
+
+> Can VisPruner cheaply predict its own risky pruning decisions?
+
+This phase may also produce a valuable negative result.
+
+If retained attention mass, entropy, confidence and other internal signals have almost no predictive ability, report that.
+
+Do not force the hypothesis to succeed.
+
+---
+
+# Phase 3 — Build Adaptive Token-Budget Routing
+
+## Question answered
+
+**Can prediction of pruning risk be converted into a useful inference policy?**
+
+Build an adaptive inference controller.
+
+Conceptually:
+
+```text
+Image + question
+       ↓
+Run aggressive VisPruner
+       ↓
+Compute cheap risk signal
+       ↓
+       ├── LOW RISK → return result
+       │
+       └── HIGH RISK
+              ↓
+       increase visual-token budget
+              ↓
+        rerun / continue
+              ↓
+         return result
 ```
 
-The hand-check and smoke run-book stay the first execution steps. Everything from the AI grader onward is **gated on evidence** from the benchmark: a grader no one trusts is a quality gate that lies.
+Potential policies:
+
+### Policy A
+
+Always 576 tokens.
+
+This is the quality baseline.
+
+### Policy B
+
+Always 64 tokens.
+
+This is the aggressive efficiency baseline.
+
+### Policy C
+
+64 → 128 fallback.
+
+### Policy D
+
+64 → 288 fallback.
+
+### Policy E
+
+64 → 128 → 288/576 multi-stage routing.
+
+Do not assume that the most complicated router wins.
+
+Compare policies empirically.
+
+## Metrics
+
+Measure:
+
+* final accuracy
+* correct → wrong rate
+* fallback percentage
+* average visual tokens/request
+* percentage reduction in tokens
+* percentage of lost accuracy recovered
+* average latency
+* p50 latency
+* p95 latency
+* additional router overhead
+
+Coordinate latency measurements with the GPU-profiling side of the project so evaluation overhead is reported separately.
+
+## Tools
+
+### PyTorch
+
+Inference/router implementation.
+
+### scikit-learn / XGBoost
+
+Risk prediction.
+
+### MLflow/W&B
+
+Threshold and policy experiments.
+
+### YAML/Hydra or simple configuration files
+
+If the number of experiment combinations warrants configuration management.
+
+Do not introduce Hydra unless configuration complexity actually becomes a problem.
+
+## Deliverable
+
+A table such as:
+
+| Policy    | Accuracy | Avg tokens | Fallback | Latency |
+| --------- | -------: | ---------: | -------: | ------: |
+| 576 fixed |        X |        576 |        — |       X |
+| 64 fixed  |        X |         64 |       0% |       X |
+| adaptive  |        X |          X |       X% |       X |
+
+The primary success condition is something resembling:
+
+> Near-baseline quality at substantially below the baseline token budget.
+
+The existing ScienceQA simulation suggests adaptive routing may be promising, but the proper experiment must establish whether that result generalizes.
 
 ---
 
-## Step 9 — Local AI grader candidates (Phase 5)
+# Phase 4 — Final Validation and ML-System Packaging
 
-**When:** after the accuracy sweep (step 5) and scorer agree/random-baseline sanity (steps 6–7) show the benchmark is trustworthy. A grader trained or validated against a broken benchmark is garbage-in.
+## Question answered
 
-**What it investigates:** a small, self-contained grader that runs locally — no network during normal operation, reproducible, low overhead, runs on our machine/GPU.
+**Does the mechanism survive a proper evaluation and can another engineer reproduce it?**
 
-**Candidate comparison** (your call to make, per criteria in SRIBHAV_WORK Phase 5 — I'll scaffold the comparison harness; I will not write the grader's scoring logic):
+Run the final benchmark on the repaired evaluation suite.
 
-| Criterion | What it means here |
-|---|---|
-| Accuracy | Agreement with human/VQA labels on dev |
-| Memory / GPU or CPU | Does it need a GPU at all; VRAM footprint on our A40/4090 |
-| Latency | Per-answer grading cost, separately timed |
-| Context requirements | Answer-only vs question+answer vs image+question+answer |
-| Reliability / determinism | Same input → same score; is temperature/seed controllable |
-| Ease of deployment | Docker pinning, disk, startup |
-| **Blind spot check** | Negation, OCR errors, count-off-by-one, hallucinated detail (your own Phase 7 list) |
+Produce:
 
-Candidates to put through it: the two existing local signals (BERTScore + NLI) as a "statistical grader," vs small local LLMs (the **Ollama/**llama stack already prototyped in `sribhav/ollama_as_a_judge.py`), vs a hybrid. Recommend a **primary + one fallback** candidate, with measurements, not vibes.
+### Evaluation artifacts
 
-**Mandatory conceptual check first (Phase 10's IMPORTANT LIMITATION, front-loaded):** an answer-only grader *cannot know whether an answer is factually correct*. So decide — before choosing candidates — what signal the grader is actually producing:
-- (a) semantic agreement with labeled references *(impossible at runtime — no labels exist at runtime)*,
-- (b) answer plausibility / self-consistency *(possible, but only a proxy)*,
-- (c) agreement with a *second*, differently-pruned run of the same question *(detects pruning-induced instability — promising, costs one extra cheap run)*,
-- (d) model confidence / token-level signal,
-- (e) a multimodal grader with the actual image *(most faithful, but likely too expensive at runtime — measure before rejecting)*.
+* accuracy-vs-token-budget curves
+* churn-vs-token-budget curves
+* category-specific failure analysis
+* predictor ROC/PR curves
+* calibration plots
+* adaptive-routing tradeoff plots
+* latency/token/accuracy frontier
 
-This decision shapes the entire gate design and will also be an interviewer's first question ("what does the grader actually know?"). The offline grader can score against labels; the *runtime* grader cannot, and the plan must not conflate the two.
+### Error analysis
 
-**Why not just use Claude (Phase 6), built in as the rule:** Claude is a perfectly good grader for **offline research evaluation** (score the sweep once, done). The local grader is only justified by the **continuous engineering QA / runtime-gating** use case — no external API, no network latency, no recurring cost, reproducible, deployable, can run on every request. So the local grader exists *because of the quality gate*, not because "local is cooler." That framing goes in the writeup.
+Study representative:
 
-**Deployment reality check:** `ollama`/`chromadb` are *not* in `requirements.txt` — any adopted grader must be pinned in the **Dockerfile + image rebuild**, never `pip install` on a pod (CLAUDE.md infra rule).
+* correct → wrong examples
+* wrong → correct examples
+* router false negatives
+* router false positives
+* cases immune to pruning
+* cases highly sensitive to pruning
 
----
+### Experiment reproducibility
 
-## Step 10 — Validate the local grader (Phase 7)
+Every important result should have:
 
-**References** (in order of trust): ground-truth dataset labels (ScienceQA + hetero answers) → the human labels you produce in Step 2 / by hand-checking failures → Claude as a strong external judge *for free-text semantic grading only*, never as ground truth for multiple-choice.
+* config
+* run ID
+* dataset version
+* model version
+* raw results
+* analysis script
 
-**Metrics** on a **dev-only** validation subset (no test contamination, rule 11):
-- agreement rate, precision, recall, false-acceptance rate, false-rejection rate, confusion matrix, score correlation;
-- broken down **per task category and per pruning level** (a grader that's accurate at n576 but blind at n64 is not a quality gate for aggressive pruning);
-- targeted case list (your Phase 7 list): semantically-equivalent-but-different, partially correct, hallucinated detail, wrong OCR, count off by one, wrong spatial reasoning.
+## Tools
 
-**Decision rule baked in:** "Is the lightweight grader reliable enough for the role we want?" If agreement with the reference is near-chance, the grader is a research *finding* (local LLMs can't replace validated scoring) and **not** a runtime gate. That negative result is valid and reportable.
+* **MLflow/W&B**
+* **Pandas**
+* **Matplotlib**
+* **PyTorch**
+* **Git/GitHub**
+* optionally **Docker** if reproducible deployment requires it
 
----
+Docker should only be used if environment reproducibility is genuinely an issue.
 
-## Step 11 — Error analysis (Phase 8)
+## Core Month-1 Completion Criterion
 
-On the dev sweep failures, classify *why* quality dropped: critical region/token removed, small object disappeared, OCR info lost, spatial relation collapsed, counting became incomplete, model already wrong at n576 (no causal relation to pruning), or the *scorer/gradger* mis-scored. Where feasible, inspect kept vs discarded patches.
+At the end of this phase, Sribhav should be able to answer four questions with evidence:
 
-Output: an **error taxonomy with representative examples per category**. This is what makes R6 ("OCR and counting break first") a *named mechanism* instead of a datapoint, and it feeds the writeup's "where the published claims held."
+1. **How much answer instability does VisPruner introduce?**
+2. **Where does that instability occur?**
+3. **Can cheap inference-time signals predict it?**
+4. **Can adaptive routing protect accuracy without surrendering most of the pruning benefit?**
 
----
+At this point, the core milestone is DONE.
 
-## Step 12 — Accuracy–pruning frontier (Phase 9)
-
-Tables/plots: pruning % ↔ token count ↔ task accuracy ↔ dataset/category. Identify safe region, sharp cliff, dataset-dependent thresholds, tasks where aggressive pruning stays safe, tasks where modest pruning is risky.
-
-This is where Sribhav's quality measurements **join Amay/Rithvik's** numbers: the final deliverable is the **accuracy–throughput frontier** chart (the single chart in the project's problem statement), and per CLAUDE.md only reportable numbers (Rithvik's harness) go on it. Sribhav supplies the accuracy axis (R6), they supply throughput (R1–R5).
-
----
-
-## Step 13 — Runtime quality gate experiment (Phase 10)
-
-Only after the grader has passed Step 11's validation. Configurations:
-
-- **A. Baseline** — no pruning.
-- **B. Fixed pruning** — VisPruner always at one budget.
-- **C. Adaptive** — start aggressive/moderate; if the gate flags "risky," rerun at a larger budget or unpruned.
-
-**Metrics (from your Phase 10 list):** final accuracy, first-pass accuracy, fallback rate, tokens processed, avg inference latency, p50/p95 if practical, **grader overhead**, **total pipeline latency**, % baseline accuracy recovered, % pruning efficiency retained.
-
-The key engineering question, stated exactly as you framed it: **Can we get most of the efficiency benefit of pruning while selectively paying additional compute only for difficult examples?**
-
-The honest failure condition (Phase 15): if adaptive fallback ends up costing nearly as much as never pruning, the idea isn't worthwhile and we say so.
+Everything below is optional.
 
 ---
 
-## Step 14 — Clean GPU measurement (Phase 11)
+# Optional Phase 5 — Representation Drift
 
-Separate these **into five buckets, never fused**: LLaVA inference, VisPruner overhead, local-grader latency, fallback-rerun latency, total end-to-end pipeline. The grader must never be folded into "VisPruner's inference time" and then claimed as such. Final performance numbers come only from Rithvik's harness; the grader work coordinates with it rather than replacing it.
+## Research question
+
+**Does aggressive pruning substantially alter internal multimodal representations, and does that change predict answer instability?**
+
+Extract hidden states under:
+
+* 576 tokens
+* 288 tokens
+* 128 tokens
+* 64 tokens
+
+Compare representations using:
+
+* cosine similarity
+* L2 distance
+* layer-wise similarity
+* CKA if justified
+
+Then correlate representation drift with answer churn/regression.
+
+## Tools
+
+* PyTorch
+* NumPy
+* scikit-learn
+* optionally CKA tooling
+* MLflow/W&B
+
+## Why this is résumé-relevant
+
+It demonstrates genuine **model interpretability / representation analysis**, rather than simply calling embeddings because they are fashionable.
 
 ---
 
-## Step 15 — Deliverables, structure, success/failure (Phases 12/13/15)
+# Optional Phase 6 — Token-Selection Stability
 
-- **Deliverables:** multi-dataset benchmark; accuracy-vs-pruning curves; per-task sensitivity; error taxonomy; representative failures; grader + grader validation + comparison vs stronger judge + latency/resource; gate prototype + fallback strategy + fixed-vs-adaptive benchmark; configs, rerun scripts, saved raw results, analysis notebooks, final plots/tables.
-- **Structure:** reuse repo conventions — eval configs under `sribhav/` (experiment configs, metrics, gate experiments), raw outputs under `results/`, plots under `sribhav/`; nothing sprawls into Amay's/Rithvik's directories.
-- **Success/failure per experiment** (Phase 15, all pre-registered): flat curves across all datasets → *pruning generalizes, report that*; poor grader agreement → no gate; adaptive ≈ unpruned cost → drop the idea; different safe ratios per dataset → adaptive pruning is a real engineering problem worth building.
+## Research question
+
+**How stable is VisPruner's selected visual evidence?**
+
+Compare token sets across:
+
+* budgets
+* precision modes
+* repeated runs
+* model variants
+
+Metrics could include:
+
+* Jaccard similarity
+* rank correlation
+* spatial overlap
+* attention-mass overlap
+
+Then ask:
+
+> Does unstable token selection correspond to unstable answers?
+
+## Tools
+
+* PyTorch
+* NumPy/Pandas
+* visualization tooling
+
+This connects the internal pruning algorithm directly to observed reliability.
 
 ---
 
-## Full execution sequence (final)
+# Optional Phase 7 — Deeper Risk Modeling
 
-| # | Step | Depends on | Effort | Evidence it yields |
-|---|---|---|---|---|
-| 1 | ScienceQA 20-sample hand-check (Deliverable A) | — | small | Exact-match error pattern; scorer-trust decision |
-| 2 | You fill the 20 judgments; we review disagreements | 1 | small (your time) | Human-graded labels for grader validation |
-| 3 | Pod smoke run-book + smokes 1&2 (Deliverable B) | — | small | Runner verified; 576=unpruned confirmed |
-| 4 | `question_type`-keyed scorer design (your call) | 2 | medium | Correct free-text metric |
-| 5 | 3-budget dev sweep n576/288/144 (r=0.5) | 3,4 | medium (pod) | Per-category accuracy-vs-tokens curves |
-| 6 | Random-answer baseline on outputs (rule 17) | 5 | small | Scorer discrimination sanity |
-| 7 | Second-scorer agreement (rule 13) + thresholds | 5,6 | small | Scorer reliability |
-| 8 | Per-category accuracy report (rule 14) | 5–7 | small | R6 result material |
-| 9 | AI grader candidate comparison (Phase 5) | 8 | medium | Primary + fallback grader, with latency/memory |
-| 10 | "Why not Claude" justification written (Phase 6) | 9 | small | Framing for the writeup |
-| 11 | Validate grader vs labels/human/Claude (Phase 7) | 9,2 | medium | Grader agreement metrics; gate-readiness decision |
-| 12 | Error analysis taxonomy (Phase 8) | 8,11 | medium | Failure mechanisms per category |
-| 13 | Accuracy–pruning frontier (Phase 9) | 8–12 + team timings | medium | Feeds final accuracy–throughput chart |
-| 14 | Runtime quality gate A/B/C experiment (Phase 10) | 11,12,13 | large | Recovery vs added-compute economics |
-| 15 | Clean 5-bucket GPU measurement (Phase 11) | 14 | medium | Separated grader vs inference costs |
-| 16 | Success/failure conditions applied (Phase 15) | 13–15 | small | Negative findings reported honestly |
-| 17 | Deliverables + writeup (Phases 12/13) | all | large | The "one chart + honest writeup" |
+If simple models show signal but are insufficient, test:
+
+* XGBoost
+* LightGBM
+* small MLP
+* calibrated ensemble
+* cost-sensitive classification
+
+The objective becomes:
+
+> Improve the quality/compute Pareto frontier without adding meaningful runtime cost.
+
+Measure the **incremental value** of each more complex model.
+
+If logistic regression performs equally well, use logistic regression.
+
+That itself is a good engineering finding.
+
+---
+
+# Optional Phase 8 — Production Observability
+
+Once adaptive routing actually exists, instrument it like a deployed ML system.
+
+For every request record:
+
+```text
+model
+pruning budget
+attention statistics
+risk score
+routing decision
+fallback?
+final token count
+latency
+```
+
+During offline evaluation also attach correctness.
+
+Build views answering:
+
+* What percentage of traffic triggers fallback?
+* Which workloads are most risky?
+* Has risk-score distribution shifted?
+* How much compute is fallback consuming?
+* Is the router's behavior changing across datasets?
+
+## Tools
+
+Possible tools:
+
+* **OpenTelemetry** for structured runtime instrumentation
+* **Prometheus** for metrics
+* **Grafana** for operational dashboards
+
+or a simpler ML-focused setup with MLflow/W&B if that solves the actual requirement.
+
+Do not add an observability stack until there is a deployed mechanism worth observing.
+
+---
+
+# Optional Phase 9 — Local AI Grader
+
+Only revisit the grader if the cheap signals from the core milestone are inadequate.
+
+The problem then becomes:
+
+> Cheap internal signals cannot reliably distinguish safe and unsafe pruning. Can an additional lightweight evaluator improve routing enough to justify its compute overhead?
+
+At that point compare:
+
+### Internal-signal router
+
+versus
+
+### Local AI-grader router
+
+versus
+
+### Strong external grader as an experimental upper bound
+
+The local grader must justify its cost.
+
+If it needs a second expensive multimodal inference and eliminates the savings from pruning, reject the idea.
+
+Potential tools would only be selected after determining the required grader architecture:
+
+* Ollama
+* vLLM
+* Hugging Face Transformers
+* quantization such as bitsandbytes/AWQ if appropriate
+
+Again:
+
+**The project should not start with “we want to use Ollama.”**
+
+It should reach Ollama only if the experiment gives us a reason to run a local model.
+
+---
+
+# Optional Phase 10 — Generalization
+
+After the mechanism works, test:
+
+* additional VQA datasets
+* different LLaVA variants
+* different VisPruner configurations
+* potentially another visual-token reduction technique
+
+The question is no longer:
+
+> Does VisPruner work on more datasets?
+
+The stronger question is:
+
+> **Does the instability predictor and adaptive-routing mechanism generalize beyond the model/workload on which it was developed?**
+
+That is a legitimate generalization experiment.
+
+---
+
+# Final Project Narrative
+
+The accuracy side of the project should eventually be explainable as:
+
+> **VisPruner appeared nearly lossless under aggregate accuracy, but we found that the mean concealed substantial per-example answer instability. I built a reproducible evaluation system to quantify that instability, instrumented the model to identify inexpensive runtime signals associated with risky pruning decisions, trained and validated a lightweight risk predictor, and used it to implement adaptive visual-token routing that selectively increased compute for sensitive requests. We then measured the resulting accuracy–compute tradeoff across multimodal workloads.**
+
+The tool story naturally follows from the problem:
+
+**PyTorch**
+→ model inference and instrumentation.
+
+**Hugging Face/Datasets**
+→ reproducible multimodal benchmark ingestion.
+
+**Pandas / NumPy / SciPy**
+→ rigorous per-example evaluation and statistics.
+
+**MLflow/W&B**
+→ reproducible management of many model/pruning/routing experiments.
+
+**scikit-learn**
+→ interpretable runtime risk prediction.
+
+**XGBoost/LightGBM**
+→ only if nonlinear prediction materially improves routing.
+
+**OpenTelemetry / Prometheus / Grafana**
+→ optional production monitoring once adaptive routing exists.
+
+**Ollama/vLLM/Transformers**
+→ optional local grader only if cheaper signals prove inadequate.
+
+The tools are therefore consequences of the engineering questions, rather than the purpose of the project.
