@@ -1,5 +1,7 @@
 # Rithvik — Benchmark Harness V2 implementation roadmap
 
+Implementation and experiment progress is tracked in [MEASUREMENT_STATUS.md](MEASUREMENT_STATUS.md). The roadmap below preserves the original planning context.
+
 This plan turns the Google Doc **Rithvik’s Plan** into work grounded in the local repository at commit `ecc205ea751d936e28e7165fa909311c95693c21`. It is a plan, not an implementation or a new benchmark result. The four weeks below are an effort estimate, not calendar deadlines.
 
 ## Outcome
