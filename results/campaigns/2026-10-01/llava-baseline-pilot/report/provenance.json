@@ -1,0 +1,66 @@
+{
+  "campaignPath": "../campaign.json",
+  "campaignSha256": "aa623465e782e06c27c4a9ed0768b7adf50886c181d16e6a46fda16c3422ccf9",
+  "runs": [
+    {
+      "runId": "2026-10-01T19-53-48.853Z_rps-1_c77c2c8c",
+      "directory": "../r1-p1-v0-d9ed18a5/runs/2026-10-01T19-53-48.853Z_rps-1_c77c2c8c",
+      "requestsSha256": "sha256:59dfc0cb1559a3ed55e898d4751cbc437bcf6001066a2cf134ccb7ee779681ee",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 141,
+        "sha256": "sha256:c822d3b2d8240db10979e8cf8fdc67a8633c2f16d2b2e77d6589762c2c7e58d4"
+      }
+    },
+    {
+      "runId": "2026-10-01T19-55-36.562Z_rps-1_9d105bb1",
+      "directory": "../r1-p1-v1-000a2469/runs/2026-10-01T19-55-36.562Z_rps-1_9d105bb1",
+      "requestsSha256": "sha256:7e4ba39a75d86bee6518a4976abcbd4021ece16a11c52889ca7603a396c95758",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 107,
+        "sha256": "sha256:74297f91b7677f9d3f33ab9f4637a79144bcddc6b62a0eeaeab703f0e5e311ea"
+      }
+    },
+    {
+      "runId": "2026-10-01T19-57-23.626Z_rps-1_76fab203",
+      "directory": "../r1-p2-v1-e4ef119d/runs/2026-10-01T19-57-23.626Z_rps-1_76fab203",
+      "requestsSha256": "sha256:f75899b18f2e922b0c47d370feee5e1e903c3723b26179c06a24e533a5a10085",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 106,
+        "sha256": "sha256:dfd9e1f25c07675040391872aba517e0a65e9a593b94b26a2a4e0e8ce35c2ac9"
+      }
+    },
+    {
+      "runId": "2026-10-01T19-59-38.390Z_rps-1_4765f54a",
+      "directory": "../r1-p2-v0-6e0b24bf/runs/2026-10-01T19-59-38.390Z_rps-1_4765f54a",
+      "requestsSha256": "sha256:ee49fa04aa23fe947068103db542db1b2dc1f4ed28ae3f151bb9e62832ff2b99",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 135,
+        "sha256": "sha256:7756b2c3e795d1b82399a4d2ed10aee77d1df10205039f966c9e9295d85c6f65"
+      }
+    },
+    {
+      "runId": "2026-10-01T20-01-24.962Z_rps-1_8e7d86e4",
+      "directory": "../r1-p3-v0-c2a60081/runs/2026-10-01T20-01-24.962Z_rps-1_8e7d86e4",
+      "requestsSha256": "sha256:a0c1e4fe2b7db35ba769f00545fd26d206dc48071ab39cb4f173bb00527bb809",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 107,
+        "sha256": "sha256:0b1c684d58e7993d3aefaf37a786a3a8abb72c20e5dde7920fac5292f06627ba"
+      }
+    },
+    {
+      "runId": "2026-10-01T20-03-12.637Z_rps-1_d9545367",
+      "directory": "../r1-p3-v1-a5b12604/runs/2026-10-01T20-03-12.637Z_rps-1_d9545367",
+      "requestsSha256": "sha256:ca5be251e6709fe7358906f380d67518cbd4f8f67e12786fe16fb42eaa3a3b65",
+      "resourceSamples": {
+        "file": "resources.jsonl",
+        "count": 108,
+        "sha256": "sha256:51c90a019852abd765eb4aa0fac6deeee7176d05faef8d5eb491765558f6f5d0"
+      }
+    }
+  ]
+}

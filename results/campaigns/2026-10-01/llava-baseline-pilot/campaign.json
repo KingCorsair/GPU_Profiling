@@ -1,0 +1,248 @@
+{
+  "schema": "loadgen-campaign",
+  "schemaVersion": 2,
+  "campaignId": "llava-baseline-pilot",
+  "spec": {
+    "campaignId": "llava-baseline-pilot",
+    "purpose": "baseline",
+    "endpoint": "http://127.0.0.1:8765/infer",
+    "datasetPath": "/workspace/rithvik-measure-20261001/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+    "rates": [
+      1
+    ],
+    "repetitions": 3,
+    "measuredRequests": 90,
+    "warmupRequests": 10,
+    "seed": 465,
+    "timeoutMs": 120000,
+    "startupTimeoutMs": 300000,
+    "settleMs": 1000,
+    "gpuExclusive": true,
+    "variants": [
+      {
+        "id": "baseline-A",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural"
+        }
+      },
+      {
+        "id": "baseline-B",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural"
+        }
+      }
+    ]
+  },
+  "specHash": "17e85f805289fe8fba7d8c8e8615bf4d93e84ad35d63a87918b5f5c5c7423342",
+  "createdAtUtc": "2026-10-01T19:53:05.370Z",
+  "schedule": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1
+    }
+  ],
+  "trials": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p1-v0-d9ed18a5/runs/2026-10-01T19-53-48.853Z_rps-1_c77c2c8c",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v0-d9ed18a5",
+          "directory": "r1-p1-v0-d9ed18a5",
+          "startedAtUtc": "2026-10-01T19:53:05.509Z",
+          "finishedAtUtc": "2026-10-01T19:55:26.195Z",
+          "status": "complete",
+          "runDirectory": "r1-p1-v0-d9ed18a5/runs/2026-10-01T19-53-48.853Z_rps-1_c77c2c8c",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p1-v1-000a2469/runs/2026-10-01T19-55-36.562Z_rps-1_9d105bb1",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v1-000a2469",
+          "directory": "r1-p1-v1-000a2469",
+          "startedAtUtc": "2026-10-01T19:55:26.263Z",
+          "finishedAtUtc": "2026-10-01T19:57:13.222Z",
+          "status": "complete",
+          "runDirectory": "r1-p1-v1-000a2469/runs/2026-10-01T19-55-36.562Z_rps-1_9d105bb1",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p2-v1-e4ef119d/runs/2026-10-01T19-57-23.626Z_rps-1_76fab203",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v1-e4ef119d",
+          "directory": "r1-p2-v1-e4ef119d",
+          "startedAtUtc": "2026-10-01T19:57:13.323Z",
+          "finishedAtUtc": "2026-10-01T19:58:59.719Z",
+          "status": "complete",
+          "runDirectory": "r1-p2-v1-e4ef119d/runs/2026-10-01T19-57-23.626Z_rps-1_76fab203",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p2-v0-6e0b24bf/runs/2026-10-01T19-59-38.390Z_rps-1_4765f54a",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v0-6e0b24bf",
+          "directory": "r1-p2-v0-6e0b24bf",
+          "startedAtUtc": "2026-10-01T19:58:59.796Z",
+          "finishedAtUtc": "2026-10-01T20:01:14.442Z",
+          "status": "complete",
+          "runDirectory": "r1-p2-v0-6e0b24bf/runs/2026-10-01T19-59-38.390Z_rps-1_4765f54a",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p3-v0-c2a60081/runs/2026-10-01T20-01-24.962Z_rps-1_8e7d86e4",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v0-c2a60081",
+          "directory": "r1-p3-v0-c2a60081",
+          "startedAtUtc": "2026-10-01T20:01:14.500Z",
+          "finishedAtUtc": "2026-10-01T20:03:01.233Z",
+          "status": "complete",
+          "runDirectory": "r1-p3-v0-c2a60081/runs/2026-10-01T20-01-24.962Z_rps-1_8e7d86e4",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p3-v1-a5b12604/runs/2026-10-01T20-03-12.637Z_rps-1_d9545367",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v1-a5b12604",
+          "directory": "r1-p3-v1-a5b12604",
+          "startedAtUtc": "2026-10-01T20:03:01.324Z",
+          "finishedAtUtc": "2026-10-01T20:04:49.166Z",
+          "status": "complete",
+          "runDirectory": "r1-p3-v1-a5b12604/runs/2026-10-01T20-03-12.637Z_rps-1_d9545367",
+          "error": null
+        }
+      ]
+    }
+  ]
+}
