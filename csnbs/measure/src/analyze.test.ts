@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
@@ -57,6 +57,15 @@ async function save(t: TestContext, run: VerifiedRun): Promise<string> {
   await writeFile(join(directory, 'run.json'), JSON.stringify(run.manifest));
   return directory;
 }
+function refreshSummary(run: VerifiedRun): void {
+  const m=run.manifest,t=m.timing;
+  t.plannedStartAtUtc=new Date(t.performanceTimeOriginUnixMs+t.plannedStartMs).toISOString();
+  t.plannedEndAtUtc=new Date(t.performanceTimeOriginUnixMs+t.plannedEndMs).toISOString();
+  t.finishedAtUtc=new Date(t.performanceTimeOriginUnixMs+t.finishedMs).toISOString();
+  m.summary=summarizeRun({plannedStartMs:t.plannedStartMs,plannedEndMs:t.plannedEndMs,finishedMs:t.finishedMs,
+    results:run.requests.filter(row=>row.phase==='measurement'),warmupResults:run.requests.filter(row=>row.phase==='warmup'),status:m.status,stopReason:m.stopReason});
+  const reasons=runQualityReasons(m);m.quality={reportable:reasons.length===0,reasons,percentileConvention:'nearest-rank'};
+}
 function pairs(latencies: number[]) {
   return latencies.map((latency, index) => ({ baseline: fixture(`a-${index}`, 20), candidate: fixture(`b-${index}`, latency), blockId: `pair-${index}` }));
 }
@@ -88,6 +97,47 @@ test('reader rejects missing coverage, altered workload, invalid timing, and fab
   await assert.rejects(readVerifiedRun(await save(t, timing)), /Latency identity/);
   const quality = fixture('quality'); quality.manifest.server.mode = 'fake';
   await assert.rejects(readVerifiedRun(await save(t, quality)), /Reportability/);
+});
+
+test('reader binds window and terminal clocks to declared duration even when summaries are rewritten', async (t) => {
+  const changed=fixture('rewritten-window');changed.manifest.timing.plannedEndMs+=90000;
+  changed.manifest.timing.finishedMs=changed.manifest.timing.plannedEndMs;refreshSummary(changed);
+  assert.equal(changed.manifest.quality.reportable,true);
+  await assert.rejects(readVerifiedRun(await save(t,changed)),/window differs from configured duration/);
+  changed.manifest.config.durationSeconds+=90;
+  await assert.rejects(readVerifiedRun(await save(t,changed)),/duration\/rate differs/);
+  const early=fixture('early-finish');early.manifest.timing.finishedMs=120600;refreshSummary(early);
+  await assert.rejects(readVerifiedRun(await save(t,early)),/finished before prescribed window/);
+  early.manifest.timing.finishedMs=120000;refreshSummary(early);
+  await assert.rejects(readVerifiedRun(await save(t,early)),/Terminal request completes after/);
+  const utc=fixture('utc-changed');utc.manifest.timing.plannedEndAtUtc=new Date(123000).toISOString();
+  await assert.rejects(readVerifiedRun(await save(t,utc)),/UTC timestamp differs/);
+});
+
+test('clock validation preserves isolated actual windows, aborted future cancellations and floating point tolerance', async (t) => {
+  const isolated=fixture('isolated-window');isolated.manifest.runKind='isolated';isolated.manifest.config.runKind='isolated';
+  isolated.manifest.timing.finishedMs=120520;isolated.manifest.timing.plannedEndMs=120520;refreshSummary(isolated);
+  assert.equal((await readVerifiedRun(await save(t,isolated))).manifest.summary.measurementWindowSeconds,119.52);
+  const aborted=fixture('aborted-window');aborted.manifest.status='aborted';aborted.manifest.stopReason='test interruption';
+  aborted.manifest.timing.finishedMs=1101;
+  for(const row of aborted.requests.filter(row=>row.phase==='measurement'&&row.sequence>0)) Object.assign(row,{
+    sentAtMs:null,completedAtMs:1100,latencyMs:null,dispatchLatenessMs:null,plannedToCompleteMs:null,status:null,error:'test interruption',
+    outcome:'cancelled',serverRequestId:null,serverMetrics:null,unattributedClientMs:null});
+  refreshSummary(aborted);
+  assert.equal((await readVerifiedRun(await save(t,aborted))).manifest.status,'aborted');
+  const precise=fixture('floating-window');precise.manifest.timing.plannedEndMs+=.00001;precise.manifest.timing.finishedMs+=.00001;refreshSummary(precise);
+  await readVerifiedRun(await save(t,precise));
+});
+
+test('campaign rejects an extended standalone duration that still rounds to the same arrival count', async (t) => {
+  const {planCampaign,verifyTrialRun}=await import('./campaign.js');
+  const campaign=planCampaign({campaignId:'fixed-duration',purpose:'ab',endpoint:'http://localhost/infer',datasetPath:'fixture.json',rates:[2],
+    repetitions:1,measuredRequests:240,warmupRequests:10,seed:7,timeoutMs:120000,startupTimeoutMs:1000,gpuExclusive:true,
+    variants:[{id:'A',command:['unused'],expected:{model_id:'llava'}},{id:'B',command:['unused'],expected:{model_id:'llava'}}]});
+  const run=fixture('duration-policy');run.manifest.config.durationSeconds=120.25;
+  run.manifest.timing.plannedEndMs=121250;run.manifest.timing.finishedMs=121250;refreshSummary(run);
+  const verified=await readVerifiedRun(await save(t,run));
+  assert.throws(()=>verifyTrialRun(campaign,campaign.trials[0]!,verified),/duration differs from prescribed trial/);
 });
 
 test('paired inference resolves improvement and regression, while A/A remains inconclusive', () => {
@@ -122,6 +172,21 @@ test('comparisons reject workload/hardware/decoding changes and distinguish toke
   assert.ok(comparabilityReasons(a.manifest, b.manifest).includes('Unmatched server hardware identity'));
   const mixed = pairs([10, 10, 10, 10, 10]); mixed[0]!.candidate.manifest.quality = { reportable: false, reasons: ['dirty'], percentileConvention: 'nearest-rank' };
   assert.equal(comparePairs(mixed, 'p50').conclusion, 'inconclusive');
+});
+
+test('instrumentation comparisons permit only the instrumentation field to change', () => {
+  const a=fixture('observations-off'),b=fixture('observations-on');
+  a.manifest.server.configuration!.instrumentation='handler-service-wall-v1';
+  b.manifest.server.configuration!.instrumentation='handler-stage-token-observations-v2';
+  assert.deepEqual(comparabilityReasons(a.manifest,b.manifest,'instrumentation'),[]);
+  assert.ok(comparabilityReasons(a.manifest,b.manifest,'token-count').includes('Unmatched effective configuration'));
+  assert.ok(comparabilityReasons(a.manifest,b.manifest,'implementation').includes('Unmatched effective configuration'));
+  for(const [key,value] of Object.entries({visual_token_num:128,implementation:'other',max_new_tokens:128,important_ratio:.7})){
+    const changed=structuredClone(b);changed.manifest.server.configuration![key]=value;
+    assert.ok(comparabilityReasons(a.manifest,changed.manifest,'instrumentation').includes('Unmatched effective configuration'),key);
+  }
+  const changed=structuredClone(b);changed.manifest.server.source!.gitCommit='different-revision';
+  assert.ok(comparabilityReasons(a.manifest,changed.manifest,'instrumentation').includes('Unmatched server implementation commit'));
 });
 
 test('baseline repeatability describes trial spread without claiming a detection threshold', () => {
@@ -219,7 +284,44 @@ test('workload characterization preserves category/source counts and observed ac
   assert.equal(characterized.sourceDatasetCounts.fixture,240);
   assert.equal(characterized.generatedTextTokens.observedCount,1);assert.equal(characterized.generatedTextTokens.median,7);
   assert.equal(characterized.promptTextTokens.median,11);assert.equal(characterized.visualTokens.observedCount,0);
-  assert.equal(characterized.outputCharacters.observedCount,0);assert.match(characterized.outputCharacters.reason,/do not retain/);
+  assert.equal(characterized.outputCharacters.observedCount,0);assert.match(characterized.outputCharacters.reason!,/do not retain/);
+  first.serverMetrics!.output_characters=0;
+  const measured=run.requests.filter(row=>row.phase==='measurement');
+  measured[1]!.serverMetrics!.output_characters=3;
+  measured[2]!.serverMetrics!.output_characters=-2;
+  measured[3]!.serverMetrics!.output_characters=1.5;
+  measured[4]!.serverMetrics!.output_characters=null;
+  const observed=characterizeWorkload(run.requests).outputCharacters;
+  assert.equal(observed.observedCount,2);assert.equal(observed.min,0);assert.equal(observed.max,3);
+  assert.match(observed.reason!,/only some/);
+});
+
+test('reports preserve instrumentation comparison scope and accept matched off/on configurations', async (t) => {
+  const {planCampaign}=await import('./campaign.js');
+  const {buildReport}=await import('./report.js');
+  const campaign=planCampaign({campaignId:'observation-overhead',purpose:'ab',comparisonKind:'instrumentation',
+    endpoint:'http://localhost/infer',datasetPath:'fixture.json',rates:[2],runKind:'isolated',repetitions:1,measuredRequests:240,
+    warmupRequests:10,seed:7,timeoutMs:120000,startupTimeoutMs:1000,gpuExclusive:true,
+    variants:[{id:'off',command:['unused'],expected:{instrumentation:'handler-service-wall-v1'}},
+      {id:'on',command:['unused'],expected:{instrumentation:'handler-stage-token-observations-v2'}}]});
+  const directory=await mkdtemp(join(tmpdir(),'observation-report-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+  for(const trial of campaign.trials){
+    const run=fixture(trial.trialId,20);Object.assign(run.manifest.server.configuration!,campaign.spec.variants[trial.variantIndex]!.expected);
+    run.manifest.runKind='isolated';run.manifest.config.runKind='isolated';
+    run.manifest.timing.plannedEndMs=120520;run.manifest.timing.finishedMs=120520;refreshSummary(run);
+    trial.status='complete';trial.runDirectory=await save(t,run);
+  }
+  const campaignPath=join(directory,'campaign.json');await writeFile(campaignPath,JSON.stringify(campaign));
+  const report=await buildReport(campaignPath,join(directory,'report'));
+  assert.equal(report.comparisonKind,'instrumentation');
+  assert.equal(report.runKind,'isolated');assert.deepEqual(report.capacityBrackets,[]);
+  assert.ok(report.runs.every(run=>run.runKind==='isolated'&&run.offeredRps===null));
+  assert.equal(report.comparisons[0]!.latency.pairCount,1);
+  assert.ok(report.comparisons[0]!.latency.reasons.every(reason=>!reason.includes('Unmatched')));
+  assert.ok(report.limitations.some(reason=>reason.includes('does not estimate total instrumentation overhead')));
+  const markdown=await readFile(join(directory,'report/report.md'),'utf8');
+  assert.match(markdown,/unavailable \(isolated\)/);assert.match(markdown,/p50 latency: inconclusive/);
+  assert.doesNotMatch(markdown,/2 RPS/);assert.match(markdown,/capacity not applicable/);
 });
 
 test('baseline reports combine both identical legs for latency spread and never narrate A/A noise as an optimization', async (t) => {

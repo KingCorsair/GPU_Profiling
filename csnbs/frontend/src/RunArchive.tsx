@@ -8,7 +8,8 @@ const value = (number: number | null, digits = 1) => number === null ? 'Unavaila
 const date = (timestamp: string | null) => timestamp ? timestamp.replace('T', ' ').replace(/\.\d+Z$/, ' UTC') : 'Date not recorded';
 const evidence = { exploratory: 'Exploratory', integration: 'Integration only', eligible: 'Run checks passed', review: 'Needs review' };
 
-function RunDetails({ run }: { run: ArchivedRun }) {
+export function RunDetails({ run }: { run: ArchivedRun }) {
+  const isolated = run.runKind === 'isolated';
   return <div className="archive-detail">
     <div className="detail-heading"><div><p className="study-label">Selected run · {evidence[run.evidence]}</p><h2>{run.modelId ?? 'Model not recorded'}</h2></div><a href={run.downloadPath} download>Download run JSON ↓</a></div>
     <p className="archive-run-id">{run.runId}</p>
@@ -24,17 +25,16 @@ function RunDetails({ run }: { run: ArchivedRun }) {
     <div className="table-scroll" role="region" aria-label="Saved timing summaries" tabIndex={0}>
       <table><caption>Saved timing summaries, milliseconds</caption><thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">p99</th></tr></thead><tbody>{[
         ['Send to response', run.summary.latencyMs],
-        ['Dispatch lateness', run.summary.dispatchLatenessMs],
-        ['Scheduled to completion', run.summary.scheduledToCompleteMs],
+        ...(!isolated ? [['Dispatch lateness', run.summary.dispatchLatenessMs], ['Scheduled to completion', run.summary.scheduledToCompleteMs]] : []),
         ['Server service', run.summary.serverServiceMs],
         ['Server queue', run.summary.serverQueueMs],
       ].map(([label, metrics]) => typeof metrics !== 'string' && <tr key={String(label)}><th scope="row">{String(label)}</th><td>{value(metrics.p50)}</td><td>{value(metrics.p95)}</td><td>{value(metrics.p99)}</td></tr>)}</tbody></table>
     </div>
-    <p className="figure-note">Send-to-response excludes client dispatch delay. Scheduled-to-completion includes it. Server service and queue values appear only when separately reported by the server. Missing or sample-limited percentiles remain unavailable.</p>
+    <p className="figure-note">{isolated ? 'Each isolated request starts after the previous response completes. There is no independent arrival schedule or offered request rate.' : 'Send-to-response excludes client dispatch delay. Scheduled-to-completion includes it.'} Server service and queue values appear only when separately reported by the server. Missing or sample-limited percentiles remain unavailable.</p>
     {run.schemaVersion === 2 && <dl className="provenance-grid">
-      <div><dt>Completed within arrival window / s</dt><dd>{value(run.summary.withinWindowThroughputRps, 3)}</dd></div>
-      <div><dt>Completed including drain / s</dt><dd>{value(run.summary.includingDrainThroughputRps, 3)}</dd></div>
-      <div><dt>Outstanding at window end</dt><dd>{value(run.summary.outstandingAtWindowEnd, 0)}</dd></div>
+      {!isolated && <div><dt>Completed within arrival window / s</dt><dd>{value(run.summary.withinWindowThroughputRps, 3)}</dd></div>}
+      <div><dt>{isolated ? 'Serial completions including drain / s' : 'Completed including drain / s'}</dt><dd>{value(run.summary.includingDrainThroughputRps, 3)}</dd></div>
+      <div><dt>{isolated ? 'Outstanding at measurement end' : 'Outstanding at window end'}</dt><dd>{value(run.summary.outstandingAtWindowEnd, 0)}</dd></div>
       <div><dt>Drain duration</dt><dd>{value(run.summary.drainMs)} ms</dd></div>
     </dl>}
     <WorkloadDetails data={run.workloadCharacterization} />
@@ -57,8 +57,9 @@ function Comparison({ runs }: { runs: ArchivedRun[] }) {
   const rows: [string, string, string][] = [
     ['Evidence', evidence[left.evidence], evidence[right.evidence]],
     ['Model', left.modelId ?? 'Not recorded', right.modelId ?? 'Not recorded'],
-    ['Visual tokens', value(left.visualTokenNum, 0), value(right.visualTokenNum, 0)],
-    ['Offered requests/s', value(left.offeredRps, 3), value(right.offeredRps, 3)],
+    ['Request mode', left.runKind, right.runKind],
+    ['Configured visual-token budget', value(left.visualTokenNum, 0), value(right.visualTokenNum, 0)],
+    ['Offered requests/s', left.runKind === 'isolated' ? 'Not applicable (sequential)' : value(left.offeredRps, 3), right.runKind === 'isolated' ? 'Not applicable (sequential)' : value(right.offeredRps, 3)],
     ['Successful samples', value(left.summary.successfulRequests, 0), value(right.summary.successfulRequests, 0)],
     ['Failed requests', value(left.summary.failedRequests, 0), value(right.summary.failedRequests, 0)],
     ['Completed requests/s', value(left.summary.successfulThroughputRps, 3), value(right.summary.successfulThroughputRps, 3)],
@@ -99,7 +100,7 @@ export default function RunArchive() {
     {error ? <div className="archive-empty" role="alert"><p>Couldn’t load the run archive.</p><button onClick={() => { setError(false); setAttempt(attempt + 1); }}>Try again</button></div> : !data ? <p aria-live="polite">Loading saved runs…</p> : <>
       <div className="archive-filters"><label>Search runs<input type="search" placeholder="Model, run ID, GPU, date, commit…" value={query} onChange={(event) => setQuery(event.target.value)} /></label><label>Evidence<select value={evidenceFilter} onChange={(event) => setEvidenceFilter(event.target.value)}><option value="all">All evidence</option><option value="exploratory">Exploratory</option><option value="integration">Integration only</option><option value="eligible">Run checks passed</option><option value="review">Needs review</option></select></label><label>Campaign<select value={campaignFilter} onChange={(event) => setCampaignFilter(event.target.value)}><option value="all">All campaigns</option>{[...new Set(data.runs.flatMap((run) => run.campaign ? [run.campaign] : []))].map((campaign) => <option key={campaign} value={campaign}>{campaign}</option>)}<option value="unassigned">Not assigned</option></select></label></div>
       <div className="archive-count"><p aria-live="polite">{filtered.length} of {data.runs.length} saved runs · select two to compare</p>{comparison.length > 0 && <button onClick={() => setComparison([])}>Clear comparison ({comparison.length}/2)</button>}</div>
-      {filtered.length ? <div className="table-scroll archive-table" tabIndex={0} role="region" aria-label="Saved run archive"><table><caption className="sr-only">Saved run summaries. p99 estimates with fewer than 1,000 successful samples are unstable.</caption><thead><tr><th scope="col">Compare</th><th scope="col">Run / model</th><th scope="col">Evidence</th><th scope="col">Offered / s</th><th scope="col">Success / fail</th><th scope="col">p50 (ms)</th><th scope="col">p95 (ms)</th><th scope="col">p99 (ms)</th><th scope="col">Completed / s</th></tr></thead><tbody>{filtered.map((run) => <tr key={run.sha256} data-selected={selected === run.sha256}><td><input type="checkbox" checked={comparison.includes(run.sha256)} disabled={comparison.length === 2 && !comparison.includes(run.sha256)} onChange={() => toggleCompare(run.sha256)} aria-label={`Compare run ${run.runId}`} /></td><th scope="row"><button className="run-select" aria-expanded={selected === run.sha256} aria-controls="selected-run-details" onClick={() => setSelected(selected === run.sha256 ? null : run.sha256)}>{run.modelId ?? 'Model not recorded'}</button><small>{run.recordedAtUtc?.slice(0, 10) ?? 'Unknown date'} · {run.visualTokenNum === null ? run.runKind : `${run.visualTokenNum} visual-token budget`}</small><small>{run.runId}</small></th><td><span className={`evidence-badge ${run.evidence}`}>{evidence[run.evidence]}</span></td><td>{value(run.offeredRps, 3)}</td><td>{run.summary.successfulRequests} / {run.summary.failedRequests}</td><td>{value(run.summary.latencyMs.p50)}</td><td>{value(run.summary.latencyMs.p95)}</td><td>{value(run.summary.latencyMs.p99)}{run.summary.successfulRequests < 1000 && <small>{run.schemaVersion === 1 ? 'Unstable tail' : 'Insufficient samples'}</small>}</td><td>{value(run.summary.successfulThroughputRps, 3)}</td></tr>)}</tbody></table></div> : <div className="archive-empty"><p>No saved runs match these filters.</p><button onClick={() => { setQuery(''); setEvidenceFilter('all'); setCampaignFilter('all'); }}>Reset filters</button></div>}
+      {filtered.length ? <div className="table-scroll archive-table" tabIndex={0} role="region" aria-label="Saved run archive"><table><caption className="sr-only">Saved run summaries. p99 estimates with fewer than 1,000 successful samples are unstable.</caption><thead><tr><th scope="col">Compare</th><th scope="col">Run / model</th><th scope="col">Evidence</th><th scope="col">Offered / s</th><th scope="col">Success / fail</th><th scope="col">p50 (ms)</th><th scope="col">p95 (ms)</th><th scope="col">p99 (ms)</th><th scope="col">Completed / s</th></tr></thead><tbody>{filtered.map((run) => <tr key={run.sha256} data-selected={selected === run.sha256}><td><input type="checkbox" checked={comparison.includes(run.sha256)} disabled={comparison.length === 2 && !comparison.includes(run.sha256)} onChange={() => toggleCompare(run.sha256)} aria-label={`Compare run ${run.runId}`} /></td><th scope="row"><button className="run-select" aria-expanded={selected === run.sha256} aria-controls="selected-run-details" onClick={() => setSelected(selected === run.sha256 ? null : run.sha256)}>{run.modelId ?? 'Model not recorded'}</button><small>{run.recordedAtUtc?.slice(0, 10) ?? 'Unknown date'} · {run.visualTokenNum === null ? run.runKind : `${run.visualTokenNum} visual-token budget`}</small><small>{run.runId}</small></th><td><span className={`evidence-badge ${run.evidence}`}>{evidence[run.evidence]}</span></td><td>{run.runKind === 'isolated' ? 'Sequential' : value(run.offeredRps, 3)}</td><td>{run.summary.successfulRequests} / {run.summary.failedRequests}</td><td>{value(run.summary.latencyMs.p50)}</td><td>{value(run.summary.latencyMs.p95)}</td><td>{value(run.summary.latencyMs.p99)}{run.summary.successfulRequests < 1000 && <small>{run.schemaVersion === 1 ? 'Unstable tail' : 'Insufficient samples'}</small>}</td><td>{value(run.summary.successfulThroughputRps, 3)}</td></tr>)}</tbody></table></div> : <div className="archive-empty"><p>No saved runs match these filters.</p><button onClick={() => { setQuery(''); setEvidenceFilter('all'); setCampaignFilter('all'); }}>Reset filters</button></div>}
       <Comparison runs={comparedRuns} />
       <div id="selected-run-details">{selectedRun && <RunDetails run={selectedRun} />}</div>
       <CampaignReports reports={data.campaignReports.filter((report) => campaignFilter === 'all' || campaignFilter === report.campaignId)} />

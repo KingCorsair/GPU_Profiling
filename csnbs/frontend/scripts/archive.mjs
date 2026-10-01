@@ -115,18 +115,24 @@ async function runFiles(directory, kind = 'runs') {
 export function archiveReport(report, evidence, sourcePath, sha256) {
   if (report.schema !== 'measurement-report' || report.schemaVersion !== 1 || !text(report.campaignId) || !text(report.purpose) || !Array.isArray(report.runs)) throw new Error('Unsupported campaign report');
   const seen = new Set();
+  const runKinds = new Set();
   for (const run of report.runs) {
     const saved = evidence.find((entry) => entry.runId === run.runId && entry.campaign === report.campaignId && `sha256:${entry.requestsSha256}` === run.requestsSha256);
     if (!saved || seen.has(run.runId) || !isDeepStrictEqual(saved.rawSummary, run.summary)) throw new Error('Campaign report does not match the indexed raw run evidence');
     if (saved.evidence === 'integration' && report.purpose !== 'integration') throw new Error('Campaign report omits the integration-only purpose of its raw evidence');
+    if (run.runKind != null && run.runKind !== saved.runKind) throw new Error('Campaign report run kind differs from raw evidence');
+    if (['isolated', 'open-loop'].includes(saved.runKind)) runKinds.add(saved.runKind);
     seen.add(run.runId);
   }
+  if (runKinds.size > 1) throw new Error('Campaign report mixes incompatible arrival modes');
+  const runKind = [...runKinds][0] ?? null;
+  if (report.runKind != null && report.runKind !== runKind) throw new Error('Campaign report arrival mode differs from raw evidence');
   const brackets = report.capacityBrackets ?? [];
   const strings = (values) => Array.isArray(values) && values.every((value) => typeof value === 'string');
   const nullableNumber = (value) => value === null || number(value) !== null;
   if (!Array.isArray(brackets) || !brackets.every((bracket) => object(bracket) && typeof bracket.variant === 'string' && bracket.sustainableCapacityEstablished === false && ['screen-bracketed', 'unbounded-above', 'unbounded-below', 'inconclusive'].includes(bracket.status) && nullableNumber(bracket.highestAllPassRate) && nullableNumber(bracket.lowestAllFailRate) && Array.isArray(bracket.points) && strings(bracket.reasons) && bracket.points.every((point) => object(point) && number(point.offeredRps) !== null && Number.isSafeInteger(point.trialCount) && point.trialCount >= 0 && nullableNumber(point.expectedTrialCount) && typeof point.classification === 'string' && strings(point.reasons)))) throw new Error('Unsupported capacity-screen report');
   if (!strings(report.limitations ?? [])) throw new Error('Unsupported report limitations');
-  return { campaignId: report.campaignId, purpose: report.purpose, sourcePath, sha256, downloadPath: `/data/archive/${sha256}.json`, runCount: report.runs.length, capacityBrackets: brackets, limitations: report.limitations ?? [] };
+  return { campaignId: report.campaignId, purpose: report.purpose, runKind, sourcePath, sha256, downloadPath: `/data/archive/${sha256}.json`, runCount: report.runs.length, capacityBrackets: brackets, limitations: report.limitations ?? [] };
 }
 
 async function campaignContext(filename, repository) {

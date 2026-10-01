@@ -1,6 +1,6 @@
 # Observable request lifecycle
 
-This contract describes the current TypeScript client and `csnbs/server.py`. The exact stored fields and version rules are in [contracts.md](contracts.md). Instrumentation preserves the existing blocking model-serving path; it does not establish queue, prefill, decode, or KV-cache measurements.
+This contract describes the TypeScript client and the default observation mode in `csnbs/server.py`. The exact stored fields, version rules and optional extended host-wall/token observations are in [contracts.md](contracts.md#optional-http-observations). Instrumentation preserves the existing blocking model-serving path; it does not establish queue, prefill, decode, or KV-cache measurements.
 
 ## Boundaries and clocks
 
@@ -27,16 +27,16 @@ Each predeclared measured request receives one terminal record on graceful compl
 
 A timeout only bounds client waiting. The campaign stops its owned server and waits for process termination before starting the next model trial. Health responsiveness alone does not prove an empty queue. Failed/interrupted attempts remain in the campaign history, including when a later attempt succeeds.
 
-## Fields deliberately unavailable today
+## Default-mode limits and optional observations
 
-The current service returns `metrics.schema_version = 1`. The client preserves the returned object and rejects negative/nonfinite known numeric metrics; accepting a metric is not independent validation of its claimed boundary.
+The default service returns `metrics.schema_version = 1`. Setting `EXTENDED_HTTP_OBSERVATIONS=1` enables schema 2, with an explicit changed instrumentation identity. The client preserves the returned object and rejects negative/nonfinite known numeric metrics; accepting a metric is not independent validation of its claimed boundary. Historical schema-1 records retain their original unavailable values.
 
 | Field or question | Current evidence | Required owner work before interpretation |
 |---|---|---|
 | `queue_ms` | Null, with `queue_unavailable_reason` | Amay must expose responsive intake, payload eligibility, and service admission on a defined clock. The blocking event loop can wait before `infer()` begins. |
-| `preprocess_ms`, `generation_wall_ms`, `postprocess_ms` | Null | Define and instrument nonoverlapping service stages. CPU generation wall time must remain distinct from CUDA event time. |
+| `preprocess_ms`, `generation_wall_ms`, `postprocess_ms` | Null by default; observed host-wall stages in extended mode | Interpret the boundaries in contracts.md. Generation wall time includes existing model-wrapper synchronization and logging; it is not CUDA event time. |
 | GPU prefill versus decode | Unavailable in the canonical per-request HTTP records | Amay supplies correlated CUDA-event boundaries without a per-request pipeline-draining synchronization. Existing diagnostic trace files do not automatically satisfy this contract. |
-| `generated_text_tokens`, `prompt_text_tokens`, `visual_tokens` | Null, with `token_unavailable_reason` | Verify the generation wrapper's actual output, BOS/EOS handling, visual-token removal and multimodal expansion. Neither configured `max_new_tokens` nor `visual_token_num` is an observed count. |
+| `generated_text_tokens`, `prompt_text_tokens`, `visual_tokens` | Null by default; extended mode checks actual IDs/returned feature count against the pinned wrapper contract | Version, BOS/EOS, shape, budget and truncation checks must pass for the affected count. Neither configured `max_new_tokens` nor `visual_token_num` is an observed count. Contract failures remain null with reasons. |
 | Batch occupancy, batch-formation wait, padded/packed work | Unavailable; current declared batch size is one | Serving-owner implementation and actual per-batch/request observations. |
 | Exact KV-cache allocation and peak | Unavailable | Allocator/cache instrumentation with a precise peak definition; sampled device memory cannot isolate KV cache. |
 

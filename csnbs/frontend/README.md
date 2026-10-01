@@ -122,6 +122,11 @@ rates; it does not interpolate a boundary or claim sustainable capacity. Reports
 are available as original-byte downloads. Older reports without repeated
 capacity screens retain an explicit unavailable message.
 
+Isolated runs are sequential: they have no offered arrival rate or independent
+arrival schedule. Their details show serial completion rate including drain,
+omit scheduled-arrival statistics, and never display capacity screens derived
+from a placeholder rate. Report arrival modes are checked against the raw runs.
+
 Tests cover the historical evidence contract plus archive quality labels,
 unknown metadata, null metrics, incompatible comparisons, campaign discovery,
 partial results, request-record tampering, portable nested exports, raw workload

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { percentile, summarizeRun, runQualityReasons, type LoadRun, type RequestResult, type RunManifest } from './loadgen.js';
+import { percentile, summarizeRun, runQualityReasons, validateConfig, type LoadRun, type RequestResult, type RunManifest } from './loadgen.js';
 
 export type VerifiedResources = {
   file: 'resources.jsonl'; count: number; sha256: string; scope: string | null;
@@ -9,6 +9,7 @@ export type VerifiedResources = {
 };
 export type VerifiedRun = { manifest: RunManifest; requests: RequestResult[]; directory: string; resources?: VerifiedResources };
 export type ComparisonMetric = 'successfulThroughputWithinWindowRps' | 'successfulThroughputIncludingDrainRps' | 'p50' | 'p95' | 'p99';
+export type ComparisonKind = 'token-count' | 'implementation' | 'instrumentation';
 export type RunPair = { baseline: VerifiedRun; candidate: VerifiedRun; blockId: string };
 export type PairComparison = {
   metric: ComparisonMetric; pairCount: number; effectPercent: number | null;
@@ -18,6 +19,7 @@ export type PairComparison = {
 };
 function invariant(condition: unknown, message: string): asserts condition { if (!condition) throw Error(message); }
 function close(a: number, b: number): boolean { return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= Math.max(1e-6, Math.abs(b) * 1e-10); }
+function clockClose(a: number, b: number): boolean { return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= Math.max(0.001, Math.max(Math.abs(a), Math.abs(b)) * Number.EPSILON * 8); }
 function compareValue(actual: unknown, expected: unknown, path: string): void {
   if (typeof expected === 'number') { invariant(typeof actual === 'number' && close(actual, expected), `${path}: summary does not match raw requests`); return; }
   if (expected === null || typeof expected !== 'object') { invariant(actual === expected, `${path}: summary does not match raw requests`); return; }
@@ -34,6 +36,8 @@ export async function readVerifiedRun(directory: string): Promise<VerifiedRun> {
   invariant(manifest.requests.file === 'requests.jsonl' && manifest.requests.schemaVersion === 3, 'Unsupported request schema');
   invariant(['complete', 'aborted'].includes(manifest.status), 'Invalid final run status');
   invariant(manifest.runKind === manifest.config.runKind, 'Run kind differs from configuration');
+  validateConfig(manifest.config);
+  invariant(manifest.config.measuredRequests === Math.floor(manifest.config.requestsPerSecond * manifest.config.durationSeconds + 1e-9), 'Configured duration/rate differs from measured request budget');
   const bytes = await readFile(join(directory, 'requests.jsonl'));
   invariant(hash(bytes) === manifest.requests.sha256, 'Raw request SHA-256 mismatch');
   const lines = bytes.toString('utf8').trim().split('\n').filter(Boolean);
@@ -88,12 +92,21 @@ export async function readVerifiedRun(directory: string): Promise<VerifiedRun> {
   compareValue(manifest.workload.measuredCategoryCounts, categories, 'workload.measuredCategoryCounts');
   const timing = manifest.timing;
   invariant(numeric(timing.plannedStartMs) && numeric(timing.plannedEndMs) && timing.plannedEndMs >= timing.plannedStartMs && numeric(timing.finishedMs), 'Invalid measurement window');
+  invariant(timing.finishedMs >= timing.plannedStartMs || clockClose(timing.finishedMs, timing.plannedStartMs), 'Run finished before measurement start');
+  if (manifest.runKind === 'isolated') invariant(clockClose(timing.plannedEndMs, timing.finishedMs), 'Isolated window must end at actual finish');
+  else invariant(clockClose(timing.plannedEndMs, timing.plannedStartMs + manifest.config.durationSeconds * 1000), 'Measurement window differs from configured duration');
+  invariant(requests.every(row => row.completedAtMs <= timing.finishedMs || clockClose(row.completedAtMs, timing.finishedMs)), 'Terminal request completes after run finish');
+  invariant(numeric(timing.performanceTimeOriginUnixMs), 'Missing monotonic clock epoch');
+  for (const [clock, utc] of [[timing.plannedStartMs,timing.plannedStartAtUtc],[timing.plannedEndMs,timing.plannedEndAtUtc],[timing.finishedMs,timing.finishedAtUtc]] as const) {
+    invariant(typeof utc === 'string' && Number.isFinite(Date.parse(utc)) && Math.abs(Date.parse(utc) - (timing.performanceTimeOriginUnixMs + clock)) <= 1.001, 'UTC timestamp differs from monotonic clock epoch');
+  }
   for (const row of phases.measurement) {
     if (manifest.runKind !== 'isolated') invariant(close(row.scheduledAtMs, timing.plannedStartMs + row.sequence * 1000 / manifest.config.requestsPerSecond), 'Open-loop schedule differs from prescribed arrivals');
     if (row.sentAtMs !== null) invariant(row.sentAtMs >= timing.plannedStartMs, 'Measured request dispatched before measurement phase');
   }
   const latestWarmup = phases.warmup.reduce((latest, row) => Math.max(latest, row.completedAtMs), -Infinity);
   if (manifest.status === 'complete') {
+    invariant(timing.finishedMs >= timing.plannedEndMs || clockClose(timing.finishedMs, timing.plannedEndMs), 'Completed run finished before prescribed window end');
     invariant(manifest.warmup.successful === manifest.config.warmupRequests, 'Completed run has unsuccessful warmup');
     invariant(timing.plannedStartMs + 2 >= latestWarmup + manifest.config.settleMs, 'Warmup or settling overlaps measurement');
     invariant(phases.measurement.every((row) => row.outcome !== 'cancelled'), 'Completed run has cancelled measured requests');
@@ -139,12 +152,14 @@ function stable(value: unknown): string {
   if (value && typeof value === 'object') return `{${Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => `${JSON.stringify(key)}:${stable(item)}`).join(',')}}`;
   return JSON.stringify(value) ?? 'undefined';
 }
-function effectiveConfiguration(config: Record<string, unknown> | null, kind: 'token-count' | 'implementation'): unknown {
+function effectiveConfiguration(config: Record<string, unknown> | null, kind: ComparisonKind): unknown {
   if (!config) return null;
-  return Object.fromEntries(Object.entries(config).filter(([key]) => kind === 'token-count' ? !['visual_token_num', 'visualTokenNum'].includes(key) : !['implementation', 'implementation_id', 'serving_variant'].includes(key)));
+  const excluded = kind === 'token-count' ? ['visual_token_num', 'visualTokenNum']
+    : kind === 'implementation' ? ['implementation', 'implementation_id', 'serving_variant'] : ['instrumentation'];
+  return Object.fromEntries(Object.entries(config).filter(([key]) => !excluded.includes(key)));
 }
 /** Reject known mismatches; missing provenance is a reporting reason, never assumed equality. */
-export function comparabilityReasons(a: RunManifest, b: RunManifest, kind: 'token-count' | 'implementation' = 'token-count'): string[] {
+export function comparabilityReasons(a: RunManifest, b: RunManifest, kind: ComparisonKind = 'token-count'): string[] {
   const reasons: string[] = [];
   const compare = (left: unknown, right: unknown, name: string) => { if (stable(left) !== stable(right)) reasons.push(`Unmatched ${name}`); };
   compare(a.runKind, b.runKind, 'run kind');
@@ -156,7 +171,7 @@ export function comparabilityReasons(a: RunManifest, b: RunManifest, kind: 'toke
   compare(aServer.hardware, bServer.hardware, 'server hardware identity'); compare(aServer.runtime, bServer.runtime, 'server runtime');
   compare(a.server.modelId, b.server.modelId, 'model identity'); compare(a.server.checkpointRevision, b.server.checkpointRevision, 'checkpoint revision');
   compare(effectiveConfiguration(a.server.configuration, kind), effectiveConfiguration(b.server.configuration, kind), 'effective configuration');
-  if (kind === 'token-count') compare((aServer.source as Record<string, unknown> | null)?.gitCommit, (bServer.source as Record<string, unknown> | null)?.gitCommit, 'server implementation commit');
+  if (kind !== 'implementation') compare((aServer.source as Record<string, unknown> | null)?.gitCommit, (bServer.source as Record<string, unknown> | null)?.gitCommit, 'server implementation commit');
   return reasons;
 }
 function valueFor(run: VerifiedRun, metric: ComparisonMetric): number | null {
@@ -168,7 +183,7 @@ function random(seed: number): () => number {
   let n = seed >>> 0;
   return () => { n += 0x6D2B79F5; let t = n; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-export function comparePairs(pairs: RunPair[], metric: ComparisonMetric = 'successfulThroughputWithinWindowRps', seed = 90, kind: 'token-count' | 'implementation' = 'token-count'): PairComparison {
+export function comparePairs(pairs: RunPair[], metric: ComparisonMetric = 'successfulThroughputWithinWindowRps', seed = 90, kind: ComparisonKind = 'token-count'): PairComparison {
   const reasons: string[] = [];
   const effects: number[] = [];
   const seen = new Set<string>();

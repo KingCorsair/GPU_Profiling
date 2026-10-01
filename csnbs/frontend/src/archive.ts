@@ -62,7 +62,7 @@ export type CapacityBracket = {
   points: { offeredRps: number; trialCount: number; expectedTrialCount: number | null; classification: string; reasons: string[] }[];
   reasons: string[];
 };
-export type CampaignReport = { campaignId: string; purpose: string; sourcePath: string; sha256: string; downloadPath: string; runCount: number; capacityBrackets: CapacityBracket[]; limitations: string[] };
+export type CampaignReport = { campaignId: string; purpose: string; runKind: 'open-loop' | 'isolated' | null; sourcePath: string; sha256: string; downloadPath: string; runCount: number; capacityBrackets: CapacityBracket[]; limitations: string[] };
 export type RunArchive = { schemaVersion: 1; generatedAtUtc: string; runs: ArchivedRun[]; campaignReports: CampaignReport[]; issues: { sourcePath: string; message: string }[] };
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 const nullableNumber = (value: unknown) => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 0;
@@ -112,6 +112,7 @@ export function parseArchive(input: unknown): RunArchive {
     }
   }
   for (const report of input.campaignReports) {
+    if (!object(report) || !['open-loop', 'isolated', null].includes(report.runKind as string | null)) return invalid();
     if (!object(report) || !['campaignId', 'purpose', 'sourcePath'].every((field) => typeof report[field] === 'string') || typeof report.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(report.sha256) || report.downloadPath !== `/data/archive/${report.sha256}.json` || !Number.isSafeInteger(report.runCount) || Number(report.runCount) < 0 || !Array.isArray(report.capacityBrackets) || !strings(report.limitations)) return invalid();
     for (const bracket of report.capacityBrackets) {
       if (!object(bracket) || typeof bracket.variant !== 'string' || bracket.sustainableCapacityEstablished !== false || !['screen-bracketed', 'unbounded-above', 'unbounded-below', 'inconclusive'].includes(String(bracket.status)) || !nullableNumber(bracket.highestAllPassRate) || !nullableNumber(bracket.lowestAllFailRate) || !strings(bracket.reasons) || !Array.isArray(bracket.points)) return invalid();
@@ -134,6 +135,7 @@ export function comparisonWarnings(a: ArchivedRun, b: ArchivedRun): string[] {
   if (a.runKind !== b.runKind) warnings.push('Load-generation modes differ.');
   if (a.schemaVersion !== b.schemaVersion) warnings.push('Harness schema versions differ; measurement boundaries and throughput definitions may differ.');
   for (const [key, label] of fields) {
+    if (key === 'offeredRps' && a.runKind === 'isolated' && b.runKind === 'isolated') continue;
     if (a[key] === null || b[key] === null) warnings.push(`${label} is unknown in at least one run.`);
     else if (a[key] !== b[key]) warnings.push(`${label} differs.`);
   }

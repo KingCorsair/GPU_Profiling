@@ -21,6 +21,16 @@ def _number(value: Any, label: str, *, nullable: bool = False) -> None:
         raise ValueError(f"{label} must be a finite nonnegative number")
 
 
+def report_run_kind(report: dict[str, Any]) -> str | None:
+    """Use explicit mode metadata only; a placeholder rate cannot prove arrivals."""
+    kinds = {value for value in [report.get("runKind"), *(run.get("runKind") for run in report["runs"])] if value is not None}
+    if not kinds:
+        return None
+    if not kinds <= {"open-loop", "isolated"} or len(kinds) != 1:
+        raise ValueError("Report run kinds must consistently identify open-loop or isolated requests")
+    return next(iter(kinds))
+
+
 def validate_report(report: Any) -> dict[str, Any]:
     """Fail visibly on incompatible evidence instead of silently dropping rows."""
     if not isinstance(report, dict) or report.get("schema") != "measurement-report" or report.get("schemaVersion") != 1:
@@ -40,11 +50,12 @@ def validate_report(report: Any) -> dict[str, Any]:
         if run["runId"] in seen:
             raise ValueError(f"Duplicate runId: {run['runId']}")
         seen.add(run["runId"])
-        _number(run.get("rate"), "Offered rate")
+        _number(run.get("rate"), "Configured trial rate")
         if not isinstance(run.get("summary"), dict):
             raise ValueError("Missing saved run summary")
         summary = run["summary"]
         _number(summary.get("successfulThroughputWithinWindowRps"), "Within-window throughput", nullable=True)
+        _number(summary.get("successfulThroughputIncludingDrainRps"), "Including-drain throughput", nullable=True)
         for field in ("successfulRequests", "failedRequests"):
             if field in summary:
                 _number(summary[field], field)
@@ -63,11 +74,19 @@ def validate_report(report: Any) -> dict[str, Any]:
             _number(point.get("scheduledSeconds"), "Timeline time")
             _number(point.get("outstanding"), "Client outstanding", nullable=True)
             _number(point.get("latencyMs"), "Timeline latency", nullable=True)
+    report_run_kind(report)
     return report
 
 
 def select_representatives(report: dict[str, Any], rate: float | None = None) -> tuple[float | None, list[dict[str, Any]]]:
     """Choose an explicitly described individual trial; never pool repetitions."""
+    if report_run_kind(report) != "open-loop":
+        if rate is not None:
+            raise ValueError("--rate requires an explicitly open-loop report; isolated/unknown modes have no offered rate")
+        representatives = {}
+        for run in report["runs"]:
+            representatives.setdefault(run["variant"], run)
+        return None, list(representatives.values())
     rates = sorted({run["rate"] for run in report["runs"]})
     if not rates:
         return None, []
@@ -95,6 +114,9 @@ def is_integration(report: dict[str, Any]) -> bool:
 
 def render_report(report: dict[str, Any], output_dir: Path, *, rate: float | None = None) -> dict[str, str]:
     validate_report(report)
+    run_kind = report_run_kind(report)
+    open_loop = run_kind == "open-loop"
+    isolated = run_kind == "isolated"
     selected_rate, representatives = select_representatives(report, rate)
     import matplotlib
 
@@ -120,29 +142,44 @@ def render_report(report: dict[str, Any], output_dir: Path, *, rate: float | Non
         banner = "INTEGRATION ONLY · Pipeline validation, not a reportable GPU performance result" if integration else "Saved campaign observations · no capacity or statistical significance inferred by this figure"
         fig.text(0.5, 0.935, banner, ha="center", fontsize=10, color="#8f3b12" if integration else "#425066",
                  bbox={"boxstyle": "round,pad=0.45", "facecolor": "#fff3e8" if integration else "#eef2f7", "edgecolor": "none"})
-        selected_label = f"{selected_rate:g} requests/s" if selected_rate is not None else "no recorded rate"
-        fig.text(0.075, 0.878, f"Throughput: every saved trial. Other panels: first recorded trial per variant at {selected_label}.", fontsize=9, color="#425066")
+        if open_loop:
+            selected_label = f"{selected_rate:g} requests/s" if selected_rate is not None else "no recorded rate"
+            selection_note = f"Throughput: every saved trial. Other panels: first recorded trial per variant at {selected_label}."
+        else:
+            mode_note = "Isolated serial requests: completion-paced, no offered arrival rate." if isolated else "Arrival mode unrecorded: no offered-load interpretation."
+            selection_note = f"{mode_note}\nCompletion rate: every saved trial. Other panels: first recorded trial per variant."
+        fig.text(0.075, 0.878, selection_note, fontsize=9, color="#425066")
 
         missing_throughput = 0
+        throughput_key = "successfulThroughputWithinWindowRps" if open_loop else "successfulThroughputIncludingDrainRps"
+        trial_sequence = {run["runId"]: index + 1 for index, run in enumerate(report["runs"])}
         for variant in variants:
             runs = [run for run in report["runs"] if run["variant"] == variant]
-            valid = [run for run in runs if run["summary"].get("successfulThroughputWithinWindowRps") is not None]
+            valid = [run for run in runs if run["summary"].get(throughput_key) is not None]
             missing_throughput += len(runs) - len(valid)
             # Scatter each repetition at its actual rate; connecting trials would imply interpolation.
             for index, run in enumerate(valid):
-                throughput.scatter(run["rate"], run["summary"]["successfulThroughputWithinWindowRps"],
+                throughput.scatter(run["rate"] if open_loop else trial_sequence[run["runId"]], run["summary"][throughput_key],
                                    s=45, color=colors[variant], marker=markers[index % len(markers)],
                                    alpha=0.75, label=f"{variant} · {len(valid)} trial{'s' if len(valid) != 1 else ''}" if index == 0 else None)
-        if report["runs"]:
+        if report["runs"] and open_loop:
             maximum = max(run["rate"] for run in report["runs"])
             throughput.plot([0, maximum], [0, maximum], color="#9ca3af", linestyle=":", linewidth=1, label="Offered rate (reference)")
-        throughput.set(title="Successful throughput during the arrival window", xlabel="Offered requests / second", ylabel="Successful completions / second")
+        if open_loop:
+            throughput.set(title="Successful throughput during the arrival window", xlabel="Offered requests / second", ylabel="Successful completions / second")
+        else:
+            throughput.set(title="Serial successful completion rate" if isolated else "Saved successful completion rate", xlabel="Recorded trial sequence", ylabel="Successful completions / second (including drain)")
+            throughput.xaxis.set_major_locator(MaxNLocator(integer=True))
         throughput.set_xlim(left=0)
         throughput.set_ylim(bottom=0)
+        if not open_loop:
+            throughput.set_xlim(0.5, max(len(report["runs"]), 1) + 0.5)
+            maximum_completion_rate = max((run["summary"].get(throughput_key) or 0 for run in report["runs"]), default=0)
+            throughput.set_ylim(0, maximum_completion_rate * 1.15 if maximum_completion_rate else 1)
         if throughput.get_legend_handles_labels()[0]:
             throughput.legend(loc="best", fontsize=8)
         if missing_throughput:
-            throughput.text(0.02, 0.98, f"{missing_throughput} runs: within-window throughput unavailable", transform=throughput.transAxes, va="top", fontsize=8)
+            throughput.text(0.02, 0.98, f"{missing_throughput} runs: saved completion rate unavailable", transform=throughput.transAxes, va="top", fontsize=8)
 
         representative_notes = []
         # Shared bin boundaries make per-run counts comparable; observations remain separate.
@@ -205,7 +242,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report", required=True, type=Path, help="Saved measurement-report JSON")
     parser.add_argument("--output-dir", type=Path, help="Default: the report's directory")
-    parser.add_argument("--rate", type=float, help="Rate for individual-run distributions; default: highest recorded")
+    parser.add_argument("--rate", type=float, help="Open-loop reports only: rate for individual-run distributions; default: highest recorded")
     args = parser.parse_args()
     try:
         report = json.loads(args.report.read_text())

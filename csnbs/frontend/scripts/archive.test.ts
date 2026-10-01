@@ -5,9 +5,13 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { archiveRun, archiveReport, syncArchive } from './archive.mjs';
 import { characterizeRecords } from './workload.mjs';
 import { comparisonWarnings, parseArchive } from '../src/archive.ts';
+import { RunDetails } from '../src/RunArchive.tsx';
+import CampaignReports from '../src/CampaignReports.tsx';
 
 const sourcePath = 'results/loadgen/2026-09-01/02-37-44Z_rps-0.5_8beede1e/run.json';
 const bytes = readFileSync(new URL(`../../../${sourcePath}`, import.meta.url));
@@ -206,7 +210,7 @@ test('portable campaign identity comes from its manifest despite nested date/run
 
 test('saved campaign screens must match raw journals and summaries and cannot claim sustainable capacity', () => {
   const hash = 'a'.repeat(64);
-  const evidence = [{ runId: raw.runId, campaign: 'canonical-id', requestsSha256: hash, rawSummary: raw.summary, evidence: 'integration' }];
+  const evidence = [{ runId: raw.runId, campaign: 'canonical-id', requestsSha256: hash, rawSummary: raw.summary, evidence: 'integration', runKind: 'open-loop' }];
   const report = { schema: 'measurement-report', schemaVersion: 1, campaignId: 'canonical-id', purpose: 'integration', runs: [{ runId: raw.runId, requestsSha256: `sha256:${hash}`, summary: raw.summary }], limitations: ['Integration only'], capacityBrackets: [{ variant: 'A', status: 'inconclusive', sustainableCapacityEstablished: false, highestAllPassRate: null, lowestAllFailRate: null, points: [{ offeredRps: 1, trialCount: 1, expectedTrialCount: 5, classification: 'inconclusive', reasons: ['Missing trials'] }], reasons: ['Longer confirmation required'] }] };
   const saved = archiveReport(report, evidence, 'results/campaigns/export/report/report.json', hash);
   assert.equal(parseArchive({ ...archive(), campaignReports: [saved] }).campaignReports.length, 1);
@@ -218,4 +222,25 @@ test('saved campaign screens must match raw journals and summaries and cannot cl
   optimistic.capacityBrackets[0].sustainableCapacityEstablished = true;
   assert.throws(() => archiveReport(optimistic, evidence, '', hash), /Unsupported capacity/);
   assert.throws(() => archiveReport({ ...report, purpose: 'benchmark' }, evidence, '', hash), /integration-only/);
+  assert.throws(() => archiveReport({ ...report, runKind: 'isolated' }, evidence, '', hash), /arrival mode differs/);
+  const openLoopHtml = renderToStaticMarkup(createElement(CampaignReports, { reports: [saved] }));
+  assert.match(openLoopHtml, /Offered \/ s/);
+  // Even an older isolated report with placeholder-based screens must hide them.
+  const isolated = archiveReport({ ...report, runKind: 'isolated' }, [{ ...evidence[0], runKind: 'isolated' }], '', hash);
+  const html = renderToStaticMarkup(createElement(CampaignReports, { reports: [isolated] }));
+  assert.match(html, /no offered arrival rate/);
+  assert.doesNotMatch(html, /Offered \/ s/);
+  assert.doesNotMatch(html, /Highest tested rate/);
+});
+
+test('isolated details show sequential timing without an arrival window or scheduled-arrival statistics', () => {
+  const run = archiveRun({ ...v2(), runKind: 'isolated' }, options);
+  const html = renderToStaticMarkup(createElement(RunDetails, { run }));
+  assert.equal(run.offeredRps, null);
+  assert.match(html, /Sequential \(no arrival schedule\)/);
+  assert.match(html, /Serial completions including drain/);
+  assert.doesNotMatch(html, /Completed within arrival window/);
+  assert.doesNotMatch(html, /Dispatch lateness/);
+  assert.doesNotMatch(html, /Scheduled to completion/);
+  assert.ok(!comparisonWarnings(run, run).some((warning) => warning.includes('Offered load is unknown')));
 });

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { hostname } from 'node:os';
 import { collectServerMetadata } from './server_metadata.js';
 import { requireIdleGpu, monitorResources } from './resources.js';
-import { readVerifiedRun, type VerifiedRun } from './analyze.js';
+import { readVerifiedRun, type VerifiedRun, type ComparisonKind } from './analyze.js';
 
 export type Variant = { id: string; command: string[]; env?: Record<string, string>; expected: Record<string, unknown> };
 export type CampaignSpec = {
@@ -15,7 +15,7 @@ export type CampaignSpec = {
   measuredRequests: number; warmupRequests: number; seed: number; timeoutMs: number;
   startupTimeoutMs: number; variants: [Variant, Variant];
   runKind?: 'open-loop' | 'isolated'; settleMs?: number; gpuExclusive?: boolean;
-  comparisonKind?: 'token-count' | 'implementation';
+  comparisonKind?: ComparisonKind;
 };
 export type TrialStatus = 'pending' | 'running' | 'complete' | 'failed' | 'interrupted';
 export type ScheduledTrial = { trialId: string; blockId: string; repetition: number; rate: number; variantIndex: number };
@@ -49,7 +49,7 @@ export function validateSpec(s: CampaignSpec): void {
   if (!Number.isSafeInteger(s.warmupRequests) || s.warmupRequests < 0 || !Number.isSafeInteger(s.seed) || s.seed < 0 || s.seed + s.repetitions - 1 > 0xffffffff) throw Error('Invalid warmup or seed');
   if (s.settleMs !== undefined && (!Number.isFinite(s.settleMs) || s.settleMs < 0)) throw Error('Invalid settling period');
   if (s.runKind !== undefined && !['open-loop', 'isolated'].includes(s.runKind)) throw Error('Invalid campaign run kind');
-  if (s.comparisonKind !== undefined && !['token-count', 'implementation'].includes(s.comparisonKind)) throw Error('Invalid comparison kind');
+  if (s.comparisonKind !== undefined && !['token-count', 'implementation', 'instrumentation'].includes(s.comparisonKind)) throw Error('Invalid comparison kind');
   if (!s.datasetPath || typeof s.datasetPath !== 'string') throw Error('A workload dataset path is required');
   if (!Array.isArray(s.variants) || s.variants.length !== 2 || s.variants.some((v) => !v.id || !v.command?.length || !v.expected || typeof v.expected !== 'object' || Array.isArray(v.expected) || !Object.keys(v.expected).length || v.command.some((a) => typeof a !== 'string' || !a))) throw Error('Two owned server variants with expected configuration are required');
   if (s.variants[0].id === s.variants[1].id) throw Error('Variant IDs must be unique');
@@ -107,6 +107,8 @@ export function verifyTrialRun(campaign: Campaign, trial: Trial, run: VerifiedRu
   const { manifest } = run, s = campaign.spec;
   if (manifest.status !== 'complete' || manifest.config.measuredRequests !== s.measuredRequests || manifest.config.requestsPerSecond !== trial.rate || manifest.config.warmupRequests !== s.warmupRequests || manifest.config.seed !== s.seed + trial.repetition || manifest.config.timeoutMs !== s.timeoutMs || manifest.config.settleMs !== (s.settleMs ?? 0) || manifest.runKind !== (s.runKind ?? 'open-loop')) throw Error(`Run does not satisfy the prescribed trial ${trial.trialId}`);
   if (manifest.summary.totalRequests !== s.measuredRequests || manifest.summary.dispatchedRequests !== s.measuredRequests) throw Error(`Incomplete delivered budget for trial ${trial.trialId}`);
+  const expectedDuration = s.measuredRequests / trial.rate;
+  if (!Number.isFinite(manifest.config.durationSeconds) || Math.abs(manifest.config.durationSeconds - expectedDuration) > Math.max(1e-9, expectedDuration * Number.EPSILON * 8)) throw Error(`Run duration differs from prescribed trial ${trial.trialId}`);
   if (!configurationMatches(manifest.server.configuration, s.variants[trial.variantIndex]!.expected)) throw Error(`Saved run configuration differs from trial ${trial.trialId}`);
 }
 async function atomicWrite(path: string, value: unknown): Promise<void> { await writeFile(`${path}.tmp`, JSON.stringify(value, null, 2) + '\n'); await rename(`${path}.tmp`, path); }
