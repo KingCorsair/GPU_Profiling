@@ -1,0 +1,479 @@
+{
+  "schema": "measurement-workload-policies",
+  "schemaVersion": 1,
+  "sourceSha256": "2786adfd1e36e9d3c5910c4e49212eb58b55eba8cd98698f07e148d103e081c2",
+  "sourceRecords": 90,
+  "sourcePathRelative": "../../../../vis_pruner_copy/vispruner_eval_dataset/dev.json",
+  "categoryCounts": {
+    "ocr": 15,
+    "counting": 15,
+    "spatial_reasoning": 15,
+    "object_presence": 15,
+    "coarse_description": 15,
+    "fine_attributes": 15
+  },
+  "longSuffix": "\nAnswer in three complete sentences. First answer the question directly, then describe the visible evidence and relevant image details supporting your answer. State any uncertainty instead of inventing details.",
+  "workloadSha256": {
+    "short": "36476132d771e68f9792438face793a96fe5ee12e2a55962d826c3320286dbbc",
+    "long": "98f40e988759494816b97827f4e779570e6919e0b7ece3be8d8d70159c4d73dc",
+    "mixed": "90dbc595bac52e3196c3c227d68b9f1f560c8fbbeb73c66ac499478d4d8607c7"
+  },
+  "mixedAssignments": [
+    {
+      "question_id": "textvqa_34628",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34620",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34614",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34638",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34633",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34610",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34608",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34618",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34616",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34622",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34613",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34637",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34643",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "textvqa_34632",
+      "category": "ocr",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "textvqa_34623",
+      "category": "ocr",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000427034.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000434479.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000438304.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000565045.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000357816.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000006040.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000195918.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000372819.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000289059.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000044279.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000410612.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000335954.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000290081.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_count/000000430286.jpg",
+      "category": "counting",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_count/000000556000.jpg",
+      "category": "counting",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000211825.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000395801.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000204871.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000007281.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000472046.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000048504.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000395701.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000062808.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "gqa_n414992_6",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "gqa_n578564_13",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000056127.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000014038.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000477955.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_position/000000458410.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_position/000000426241.jpg",
+      "category": "spatial_reasoning",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "gqa_n309148_109",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "gqa_n207708_55",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000494427.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000009590.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000537812.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000015746.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000037751.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000050145.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000007816.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000572956.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "gqa_n473688_116",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000007108.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000061418.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_existence/000000541952.jpg",
+      "category": "object_presence",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_existence/000000424521.jpg",
+      "category": "object_presence",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000144.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000193.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000089.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000165.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000162.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000164.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000011.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000009.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000072.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000127.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000106.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000052.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000163.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000022.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_scene/Places365_val_00000108.jpg",
+      "category": "coarse_description",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000492992.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000006723.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000377723.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000370208.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000012120.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000053994.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000492362.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000047112.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000512929.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000047121.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000014831.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "mme_color/000000057597.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000563758.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    },
+    {
+      "question_id": "gqa_n235859_1",
+      "category": "fine_attributes",
+      "mixed_policy": "three-sentences"
+    },
+    {
+      "question_id": "mme_color/000000008277.jpg",
+      "category": "fine_attributes",
+      "mixed_policy": "original"
+    }
+  ],
+  "limitations": [
+    "Performance workloads only; no new accuracy labels or evaluation splits.",
+    "Natural EOS is retained; a longer requested answer does not guarantee a longer generated answer.",
+    "Verify observed output tokens, EOS and cap-hit counts before interpreting length sensitivity.",
+    "Mixed policy is fixed per question and reused in every paired trial."
+  ]
+}
