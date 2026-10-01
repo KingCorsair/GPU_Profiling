@@ -1,0 +1,5 @@
+trialId,variant,runKind,offeredRps,successes,failures,windowThroughputRps,drainThroughputRps,p50Ms,p95Ms,p99Ms,drainMs
+"r1-p1-v0","baseline-A","open-loop",1,90,0,1,1,513.390333000003,"","",0
+"r1-p1-v1","pruned-128","open-loop",1,90,0,1,1,467.063728000001,"","",0
+"r1-p2-v1","pruned-128","open-loop",1,90,0,0.9888888888888889,0.9880025568629703,482.30702100000053,"","",1092.8816680000018
+"r1-p2-v0","baseline-A","open-loop",1,90,0,1,1,518.9271179999996,"","",0

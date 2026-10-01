@@ -1,0 +1,557 @@
+{
+  "schema": "oct01-measurement-collection-index",
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-10-01T22:05:00.934308+00:00",
+  "scope": "Seven completed model-serving campaigns only. Synthetic CPU and CUDA calibrations are separate. Rehashed reports, campaign manifests, run manifests, request journals and resource files against saved PostgreSQL verification records; all measured and warmup terminal outcomes checked. No model was run during this check.",
+  "totals": {
+    "campaigns": 7,
+    "trials": 58,
+    "measuredRequests": 8820,
+    "warmupRequests": 580,
+    "failedMeasuredRequests": 0,
+    "failedWarmupRequests": 0,
+    "rawArtifactsRehashed": 174,
+    "resourceSamples": 7176
+  },
+  "campaigns": [
+    {
+      "campaignId": "llava-baseline-pilot",
+      "trialCount": 6,
+      "measuredRequests": 540,
+      "warmupRequests": 60,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-baseline-pilot/report/report.json",
+      "reportSha256": "b824c41a81823cdf6f3aa0cdd7a3796d9ead364ee53fe2b99577eb11bed4dda1",
+      "campaignSha256": "aa623465e782e06c27c4a9ed0768b7adf50886c181d16e6a46fda16c3422ccf9",
+      "storageVerification": "results/campaigns/2026-10-01/llava-baseline-pilot/report/storage-verification-final.json",
+      "storageVerificationSha256": "1b568dc1b0aa0e5cd4c5ce89af42bad5e02a37bcd5ee09dfe47eb67e03b722da",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 18,
+      "clientExecutionCommits": [
+        "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-d9ed18a5",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p1-v0-d9ed18a5/server.json",
+          "sha256": "a9fa0f31762a6d3e54a0841fc76936169caf7f6938628a8b31b72a93709bbd6c",
+          "readinessWaitMs": 42302.758333000005
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-000a2469",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p1-v1-000a2469/server.json",
+          "sha256": "42eda9d6da508c66e85cde563feb331094058a4dbf2a85e45140112f9ddf6480",
+          "readinessWaitMs": 9297.652101999993
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-e4ef119d",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p2-v1-e4ef119d/server.json",
+          "sha256": "f6cdadfc7c3ff3a9cf22700885f8dbbeb699291b9f181f9cbebb2465a207f056",
+          "readinessWaitMs": 9298.449403999984
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-6e0b24bf",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p2-v0-6e0b24bf/server.json",
+          "sha256": "1cc7c866563bb99b6fd357a2cff88e846c6c86480875cc65602b194d023406aa",
+          "readinessWaitMs": 37177.971759999986
+        },
+        {
+          "trialId": "r1-p3-v0",
+          "attemptId": "r1-p3-v0-c2a60081",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p3-v0-c2a60081/server.json",
+          "sha256": "f3cf288b31788e52f14a960aab992e5ec185093ae0dd566ec1f5ce05c9880793",
+          "readinessWaitMs": 9487.285066000011
+        },
+        {
+          "trialId": "r1-p3-v1",
+          "attemptId": "r1-p3-v1-a5b12604",
+          "path": "results/campaigns/2026-10-01/llava-baseline-pilot/r1-p3-v1-a5b12604/server.json",
+          "sha256": "ebe97d888d4b14b952db77a8f8c68a355edce5ae7f1dd9ca3fb950aecbddfd88",
+          "readinessWaitMs": 10306.986160999979
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-http-overhead",
+      "trialCount": 10,
+      "measuredRequests": 900,
+      "warmupRequests": 100,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-http-overhead/report/report.json",
+      "reportSha256": "d35412b7e8894e9c8226a2ce34c341858edb34de4c41e4e031aa568f635db3d6",
+      "campaignSha256": "ce3b3f1dd019f7c6937c9de0883ac7ebd99e98746f3786f0cb981fbd6fb5dd77",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-http-overhead/report/storage-verification.json",
+      "storageVerificationSha256": "5cf4af82e73244e721b2acf1392bb546ec6e0e8a6c55d27b493ac602c12229a4",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 30,
+      "clientExecutionCommits": [
+        "e90148c647c62eb8dbc1a856f5cd96e44bd6f202"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-a76aa0fa",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p1-v0-a76aa0fa/server.json",
+          "sha256": "f73a7f7608ddb6b7754f7353242775654fd01d52340e1ed19dc04e785429b85e",
+          "readinessWaitMs": 9756.335434
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-53853771",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p1-v1-53853771/server.json",
+          "sha256": "f18b17af31a6779ff2f8ca15c01786d29faf1b0dcb3eebd399e7691dc5bd218c",
+          "readinessWaitMs": 9506.839339999999
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-73802a94",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p2-v1-73802a94/server.json",
+          "sha256": "9c9b8044bd768ec89c102b3a4ea3671c04f4c95610c03eef8022d88a475e49bd",
+          "readinessWaitMs": 9109.889897000001
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-bcb36e5a",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p2-v0-bcb36e5a/server.json",
+          "sha256": "b1bae5d343c5ac1d31d856edcfe3d584b3830a30792436749ae1f58f8036339f",
+          "readinessWaitMs": 9710.753353000007
+        },
+        {
+          "trialId": "r1-p3-v0",
+          "attemptId": "r1-p3-v0-541d9ffa",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p3-v0-541d9ffa/server.json",
+          "sha256": "48741ab831335e3f04c5c2c4030d35f909cb2f9b9d876d3a22716a16b0e6de79",
+          "readinessWaitMs": 9706.358852999983
+        },
+        {
+          "trialId": "r1-p3-v1",
+          "attemptId": "r1-p3-v1-3f6b45f4",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p3-v1-3f6b45f4/server.json",
+          "sha256": "03f59a1375d629b7fbae9b1b6bd0715cdf93f521344d69c00a25f48a94672d8f",
+          "readinessWaitMs": 9710.150093999982
+        },
+        {
+          "trialId": "r1-p4-v1",
+          "attemptId": "r1-p4-v1-4871d9e4",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p4-v1-4871d9e4/server.json",
+          "sha256": "775645f35bb4bdf8b46143313358467f2a141b9d12ceef7df77c62a093d82aa3",
+          "readinessWaitMs": 9708.524357999966
+        },
+        {
+          "trialId": "r1-p4-v0",
+          "attemptId": "r1-p4-v0-bd163dda",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p4-v0-bd163dda/server.json",
+          "sha256": "fa63844c376a2c231ad8a9b6a61aecbff3b6b78432d2f64e14c6ccf86a3b98b0",
+          "readinessWaitMs": 9916.624522000027
+        },
+        {
+          "trialId": "r1-p5-v0",
+          "attemptId": "r1-p5-v0-f6c2e25c",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p5-v0-f6c2e25c/server.json",
+          "sha256": "2a999a76c8d61a6016041f4d149ae7da6c63f29f8d6cfd8ef9706e5316c9ecc2",
+          "readinessWaitMs": 9501.142886999995
+        },
+        {
+          "trialId": "r1-p5-v1",
+          "attemptId": "r1-p5-v1-5449e4fb",
+          "path": "results/campaigns/2026-10-01/llava-oct01-http-overhead/r1-p5-v1-5449e4fb/server.json",
+          "sha256": "7320d0e0879e3ccb3d2a7dca407e49fda0777ef46e027b4dee2899cd9220fe10",
+          "readinessWaitMs": 9688.433765000023
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-isolated",
+      "trialCount": 10,
+      "measuredRequests": 900,
+      "warmupRequests": 100,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-isolated/report/report.json",
+      "reportSha256": "f4b4e52b3a907c0dea712d815c9eb29b2a844fa132fef28e74f3715e0381df83",
+      "campaignSha256": "12072de1fb7850008d2e7c093eecfe8442bd9a6084e953b0aa3a461d8dde6f91",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-isolated/report/storage-verification.json",
+      "storageVerificationSha256": "3567d6a6aed60383a4e8db72104a9fd4bfd164307fabada97db4658ce4a70149",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 30,
+      "clientExecutionCommits": [
+        "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-ca225736",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p1-v0-ca225736/server.json",
+          "sha256": "b4c4394dcca84b658cff6eef918cbf7b83ce669723cf686ec2705867c4229012",
+          "readinessWaitMs": 42518.955179
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-b26f98e5",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p1-v1-b26f98e5/server.json",
+          "sha256": "ad1ec25f784d0301061ad78040d7b50bb226c85defa545a830c60e31c969afb5",
+          "readinessWaitMs": 9717.121255999999
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-43c10d72",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p2-v1-43c10d72/server.json",
+          "sha256": "68dcc928cbc3de69e045f135d250fc8a027ec37efc71595bfe0620f8fc02a18e",
+          "readinessWaitMs": 9309.036978000018
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-a7bdcc9f",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p2-v0-a7bdcc9f/server.json",
+          "sha256": "8758ac1e6690d32f1ebde7434fcad0ea57c5cd6a96fd24cc9b20f38328e546da",
+          "readinessWaitMs": 9506.464033000026
+        },
+        {
+          "trialId": "r1-p3-v0",
+          "attemptId": "r1-p3-v0-37ff6866",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p3-v0-37ff6866/server.json",
+          "sha256": "697b7faf5d0fb2e9d9a0aedc63348a470b7b2826c0fe96284787c6362d9d3498",
+          "readinessWaitMs": 10116.115296000004
+        },
+        {
+          "trialId": "r1-p3-v1",
+          "attemptId": "r1-p3-v1-0ddeb045",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p3-v1-0ddeb045/server.json",
+          "sha256": "f8af5f29fb11f42f14821fc717ac1da300cfcb64a19625fb54200ae803c64e76",
+          "readinessWaitMs": 9703.674927999964
+        },
+        {
+          "trialId": "r1-p4-v1",
+          "attemptId": "r1-p4-v1-7c65fe7a",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p4-v1-7c65fe7a/server.json",
+          "sha256": "40c3a07249ee345c7710f657ba5152daa0f821e78e18f0faba6dff449a7e6d01",
+          "readinessWaitMs": 9092.830743000028
+        },
+        {
+          "trialId": "r1-p4-v0",
+          "attemptId": "r1-p4-v0-fbf7f59c",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p4-v0-fbf7f59c/server.json",
+          "sha256": "43c383710bf2b8b26c5cc44753d915ca368319650ead2b233220258f782416d0",
+          "readinessWaitMs": 9300.970707
+        },
+        {
+          "trialId": "r1-p5-v0",
+          "attemptId": "r1-p5-v0-3afe0fb9",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p5-v0-3afe0fb9/server.json",
+          "sha256": "3d8ef699ae8b964e273899cf3cbb5535ea1ac6001b2384dedb46c79032fc5d12",
+          "readinessWaitMs": 9095.136616000033
+        },
+        {
+          "trialId": "r1-p5-v1",
+          "attemptId": "r1-p5-v1-f1a814e5",
+          "path": "results/campaigns/2026-10-01/llava-oct01-isolated/r1-p5-v1-f1a814e5/server.json",
+          "sha256": "6bc98d88438954e401405d4d41e39725e2ac4179c122c8a4c587834243e2c03a",
+          "readinessWaitMs": 9701.861458000029
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-primary",
+      "trialCount": 20,
+      "measuredRequests": 5400,
+      "warmupRequests": 200,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-primary/report/report.json",
+      "reportSha256": "8a81907268ab8853b4f6a6b2445f0b5ab78e235b0ad14c676bae25ae1db8f4f6",
+      "campaignSha256": "fb99e0c4fcdbc7805d610e8487baa9e5f4116caf1eefba3036bd1d0b7c451b6e",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-primary/report/storage-verification.json",
+      "storageVerificationSha256": "57b92cebfbd337dc53bef3075ed3409e2ab6bb59af37d5b85c968bdc72ebea0a",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 60,
+      "clientExecutionCommits": [
+        "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r3-p1-v0",
+          "attemptId": "r3-p1-v0-69033c9e",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p1-v0-69033c9e/server.json",
+          "sha256": "4c792a7d9e941077744804144128bdde010ef683a55782fdf7be5a270a255f6d",
+          "readinessWaitMs": 9360.98672
+        },
+        {
+          "trialId": "r3-p1-v1",
+          "attemptId": "r3-p1-v1-5cffcac1",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p1-v1-5cffcac1/server.json",
+          "sha256": "0fc78d2b53dd8076f152f22f744c2715e533cadf85a2db14f5e1fea952ce154e",
+          "readinessWaitMs": 9920.78588499999
+        },
+        {
+          "trialId": "r3-p2-v1",
+          "attemptId": "r3-p2-v1-88836c9a",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p2-v1-88836c9a/server.json",
+          "sha256": "f62b2ebd62a311c156ac7bc31ed5ed8f29e6176f4e4a60018257d1e3111edac2",
+          "readinessWaitMs": 9501.623886999994
+        },
+        {
+          "trialId": "r3-p2-v0",
+          "attemptId": "r3-p2-v0-bd59a363",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p2-v0-bd59a363/server.json",
+          "sha256": "d8f707cdc89d8d9d121d6117075ee7c0da861d6fd144a7833aa63721be3fc105",
+          "readinessWaitMs": 9714.654692000011
+        },
+        {
+          "trialId": "r3-p3-v0",
+          "attemptId": "r3-p3-v0-decdbd99",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p3-v0-decdbd99/server.json",
+          "sha256": "1127e9edb4bba7f50af92a34c4bf72a618d3f7dc9c19644d97f46d9ea0f64181",
+          "readinessWaitMs": 9914.740346000006
+        },
+        {
+          "trialId": "r3-p3-v1",
+          "attemptId": "r3-p3-v1-66be1539",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p3-v1-66be1539/server.json",
+          "sha256": "908979929b2767f1739742011eee354d962cbec578ed41a7efd102898a993384",
+          "readinessWaitMs": 9304.572499000002
+        },
+        {
+          "trialId": "r3-p4-v1",
+          "attemptId": "r3-p4-v1-6bd778e3",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p4-v1-6bd778e3/server.json",
+          "sha256": "2e9cea09813234e97dd864060ec10d5529ecb6163caaa44427a02d616608cd77",
+          "readinessWaitMs": 9700.35441499995
+        },
+        {
+          "trialId": "r3-p4-v0",
+          "attemptId": "r3-p4-v0-5036dc1b",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p4-v0-5036dc1b/server.json",
+          "sha256": "ffde40aa3c8061341e8ab637186ec8300dc8c2d35e31965cc6f58dec9f38fa0b",
+          "readinessWaitMs": 9716.94717499998
+        },
+        {
+          "trialId": "r3-p5-v0",
+          "attemptId": "r3-p5-v0-6d255e08",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p5-v0-6d255e08/server.json",
+          "sha256": "791606c68b377e39995b5bb7ee61f84794548e62474ffb69517627fda4687047",
+          "readinessWaitMs": 9101.557748000021
+        },
+        {
+          "trialId": "r3-p5-v1",
+          "attemptId": "r3-p5-v1-9e0c6c2d",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r3-p5-v1-9e0c6c2d/server.json",
+          "sha256": "b5d7ec0ffa08f45b195910650f8ca03331bac35616e0d5f1feea2017e497855e",
+          "readinessWaitMs": 10315.834336999804
+        },
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-01fceecb",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p1-v0-01fceecb/server.json",
+          "sha256": "bc66e70a679e29f1a4019b816fb0a288d3c23327f9781fd17d6e9662387b87c2",
+          "readinessWaitMs": 10102.818162999814
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-560f271d",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p1-v1-560f271d/server.json",
+          "sha256": "9de41eb4b3f7cea661e4149c7aa536aab6d59e43960633b75f8b6329566dfcfd",
+          "readinessWaitMs": 10509.595527000027
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-da74cfaf",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p2-v1-da74cfaf/server.json",
+          "sha256": "9f261601e245940123d923cf3ffacd9127d26f51b280e551ea113fedda1baed8",
+          "readinessWaitMs": 10108.63874500012
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-6e031844",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p2-v0-6e031844/server.json",
+          "sha256": "8106353adcca7fe76243461986d386bda6ad80a40612f2a79d73537249fdd17c",
+          "readinessWaitMs": 9903.186374999816
+        },
+        {
+          "trialId": "r1-p3-v0",
+          "attemptId": "r1-p3-v0-56c05bf7",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p3-v0-56c05bf7/server.json",
+          "sha256": "0991892cf8693318c2b14af2e49b93ef68f3d6e0e8b62afbb33656617d188499",
+          "readinessWaitMs": 9698.070774999913
+        },
+        {
+          "trialId": "r1-p3-v1",
+          "attemptId": "r1-p3-v1-67cde2af",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p3-v1-67cde2af/server.json",
+          "sha256": "3f44e9b417fafaa237218fa2a09d9c5593e29f07ed44e06723098ab4dfe9cc5c",
+          "readinessWaitMs": 9499.125643000007
+        },
+        {
+          "trialId": "r1-p4-v1",
+          "attemptId": "r1-p4-v1-09f1b303",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p4-v1-09f1b303/server.json",
+          "sha256": "41769b612b79ffdf0cff57309a019ee88994ee9f602c2dcf5725d26c42899b44",
+          "readinessWaitMs": 11314.82797600003
+        },
+        {
+          "trialId": "r1-p4-v0",
+          "attemptId": "r1-p4-v0-38471bbf",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p4-v0-38471bbf/server.json",
+          "sha256": "d76e707721ea05f383bd9aed38cbebefebbcde3b2ba15c6b47280591bd546faf",
+          "readinessWaitMs": 10309.767590999603
+        },
+        {
+          "trialId": "r1-p5-v0",
+          "attemptId": "r1-p5-v0-8d94dc6b",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p5-v0-8d94dc6b/server.json",
+          "sha256": "8dbbe1d9b64e62554acfeccfe14909aa04763e355e05d25d974bda82c47c78fa",
+          "readinessWaitMs": 9498.885343000293
+        },
+        {
+          "trialId": "r1-p5-v1",
+          "attemptId": "r1-p5-v1-016f4475",
+          "path": "results/campaigns/2026-10-01/llava-oct01-primary/r1-p5-v1-016f4475/server.json",
+          "sha256": "5fb06338b456bb0bd14c2b54257fab29e1f6050d9eada2ed7e12f144606ead1c",
+          "readinessWaitMs": 51087.50311199995
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-workload-long",
+      "trialCount": 4,
+      "measuredRequests": 360,
+      "warmupRequests": 40,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-workload-long/report/report.json",
+      "reportSha256": "b29d8b3a63cfb92b1b69dc1dcef8bc1016e1d522a8a79fdda3aeb02cd1f9c9d4",
+      "campaignSha256": "d4f451ecf940d47d829b0987eaecf0ba2d70d70a009dc4d042bed0689f0e725c",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-workload-long/report/storage-verification.json",
+      "storageVerificationSha256": "32b103f4916701c773f887edf4ad9c9ac5dc51009ada4999de785698aae5a598",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 12,
+      "clientExecutionCommits": [
+        "e90148c647c62eb8dbc1a856f5cd96e44bd6f202"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-b4d4d4bf",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-long/r1-p1-v0-b4d4d4bf/server.json",
+          "sha256": "761d0ed9933ea2034e0c7069aa3ff6048c72f1f9779e24fc3b0dab2c4b04e1a2",
+          "readinessWaitMs": 9143.714849
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-4586ee92",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-long/r1-p1-v1-4586ee92/server.json",
+          "sha256": "9e73bac09d080478264c268cf05d7c9ac6210b4a1819099633620cf1c838085d",
+          "readinessWaitMs": 9297.912332000007
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-1374defc",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-long/r1-p2-v1-1374defc/server.json",
+          "sha256": "c83d242f93559708f18d8b6420655b0b46b47f8ea1882ec9d9e79e6079f166cd",
+          "readinessWaitMs": 9303.411265999981
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-446cdfbf",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-long/r1-p2-v0-446cdfbf/server.json",
+          "sha256": "a14633144968d39ee959e828ca27abfddb3c9d3cffa02247061b90146b0e1036",
+          "readinessWaitMs": 9298.775734000024
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-workload-mixed",
+      "trialCount": 4,
+      "measuredRequests": 360,
+      "warmupRequests": 40,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/report.json",
+      "reportSha256": "a34a5e89fe1781eade9d48d3c4070418aed1bda750f31ee800679e8c0407365b",
+      "campaignSha256": "811173246167100091a47df92a32541d0ec17dac6e0273f5faedd6c22b93013a",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/storage-verification.json",
+      "storageVerificationSha256": "1d32da490acb1d4dc42500b22c74372098aed33fd20c4d92fd5cd7fc2bc199c5",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 12,
+      "clientExecutionCommits": [
+        "e90148c647c62eb8dbc1a856f5cd96e44bd6f202"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-1e42c711",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/r1-p1-v0-1e42c711/server.json",
+          "sha256": "c95b247677ae154fc0b1a397a6752c70f06c902d952462d4fa47371718e2d2d0",
+          "readinessWaitMs": 9769.03882
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-950858e6",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/r1-p1-v1-950858e6/server.json",
+          "sha256": "70ea90d478f939cd6641cdea54d8f526e83f809576fca32efe102ec6f02f2077",
+          "readinessWaitMs": 9305.518020999996
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-40296e5a",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/r1-p2-v1-40296e5a/server.json",
+          "sha256": "96a82061375f59163fb009a300807fb3481d76b7320c1559bfcc47785dee09bc",
+          "readinessWaitMs": 9905.57418299999
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-fbae2630",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-mixed/r1-p2-v0-fbae2630/server.json",
+          "sha256": "640c9ed2f68f8240eef1e9de4808d5522cab6d29e2d3ae9a14e7c6e0b654882e",
+          "readinessWaitMs": 9301.080736999982
+        }
+      ]
+    },
+    {
+      "campaignId": "llava-oct01-workload-short",
+      "trialCount": 4,
+      "measuredRequests": 360,
+      "warmupRequests": 40,
+      "failedMeasuredRequests": 0,
+      "report": "results/campaigns/2026-10-01/llava-oct01-workload-short/report/report.json",
+      "reportSha256": "9747b0950a29ab39369a34ee3e58b2734835ccceba7e1431efa4f650d2f0118f",
+      "campaignSha256": "d70536e072505e934c634c20c395de82b5c58f780fc3a960421025015522ff92",
+      "storageVerification": "results/campaigns/2026-10-01/llava-oct01-workload-short/report/storage-verification.json",
+      "storageVerificationSha256": "7f832db2d2afc74118334dfb767de1d533af30e6ccffc026114da8d7003a198b",
+      "secondImportInsertedRuns": 0,
+      "rawArtifactCount": 12,
+      "clientExecutionCommits": [
+        "e90148c647c62eb8dbc1a856f5cd96e44bd6f202"
+      ],
+      "readinessWaitObservations": [
+        {
+          "trialId": "r1-p1-v0",
+          "attemptId": "r1-p1-v0-f3cd56f9",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-short/r1-p1-v0-f3cd56f9/server.json",
+          "sha256": "91d4ade6575d128e4db046e903f8b792b719c86a0ac9a3d3293f5235e1787307",
+          "readinessWaitMs": 10167.377898
+        },
+        {
+          "trialId": "r1-p1-v1",
+          "attemptId": "r1-p1-v1-8dd71d8b",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-short/r1-p1-v1-8dd71d8b/server.json",
+          "sha256": "75db774cd0949570444d35cd724dce5b8b6c1f18bc9a280266632d2aebc69031",
+          "readinessWaitMs": 9321.056989000004
+        },
+        {
+          "trialId": "r1-p2-v1",
+          "attemptId": "r1-p2-v1-86be2ff9",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-short/r1-p2-v1-86be2ff9/server.json",
+          "sha256": "322ed4b2671c0f2563a07b7869cf2d84afa33a24aee40d09236cfa65de8be6a7",
+          "readinessWaitMs": 9502.802034000022
+        },
+        {
+          "trialId": "r1-p2-v0",
+          "attemptId": "r1-p2-v0-a26c553b",
+          "path": "results/campaigns/2026-10-01/llava-oct01-workload-short/r1-p2-v0-a26c553b/server.json",
+          "sha256": "ef69eb4d2d9e6b81b1704cd6fab75b447e519b4c0ee7b4801e4c04446f3a2173",
+          "readinessWaitMs": 8897.873840999964
+        }
+      ]
+    }
+  ]
+}

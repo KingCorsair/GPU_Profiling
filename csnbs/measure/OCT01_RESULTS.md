@@ -2,7 +2,7 @@
 
 The completed primary study supports a modest measured serving benefit from changing the existing configuration from 576 to 128 visual tokens: **13.95% more successful completions within the 90-second arrival window at 3 requests/second**. At 1 request/second, paired p50 HTTP latency fell **9.95%**. These results concern the recorded, instrumented, batch-one serving path and the existing 90-question dev workload. They do not establish unchanged accuracy or a maximum sustainable request rate.
 
-Primary, isolated HTTP, observation-overhead, long-instruction and mixed-policy collection and raw verification are complete. The final original-question policy follow-up is still collecting; its findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
+All seven saved campaigns are complete: **58 trials, 8,820 measured requests and 580 warmups, with zero request failures**. The [completion table](../MEASUREMENT_STATUS.md) links each study; the [collection index](../../results/provenance/2026-10-01/collection-index.json) verifies the saved reports and raw artifacts against the PostgreSQL verification records. The fixed budgets were preserved, including inconclusive findings.
 
 ## Primary comparison
 
@@ -53,13 +53,42 @@ Both variants completed every prescribed 1-RPS arrival within the observation wi
 
 The [mixed policy](../../results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/report.md), with 45 original questions and 45 appended instructions, also completed **360 measured requests and 40 warmups** without failure. Both baseline trials had a text-token median of one (range 1–52); both pruned trials had a median of two (range 1–64). Each pruned trial had one response reach the 64-step budget without EOS, while all baseline responses ended naturally. The descriptive paired p50 reduction was 8.16%; the two-pair comparison remains inconclusive. Changed response lengths and termination prevent interpreting the latency difference as a pure compute reduction at fixed output length. The report retains the one pruned-trial request that finished after the arrival window.
 
+The final [original-question policy](../../results/campaigns/2026-10-01/llava-oct01-workload-short/report/report.md) completed **360 measured requests and 40 warmups** without failure. All four trials had a median of ten generated text tokens. Each pruned trial had one response reach the budget without EOS. The descriptive paired p50 reduction was 7.06%, again inconclusive with two blocks. One request in the second pruned trial completed 1.09 seconds after the window ended. The original-question baseline generated longer answers than the appended-instruction policy, underscoring why the policy names cannot substitute for observed output lengths.
+
+Every trial below has 90/90 valid observations. Entries show **min / p50 / max within each trial**; the two repetitions of each listed condition have identical characterizations, and are not pooled. Steps include EOS/special tokens. EOS and cap counts are per trial, with no EOS-at-budget cases. Each raw report retains the trial and run IDs.
+
+| Policy / visual tokens | Prompt text tokens | Generated text tokens | Generated steps | Output characters | EOS / cap without EOS |
+|---|---:|---:|---:|---:|---:|
+| Long instruction / 576 | 82 / 92 / 99 | 1 / 1 / 17 | 2 / 2 / 18 | 2 / 3 / 63 | 90 / 0 |
+| Long instruction / 128 | 82 / 92 / 99 | 1 / 1 / 17 | 2 / 2 / 18 | 3 / 3 / 63 | 90 / 0 |
+| Mixed / 576 | 50 / 64 / 99 | 1 / 1 / 52 | 2 / 2 / 53 | 2 / 3 / 199 | 90 / 0 |
+| Mixed / 128 | 50 / 64 / 99 | 1 / 2 / 64 | 2 / 3 / 64 | 2 / 4 / 273 | 89 / 1 |
+| Original question / 576 | 47 / 57 / 64 | 1 / 10 / 52 | 2 / 11 / 53 | 2 / 36 / 199 | 90 / 0 |
+| Original question / 128 | 47 / 57 / 64 | 1 / 10 / 64 | 2 / 11 / 64 | 2 / 38 / 273 | 89 / 1 |
+
+These policy studies use only one offered rate and two paired blocks each. They characterize this dev workload; they do not establish a workload-by-pruning interaction, sustained capacity or output-quality equivalence. Observed differences in response length remain part of the natural-EOS result.
+
 ## Baseline and measurement checks
 
-Before the primary comparison, [six identical 576-token pilot trials](../../results/campaigns/2026-10-01/llava-baseline-pilot/report/report.md) completed 540 measured requests plus 60 warmups without failure. Trial p50 ranged from 515.57 to 558.52 ms: an 8.21% relative range and 0.61% relative median absolute deviation. Those are descriptive observed variations, not a promised detection threshold. The pilot's 90 observations per trial cannot support the project's p95/p99 claims.
+Before the primary comparison, [six identical 576-token pilot trials](../../results/campaigns/2026-10-01/llava-baseline-pilot/report/report.md) completed 540 measured requests plus 60 warmups without failure. Trial p50 ranged from 515.57 to 558.52 ms: an 8.21% relative range and 0.61% relative median absolute deviation. Those are descriptive observed variations, not a promised detection threshold. The pilot's 90 observations per trial cannot support the project's p95/p99 claims. The [final pilot verification](../../results/campaigns/2026-10-01/llava-baseline-pilot/report/storage-verification-final.json) validates the current report against raw evidence and PostgreSQL; its earlier verification record is retained as history.
 
 The separate [synthetic coordinated-omission demonstration](../../results/calibration/2026-10-01/coordinated-omission-fixed-10000/report.md) preserves 40,000 measured requests. At the 750-RPS target, open loop sent all 10,000 prescribed arrivals within the 13.333-second reference window and observed 9,768.202-ms p95 latency. The completion-paced control sent only 4,442 in that window and showed 3.359-ms p95; it eventually sent all 10,000 over 29.907 seconds. These are CPU-service observations illustrating a client-design failure, not GPU benchmark results.
 
 The [CUDA diagnostic](../../results/calibration/2026-10-01/2026-10-01T19-48-34Z_5c1e8d96/calibration.json) records warmup, CUDA-event and host-enqueue observations separately. Its cache-perturbation comparison did not establish the expected slowdown. It does not measure the model's prefill/decode split or validate model-instrumentation overhead.
+
+## Readiness wait outside request timing
+
+Each attempt preserves `startupMs` in its exported `server.json`. In the [runner](src/campaign.ts), this clock starts after process launch and resource-monitor initialization, immediately before waiting for verified health, and includes readiness polling. It is not a complete process-launch interval or pure model-loading duration. These waits, warmups and settling are outside measured HTTP latency. The following nearest-rank p50 values describe all saved attempts, across both variants; no timing comparison is inferred.
+
+| Study | Attempts | Readiness-wait p50 (seconds) | Min–max (seconds) |
+|---|---:|---:|---:|
+| Baseline pilot | 6 | 9.49 | 9.30–42.30 |
+| Primary | 20 | 9.72 | 9.10–51.09 |
+| Isolated HTTP | 10 | 9.51 | 9.09–42.52 |
+| HTTP observation overhead | 10 | 9.71 | 9.11–9.92 |
+| Long instruction | 4 | 9.30 | 9.14–9.30 |
+| Mixed | 4 | 9.31 | 9.30–9.91 |
+| Original question | 4 | 9.32 | 8.90–10.17 |
 
 ## Scope and provenance
 
@@ -68,6 +97,8 @@ The primary and isolated studies use clean source `356df7d66f7cf4c7524c93d7c9d37
 The main LLaVA checkpoint is revision `4481d270cc22fd5c4d1bb5df129622006ccd9234`, with downloaded file hashes verified before use. A container-image digest was unavailable. The exact CLIP revision was not captured by the original health endpoint; [supplemental cache inspection](../../results/provenance/2026-10-01/vision-cache-provenance.json) after the primary study found candidate `ce19dc912ca5cd21c8a653c79e251e808ccabcd1`, but cannot retrospectively prove the loaded revision. [Static source inspection](../../results/provenance/2026-10-01/frozen-model-source-provenance.json) preserves both launchers' import paths and source hashes; it is not introspection of the earlier running processes. These gaps remain explicit.
 
 GPU resource files sample the whole device, including startup, approximately once per second; sampled used memory is not exact KV-cache allocation or a guaranteed transient peak. CPU-load collection was implemented after these frozen execution revisions, so the current GPU evidence has no CPU-load observations. Those missing values have not been backfilled.
+
+The [preserved model diagnostic archive](../../results/provenance/2026-10-01/supplemental-model-diagnostics/provenance.json) contains 9,400 nonempty records, with verified raw/compressed hashes and decompression. It mixes campaigns and lacks canonical request correlation, so it is supplemental evidence of the existing instrumentation, not a source for reportable GPU-stage comparisons. [Final session checks](../../results/provenance/2026-10-01/supplemental-model-diagnostics/final-session-verification.json) record clean frozen source checkouts, closed owned endpoints and no remaining owned model/campaign or GPU compute processes. The shared pod stays running.
 
 The configured visual-token budget decreased by 77.78%, but that is not a measurement of total FLOP reduction, actual primary-run sequence lengths, or wall-time reduction. The primary revision did not record actual output lengths. Existing model-internal CUDA events, synchronization and diagnostic writes were active; the later HTTP off/on test isolates only its additional observations. No causal prefill/decode decomposition or direct comparison to a paper's different timing boundary is established here.
 

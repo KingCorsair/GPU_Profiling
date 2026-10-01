@@ -1,0 +1,101 @@
+{
+  "schema": "supplemental-model-diagnostics",
+  "schemaVersion": 1,
+  "startedAtUtc": "2026-10-01T22:00:46.722775+00:00",
+  "scope": "Mixed-campaign model-internal diagnostic timing. These records are not correlated canonical request-stage evidence; existing model instrumentation includes CUDA events, boundary synchronizations and diagnostic logging.",
+  "campaigns": [
+    {
+      "campaignId": "llava-oct01-primary",
+      "completedTrials": 20,
+      "expectedTrials": 20,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-isolated",
+      "completedTrials": 10,
+      "expectedTrials": 10,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-http-overhead",
+      "completedTrials": 10,
+      "expectedTrials": 10,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-long",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-mixed",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-short",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    }
+  ],
+  "sourceChecks": [
+    {
+      "checkout": "/workspace/rithvik-measure-20261001",
+      "gitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+      "gitDirty": false
+    },
+    {
+      "checkout": "/workspace/rithvik-measure-observations-20261001",
+      "gitCommit": "e90148c647c62eb8dbc1a856f5cd96e44bd6f202",
+      "gitDirty": false
+    }
+  ],
+  "idleBefore": {
+    "checkedAtUtc": "2026-10-01T22:00:47.862875+00:00",
+    "gpuComputeProcesses": [],
+    "ownedProcesses": [],
+    "closedEndpoints": [
+      "http://127.0.0.1:8765/infer"
+    ]
+  },
+  "original": {
+    "path": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+    "bytes": 13176975,
+    "sha256": "sha256:864754d48e2d073f5b42b612fef0b6d8a5da6c0d77aef41679432e7d818bdab3",
+    "nonemptyLineCount": 9400,
+    "unchangedWhileCopied": true,
+    "mtimeNs": 1790891975000000000
+  },
+  "gzip": {
+    "path": "/workspace/rithvik-results/supplemental-model-diagnostics/model-diagnostic-timing.jsonl.gz",
+    "bytes": 2060693,
+    "sha256": "sha256:fb78fbb07a8a2df4d18b5f49a2fe3e782ddc9dfc1df9dc580847bc8c56652020",
+    "roundTripVerified": true,
+    "compressionLevel": 6,
+    "headerMtime": 0
+  },
+  "idleAfter": {
+    "checkedAtUtc": "2026-10-01T22:00:48.563421+00:00",
+    "gpuComputeProcesses": [],
+    "ownedProcesses": [],
+    "closedEndpoints": [
+      "http://127.0.0.1:8765/infer"
+    ]
+  },
+  "finishedAtUtc": "2026-10-01T22:00:48.563444+00:00"
+}

@@ -1,6 +1,6 @@
 # Rithvik's measurement work
 
-The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI and CI are implemented. The October 1 GPU studies use fixed saved protocols; the collection table below distinguishes completed evidence from work still running. Read the [results and interpretation](measure/OCT01_RESULTS.md) for the verified findings. This document covers Rithvik's scope. The shared serving and accuracy implementations remain with Amay and Sribhav.
+The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI and CI are implemented. All seven October 1 GPU campaigns are complete: **58 trials, 8,820 measured requests plus 580 warmups, zero request failures**. Read the [results and interpretation](measure/OCT01_RESULTS.md) and [verified collection index](../results/provenance/2026-10-01/collection-index.json). This document covers Rithvik's scope. The shared serving and accuracy implementations remain with Amay and Sribhav.
 
 ## Implemented and verified
 
@@ -22,13 +22,13 @@ The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI a
 |---|---|---|
 | A40 clock/warmup/cache diagnostic | Complete; synthetic operations, not serving results | [CUDA calibration](../results/calibration/2026-10-01/2026-10-01T19-48-34Z_5c1e8d96/calibration.json) |
 | Coordinated omission and latency distributions | Complete; 40,000 synthetic measured requests, zero failures | [Demonstration and plots](../results/calibration/2026-10-01/coordinated-omission-fixed-10000/report.md) |
-| Repeated 576-token model baseline | Complete; 6 trials, 540 measured requests plus 60 warmups, zero failures | [Pilot report](../results/campaigns/2026-10-01/llava-baseline-pilot/report/report.md) and [PostgreSQL verification](../results/campaigns/2026-10-01/llava-baseline-pilot/report/storage-verification.json) |
+| Repeated 576-token model baseline | Complete; 6 trials, 540 measured requests plus 60 warmups, zero failures | [Pilot report](../results/campaigns/2026-10-01/llava-baseline-pilot/report/report.md) and [PostgreSQL verification](../results/campaigns/2026-10-01/llava-baseline-pilot/report/storage-verification-final.json) |
 | Paired 576/128 tokens at 1 and 3 RPS | Complete; 20 trials, 5,400 measured requests plus 200 warmups, zero failures | [Verified report](../results/campaigns/2026-10-01/llava-oct01-primary/report/report.md), [PostgreSQL verification](../results/campaigns/2026-10-01/llava-oct01-primary/report/storage-verification.json), [fixed protocol](measure/OCT01_PROTOCOL.md) |
 | Isolated full-HTTP comparison | Complete; 10 trials, 900 measured requests plus 100 warmups, zero failures | [Verified report](../results/campaigns/2026-10-01/llava-oct01-isolated/report/report.md), [fixed protocol](measure/OCT01_PROTOCOL.md) |
 | Incremental HTTP observation overhead | Complete; 10 trials, 900 measured requests plus 100 warmups, zero failures; effect inconclusive | [Verified report](../results/campaigns/2026-10-01/llava-oct01-http-overhead/report/report.md), [observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) |
 | Long-instruction policy | Complete; 4 trials, 360 measured requests plus 40 warmups, zero failures; generated text median was one token, so this did not establish long-output behavior | [Verified report](../results/campaigns/2026-10-01/llava-oct01-workload-long/report/report.md) |
 | Mixed policy | Complete; 4 trials, 360 measured requests plus 40 warmups, zero failures; one capped response per pruned trial | [Verified report](../results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/report.md) |
-| Original-question policy | Running; final 4 prescribed descriptive trials | [Observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) and [workload manifest](measure/workloads/oct01/manifest.json) |
+| Original-question policy | Complete; 4 trials, 360 measured requests plus 40 warmups, zero failures; one capped response per pruned trial | [Verified report](../results/campaigns/2026-10-01/llava-oct01-workload-short/report/report.md), [observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) and [workload manifest](measure/workloads/oct01/manifest.json) |
 
 The six identical baseline trials had per-trial p50 latencies from 515.57 to 558.52 ms: an 8.21% observed range and 0.61% median absolute deviation relative to the nearest-rank median. This is descriptive pilot spread, not a guaranteed detection threshold. Their 90 measured observations per trial do not support p95/p99 under this project's policy.
 
@@ -49,5 +49,7 @@ Capacity screens describe fixed windows. They do not establish a precise sustain
 Start with [the measurement README](measure/README.md), [clock/record contracts](measure/contracts.md), [methodology](measure/methodology.md) and [database instructions](measure/db/README.md). The dashboard runs with `npm --prefix csnbs/frontend run dev`; production data/build uses `npm --prefix csnbs/frontend run build`.
 
 GPU source for the primary and isolated experiments is clean commit `356df7d66f7cf4c7524c93d7c9d373e2b920fbfc`. Optional observation follow-ups use clean commit `e90148c647c62eb8dbc1a856f5cd96e44bd6f202`. Both are separate checkouts under `/workspace`; results stay outside them during collection. Only owned model processes are terminated. The shared pod and shared checkout are preserved.
+
+Collection is finished and the owned model processes are stopped; the shared pod remains running. Supplemental source/cache provenance and the unchanged diagnostic log are archived under [the provenance directory](../results/provenance/2026-10-01/). Every campaign passed exact-byte PostgreSQL verification and an idempotent second import. The local database is stopped after verification. The dashboard includes these campaigns alongside the historical archive.
 
 To explain the core component aloud: distinguish scheduled, sent and completed times; explain why warmup must drain before measurement; show why a completion-paced client loses intended arrivals; explain why requests within one trial are not independent replications; and state what a confidence interval crossing zero does and does not mean. The raw examples and corresponding source are retained for that review.
