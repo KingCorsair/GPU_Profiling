@@ -2,7 +2,7 @@
 
 The completed primary study supports a modest measured serving benefit from changing the existing configuration from 576 to 128 visual tokens: **13.95% more successful completions within the 90-second arrival window at 3 requests/second**. At 1 request/second, paired p50 HTTP latency fell **9.95%**. These results concern the recorded, instrumented, batch-one serving path and the existing 90-question dev workload. They do not establish unchanged accuracy or a maximum sustainable request rate.
 
-Primary, isolated HTTP, observation-overhead and long-instruction collection and raw verification are complete. Mixed and original-question policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
+Primary, isolated HTTP, observation-overhead, long-instruction and mixed-policy collection and raw verification are complete. The final original-question policy follow-up is still collecting; its findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
 
 ## Primary comparison
 
@@ -51,6 +51,8 @@ The [long-instruction policy](../../results/campaigns/2026-10-01/llava-oct01-wor
 
 Both variants completed every prescribed 1-RPS arrival within the observation window. The descriptive paired p50-latency reduction was 12.44%, but two paired blocks cannot resolve uncertainty under the frozen policy; no confidence interval, p95, p99 or capacity claim is made. These results describe a longer instruction and unexpectedly short generated answers. They do not isolate the effect of long generated output. The fixed protocol was preserved rather than retuning the prompt after observing its responses.
 
+The [mixed policy](../../results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/report.md), with 45 original questions and 45 appended instructions, also completed **360 measured requests and 40 warmups** without failure. Both baseline trials had a text-token median of one (range 1–52); both pruned trials had a median of two (range 1–64). Each pruned trial had one response reach the 64-step budget without EOS, while all baseline responses ended naturally. The descriptive paired p50 reduction was 8.16%; the two-pair comparison remains inconclusive. Changed response lengths and termination prevent interpreting the latency difference as a pure compute reduction at fixed output length. The report retains the one pruned-trial request that finished after the arrival window.
+
 ## Baseline and measurement checks
 
 Before the primary comparison, [six identical 576-token pilot trials](../../results/campaigns/2026-10-01/llava-baseline-pilot/report/report.md) completed 540 measured requests plus 60 warmups without failure. Trial p50 ranged from 515.57 to 558.52 ms: an 8.21% relative range and 0.61% relative median absolute deviation. Those are descriptive observed variations, not a promised detection threshold. The pilot's 90 observations per trial cannot support the project's p95/p99 claims.
@@ -63,7 +65,9 @@ The [CUDA diagnostic](../../results/calibration/2026-10-01/2026-10-01T19-48-34Z_
 
 The primary and isolated studies use clean source `356df7d66f7cf4c7524c93d7c9d373e2b920fbfc`; the [observation follow-up](OCT01_OBSERVATION_PROTOCOL.md) uses clean source `e90148c647c62eb8dbc1a856f5cd96e44bd6f202`. They must not be pooled as if source and instrumentation were identical. Reports retain server/client revisions, GPU UUID/driver/runtime, effective configuration, request-order seeds and exact artifact hashes. Load trials overlap requests at the client; the server retains its blocking generation path. Continuous batching is outside this study.
 
-The main LLaVA checkpoint is revision `4481d270cc22fd5c4d1bb5df129622006ccd9234`, with downloaded file hashes verified before use. A container-image digest was unavailable. The exact CLIP revision was not captured by the original health endpoint; supplemental cache inspection after the primary study cannot retrospectively prove the loaded revision. These gaps remain explicit.
+The main LLaVA checkpoint is revision `4481d270cc22fd5c4d1bb5df129622006ccd9234`, with downloaded file hashes verified before use. A container-image digest was unavailable. The exact CLIP revision was not captured by the original health endpoint; [supplemental cache inspection](../../results/provenance/2026-10-01/vision-cache-provenance.json) after the primary study found candidate `ce19dc912ca5cd21c8a653c79e251e808ccabcd1`, but cannot retrospectively prove the loaded revision. [Static source inspection](../../results/provenance/2026-10-01/frozen-model-source-provenance.json) preserves both launchers' import paths and source hashes; it is not introspection of the earlier running processes. These gaps remain explicit.
+
+GPU resource files sample the whole device, including startup, approximately once per second; sampled used memory is not exact KV-cache allocation or a guaranteed transient peak. CPU-load collection was implemented after these frozen execution revisions, so the current GPU evidence has no CPU-load observations. Those missing values have not been backfilled.
 
 The configured visual-token budget decreased by 77.78%, but that is not a measurement of total FLOP reduction, actual primary-run sequence lengths, or wall-time reduction. The primary revision did not record actual output lengths. Existing model-internal CUDA events, synchronization and diagnostic writes were active; the later HTTP off/on test isolates only its additional observations. No causal prefill/decode decomposition or direct comparison to a paper's different timing boundary is established here.
 

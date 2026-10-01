@@ -1,0 +1,579 @@
+{
+  "schema": "frozen-model-source-provenance",
+  "schemaVersion": 1,
+  "inspectedAtUtc": "2026-10-01T21:26:40.101792+00:00",
+  "host": "a4fb61b40a7f",
+  "scope": "Static launcher and import-path resolution after isolated completion; no server/model modules were imported and no model weights were loaded. This is supplemental verification, not introspection of prior processes.",
+  "checkouts": [
+    {
+      "checkout": "/workspace/rithvik-measure-20261001",
+      "gitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+      "gitDirty": false,
+      "launcher": {
+        "path": "/workspace/rithvik-measure-20261001/scripts/start_model_server.sh",
+        "bytes": 430,
+        "sha256": "sha256:6b33b2c9f25422b0f5b6e2e75d4ff516acb35e6e8482042f3ce9bbbb3bc00e0c",
+        "source": "#!/usr/bin/env bash\nset -euo pipefail\n\nrepo_root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"\n\nexport PYTHONPATH=\"$repo_root/vis_pruner_copy${PYTHONPATH:+:$PYTHONPATH}\"\nexport SERVER_MODE=\"model\"\nexport MODEL_PATH=\"${MODEL_PATH:-$repo_root/vis_pruner_copy/checkpoints/llava-v1.5-7b}\"\n\ncd \"$repo_root\"\nexec python -m uvicorn csnbs.server:app \\\n  --host \"${MODEL_SERVER_HOST:-0.0.0.0}\" \\\n  --port \"${MODEL_SERVER_PORT:-8000}\"\n"
+      },
+      "pythonPathPrefix": "/workspace/rithvik-measure-20261001/vis_pruner_copy",
+      "resolvedPackageOrigin": "/workspace/rithvik-measure-20261001/vis_pruner_copy/llava/__init__.py",
+      "packageSourceFiles": [
+        {
+          "path": "vis_pruner_copy/llava/__init__.py",
+          "bytes": 41,
+          "sha256": "sha256:52508db720555fae39081e92e8b7f26244df4153b5f3f6bc7bd4a647b7071310"
+        },
+        {
+          "path": "vis_pruner_copy/llava/constants.py",
+          "bytes": 335,
+          "sha256": "sha256:05caa532060f61b30cada5ba23da0f4bf640c898298913f768653583482e5901"
+        },
+        {
+          "path": "vis_pruner_copy/llava/conversation.py",
+          "bytes": 15877,
+          "sha256": "sha256:c5804387e0368a41e5d94849ea05a797d16e57b76c58dfc53556fa7e5db96d7a"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review.py",
+          "bytes": 3620,
+          "sha256": "sha256:6eaa69df1c2505dd60f827dc4b37ac469c693a30b6566a3743d97fd3b839d318"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review_bench.py",
+          "bytes": 4172,
+          "sha256": "sha256:fd6a2c3ed99b0b2881e056160c03aab17f7ea5879b9e03fd993381b4d47e63f2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review_visual.py",
+          "bytes": 4177,
+          "sha256": "sha256:a0bd7f0900ed11c047906b4360e003233f1537bedca0e22f4153dceed696b0eb"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_pope.py",
+          "bytes": 2856,
+          "sha256": "sha256:519b407a7f9e9e5eac8aa57e90135b0e09a7729b3f84bb4b613392f67a8d014b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa.py",
+          "bytes": 3920,
+          "sha256": "sha256:e57b92cafc7a4c0d0228bc0554a4315ef808e844d009dcaafa3b0f6ac693fbaf"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa_gpt4.py",
+          "bytes": 3675,
+          "sha256": "sha256:979374e63d47b1c83b5b57fa8b47770d7c526ff3656b0709c5162fdb7f5cc7b2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa_gpt4_requery.py",
+          "bytes": 5774,
+          "sha256": "sha256:9652b38ad7826e95071fbcd88fcc5f72f114ebab6729b10c479bb0a6824a7cd6"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_textvqa.py",
+          "bytes": 2226,
+          "sha256": "sha256:e78fdd1ae8fdf94c46053c14f7d65f20707b6a0c324c632b841dde5ef04783a0"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/generate_webpage_data_from_table.py",
+          "bytes": 4088,
+          "sha256": "sha256:617dee4abe58ea5b2a74493b01241ac1689a27c33db600d4a7b3417aa865a133"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/m4c_evaluator.py",
+          "bytes": 10265,
+          "sha256": "sha256:8b49e1033e29d551c0bdd86d9149e2b54370e4cd17e52176ac9061b3521f0774"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_qa.py",
+          "bytes": 2430,
+          "sha256": "sha256:8f30a51cc471a977dfa731844ec4d36f33fec15f9ec6f1f8503d1e068f341ec4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa.py",
+          "bytes": 4491,
+          "sha256": "sha256:395bcc21054ef401633720f41af8bb173fe997434beff59336cc9f0ee9e705bb"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_heterogeneous.py",
+          "bytes": 9657,
+          "sha256": "sha256:15056de129782c7d9c7a952d2135bcc788f2c0a9364b54b89e6199b14b5cd923"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_loader.py",
+          "bytes": 6388,
+          "sha256": "sha256:ebb838c45fbc7a41a4be6754178d6c00f01d6dd1f4e2b0a2124f4abd298de409"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_mmbench.py",
+          "bytes": 6803,
+          "sha256": "sha256:b9079ccf5cf274eef17c5cafdff20cc752a6ebe58786e7b219c9f0f8ff1ece6f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_science.py",
+          "bytes": 6883,
+          "sha256": "sha256:e60637c8e28c3d5a9c257c917aaa23b3c2173249a954974c6ce09e494e967ff3"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/qa_baseline_gpt35.py",
+          "bytes": 2345,
+          "sha256": "sha256:f10aee9bce58619a097d3dfb29335b4b437872a4d482f350b614b248622eaca7"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/run_llava.py",
+          "bytes": 4443,
+          "sha256": "sha256:d92adf2e91aec9af9280da4662482f943de49a71f3ee29803e06adc5287b482b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/summarize_gpt_review.py",
+          "bytes": 2438,
+          "sha256": "sha256:e5d8856867207f3729877d233f74cb12240d5c998650f22b1aec0ba67c21740b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/mm_utils.py",
+          "bytes": 9670,
+          "sha256": "sha256:138ce1f9140728ab9e8050bb38cc614a59ca09ff0b1d81d8c23ead70da41b29e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/__init__.py",
+          "bytes": 317,
+          "sha256": "sha256:304ee2cd8ad94bb39a74bd0ba3745e19abb4662110cf88e7f9fe87dbb8e0aa69"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/apply_delta.py",
+          "bytes": 1956,
+          "sha256": "sha256:ddf4b680787dd76e659806c96e6cee5c156b913ff6f6e78aa70a347594b8ad79"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/builder.py",
+          "bytes": 9170,
+          "sha256": "sha256:c4c6171347bd6c3d7283a33795ffd579467fb545b30a2363006d505df00f9850"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/consolidate.py",
+          "bytes": 914,
+          "sha256": "sha256:d7d8c75a1173ab3b616a84093c98e7d1e04783de7489644a34816c3e7d88df9f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_llama.py",
+          "bytes": 10812,
+          "sha256": "sha256:c6d350a493303eb108ce551ec09ed61411fe7743d6b0a4a287a34fe20b195f92"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_llama_timing.py",
+          "bytes": 8021,
+          "sha256": "sha256:1424e0ca3654e4ffb96ccaf0b48201d62fc897054718feff1973f827a8432c2e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_mistral.py",
+          "bytes": 5386,
+          "sha256": "sha256:2fbd8141fee2cf00f9a3e5485d18b88199c5221a3f4952acdad65c8ebe0fe913"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_mpt.py",
+          "bytes": 3487,
+          "sha256": "sha256:1a4a8e900501299dcae2839053c45a6cfe3ab601189010952f4bba5b85c5e3e8"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_qwen.py",
+          "bytes": 6293,
+          "sha256": "sha256:b2d5267a77f97b2c35f031e46d589ac406210b0677e2f403d0033d09a94a2b80"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/llava_arch.py",
+          "bytes": 22515,
+          "sha256": "sha256:5559d52a05fd77e39aa82cfe4e05835adea787604fdab8ad4588291bb6e843b2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/make_delta.py",
+          "bytes": 2257,
+          "sha256": "sha256:c315a9bf0c288cff8a5de1aba46ad348ae544de94439b0e8c36ad6fc260fdad2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/builder.py",
+          "bytes": 886,
+          "sha256": "sha256:7077221cb97baf2771373b2ab64481ebddd5e2c9745e70645cc6f4c6623aa33f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/clip_encoder.py",
+          "bytes": 6649,
+          "sha256": "sha256:9b1e357324c21b90aacdc92b037f7e871a42bc0f0fff6508e5aafda856df9fbf"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/siglip_encoder.py",
+          "bytes": 3407,
+          "sha256": "sha256:acd1b4b0b173be686fbd3e6b7aa421621501d4b4da94be1f2d7eebfb716313e5"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_projector/builder.py",
+          "bytes": 1437,
+          "sha256": "sha256:19f127682ffad6a7bb71a35fc7a463dbb3eb76594180ba54931bee02331a0bd9"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/utils.py",
+          "bytes": 927,
+          "sha256": "sha256:a6beb41c51d7a124547188d10bf0b7f4ea613b1ecccf165601b96de525664241"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/__init__.py",
+          "bytes": 0,
+          "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/cli.py",
+          "bytes": 4718,
+          "sha256": "sha256:8732b39dac06e6094375acf86a0873f852e6ccc6a617334897bb2af802a0bbf4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/controller.py",
+          "bytes": 9949,
+          "sha256": "sha256:987ef3d635b25636d7e7b5fe58ada38331da47a2b61a079288848ed7c1a29231"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/gradio_web_server.py",
+          "bytes": 18873,
+          "sha256": "sha256:48ec823fd3675962a2811017ff4f55c52b76e207dc98bb008e13d334fc42ff2d"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/model_worker.py",
+          "bytes": 11176,
+          "sha256": "sha256:8ebb3d23906e25758e87823a9e1b461117c230e75d12c11bb424b56130cb775e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/register_worker.py",
+          "bytes": 734,
+          "sha256": "sha256:ebd9ba00aa2b511d3bed8145bf6713fb93e884f2032ede37c361a9b46f8f9ed4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/sglang_worker.py",
+          "bytes": 8678,
+          "sha256": "sha256:4f84a338daa4da8baae28bd606fbaa26881c0dbf04775f4e590bb4c085874d6d"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/test_message.py",
+          "bytes": 2022,
+          "sha256": "sha256:ba1ca43e31211053d0e3f7cb966189c81b106278a93b45bd2c030b10e58b21e8"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llama_flash_attn_monkey_patch.py",
+          "bytes": 4404,
+          "sha256": "sha256:06ce5f55f3c1b2fdb4d0678ee7dfb8022cc627287d05f800287cd75fc0ad2cf6"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llama_xformers_attn_monkey_patch.py",
+          "bytes": 4916,
+          "sha256": "sha256:9fa5e222e76722fd3325ef0dd77d5e47378f6b6b6084b5c0f41eab90829d6fe9"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llava_trainer.py",
+          "bytes": 11076,
+          "sha256": "sha256:b7b5d6f9b02db0a611dc82d9d6eac7862fb2a2e6b8486181d0d05a95d48a9f2c"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train.py",
+          "bytes": 38414,
+          "sha256": "sha256:f87eca266b79905df845efd6bc5e28a57fe10dd8eeaa8d08ea4de97d27ad7b06"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train_mem.py",
+          "bytes": 115,
+          "sha256": "sha256:7f8144e3428598160a53cf8ee245ace1339fc448c189f8baf56c358202e2ad31"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train_xformers.py",
+          "bytes": 366,
+          "sha256": "sha256:92c93c66cddc4aa5c39e7f1064bc3c3901d69346bf89bee3f16380532daeae47"
+        },
+        {
+          "path": "vis_pruner_copy/llava/utils.py",
+          "bytes": 4003,
+          "sha256": "sha256:b51a3ef996597b7d8b7a54e280529985a7154992bd863209bdbc761b8b397102"
+        }
+      ]
+    },
+    {
+      "checkout": "/workspace/rithvik-measure-observations-20261001",
+      "gitCommit": "e90148c647c62eb8dbc1a856f5cd96e44bd6f202",
+      "gitDirty": false,
+      "launcher": {
+        "path": "/workspace/rithvik-measure-observations-20261001/scripts/start_model_server.sh",
+        "bytes": 430,
+        "sha256": "sha256:6b33b2c9f25422b0f5b6e2e75d4ff516acb35e6e8482042f3ce9bbbb3bc00e0c",
+        "source": "#!/usr/bin/env bash\nset -euo pipefail\n\nrepo_root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"\n\nexport PYTHONPATH=\"$repo_root/vis_pruner_copy${PYTHONPATH:+:$PYTHONPATH}\"\nexport SERVER_MODE=\"model\"\nexport MODEL_PATH=\"${MODEL_PATH:-$repo_root/vis_pruner_copy/checkpoints/llava-v1.5-7b}\"\n\ncd \"$repo_root\"\nexec python -m uvicorn csnbs.server:app \\\n  --host \"${MODEL_SERVER_HOST:-0.0.0.0}\" \\\n  --port \"${MODEL_SERVER_PORT:-8000}\"\n"
+      },
+      "pythonPathPrefix": "/workspace/rithvik-measure-observations-20261001/vis_pruner_copy",
+      "resolvedPackageOrigin": "/workspace/rithvik-measure-observations-20261001/vis_pruner_copy/llava/__init__.py",
+      "packageSourceFiles": [
+        {
+          "path": "vis_pruner_copy/llava/__init__.py",
+          "bytes": 41,
+          "sha256": "sha256:52508db720555fae39081e92e8b7f26244df4153b5f3f6bc7bd4a647b7071310"
+        },
+        {
+          "path": "vis_pruner_copy/llava/constants.py",
+          "bytes": 335,
+          "sha256": "sha256:05caa532060f61b30cada5ba23da0f4bf640c898298913f768653583482e5901"
+        },
+        {
+          "path": "vis_pruner_copy/llava/conversation.py",
+          "bytes": 15877,
+          "sha256": "sha256:c5804387e0368a41e5d94849ea05a797d16e57b76c58dfc53556fa7e5db96d7a"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review.py",
+          "bytes": 3620,
+          "sha256": "sha256:6eaa69df1c2505dd60f827dc4b37ac469c693a30b6566a3743d97fd3b839d318"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review_bench.py",
+          "bytes": 4172,
+          "sha256": "sha256:fd6a2c3ed99b0b2881e056160c03aab17f7ea5879b9e03fd993381b4d47e63f2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_gpt_review_visual.py",
+          "bytes": 4177,
+          "sha256": "sha256:a0bd7f0900ed11c047906b4360e003233f1537bedca0e22f4153dceed696b0eb"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_pope.py",
+          "bytes": 2856,
+          "sha256": "sha256:519b407a7f9e9e5eac8aa57e90135b0e09a7729b3f84bb4b613392f67a8d014b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa.py",
+          "bytes": 3920,
+          "sha256": "sha256:e57b92cafc7a4c0d0228bc0554a4315ef808e844d009dcaafa3b0f6ac693fbaf"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa_gpt4.py",
+          "bytes": 3675,
+          "sha256": "sha256:979374e63d47b1c83b5b57fa8b47770d7c526ff3656b0709c5162fdb7f5cc7b2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_science_qa_gpt4_requery.py",
+          "bytes": 5774,
+          "sha256": "sha256:9652b38ad7826e95071fbcd88fcc5f72f114ebab6729b10c479bb0a6824a7cd6"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/eval_textvqa.py",
+          "bytes": 2226,
+          "sha256": "sha256:e78fdd1ae8fdf94c46053c14f7d65f20707b6a0c324c632b841dde5ef04783a0"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/generate_webpage_data_from_table.py",
+          "bytes": 4088,
+          "sha256": "sha256:617dee4abe58ea5b2a74493b01241ac1689a27c33db600d4a7b3417aa865a133"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/m4c_evaluator.py",
+          "bytes": 10265,
+          "sha256": "sha256:8b49e1033e29d551c0bdd86d9149e2b54370e4cd17e52176ac9061b3521f0774"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_qa.py",
+          "bytes": 2430,
+          "sha256": "sha256:8f30a51cc471a977dfa731844ec4d36f33fec15f9ec6f1f8503d1e068f341ec4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa.py",
+          "bytes": 4491,
+          "sha256": "sha256:395bcc21054ef401633720f41af8bb173fe997434beff59336cc9f0ee9e705bb"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_heterogeneous.py",
+          "bytes": 9657,
+          "sha256": "sha256:15056de129782c7d9c7a952d2135bcc788f2c0a9364b54b89e6199b14b5cd923"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_loader.py",
+          "bytes": 6388,
+          "sha256": "sha256:ebb838c45fbc7a41a4be6754178d6c00f01d6dd1f4e2b0a2124f4abd298de409"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_mmbench.py",
+          "bytes": 6803,
+          "sha256": "sha256:b9079ccf5cf274eef17c5cafdff20cc752a6ebe58786e7b219c9f0f8ff1ece6f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/model_vqa_science.py",
+          "bytes": 6883,
+          "sha256": "sha256:e60637c8e28c3d5a9c257c917aaa23b3c2173249a954974c6ce09e494e967ff3"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/qa_baseline_gpt35.py",
+          "bytes": 2345,
+          "sha256": "sha256:f10aee9bce58619a097d3dfb29335b4b437872a4d482f350b614b248622eaca7"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/run_llava.py",
+          "bytes": 4443,
+          "sha256": "sha256:d92adf2e91aec9af9280da4662482f943de49a71f3ee29803e06adc5287b482b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/eval/summarize_gpt_review.py",
+          "bytes": 2438,
+          "sha256": "sha256:e5d8856867207f3729877d233f74cb12240d5c998650f22b1aec0ba67c21740b"
+        },
+        {
+          "path": "vis_pruner_copy/llava/mm_utils.py",
+          "bytes": 9670,
+          "sha256": "sha256:138ce1f9140728ab9e8050bb38cc614a59ca09ff0b1d81d8c23ead70da41b29e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/__init__.py",
+          "bytes": 317,
+          "sha256": "sha256:304ee2cd8ad94bb39a74bd0ba3745e19abb4662110cf88e7f9fe87dbb8e0aa69"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/apply_delta.py",
+          "bytes": 1956,
+          "sha256": "sha256:ddf4b680787dd76e659806c96e6cee5c156b913ff6f6e78aa70a347594b8ad79"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/builder.py",
+          "bytes": 9170,
+          "sha256": "sha256:c4c6171347bd6c3d7283a33795ffd579467fb545b30a2363006d505df00f9850"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/consolidate.py",
+          "bytes": 914,
+          "sha256": "sha256:d7d8c75a1173ab3b616a84093c98e7d1e04783de7489644a34816c3e7d88df9f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_llama.py",
+          "bytes": 10812,
+          "sha256": "sha256:c6d350a493303eb108ce551ec09ed61411fe7743d6b0a4a287a34fe20b195f92"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_llama_timing.py",
+          "bytes": 8021,
+          "sha256": "sha256:1424e0ca3654e4ffb96ccaf0b48201d62fc897054718feff1973f827a8432c2e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_mistral.py",
+          "bytes": 5386,
+          "sha256": "sha256:2fbd8141fee2cf00f9a3e5485d18b88199c5221a3f4952acdad65c8ebe0fe913"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_mpt.py",
+          "bytes": 3487,
+          "sha256": "sha256:1a4a8e900501299dcae2839053c45a6cfe3ab601189010952f4bba5b85c5e3e8"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/language_model/llava_qwen.py",
+          "bytes": 6293,
+          "sha256": "sha256:b2d5267a77f97b2c35f031e46d589ac406210b0677e2f403d0033d09a94a2b80"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/llava_arch.py",
+          "bytes": 22515,
+          "sha256": "sha256:5559d52a05fd77e39aa82cfe4e05835adea787604fdab8ad4588291bb6e843b2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/make_delta.py",
+          "bytes": 2257,
+          "sha256": "sha256:c315a9bf0c288cff8a5de1aba46ad348ae544de94439b0e8c36ad6fc260fdad2"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/builder.py",
+          "bytes": 886,
+          "sha256": "sha256:7077221cb97baf2771373b2ab64481ebddd5e2c9745e70645cc6f4c6623aa33f"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/clip_encoder.py",
+          "bytes": 6649,
+          "sha256": "sha256:9b1e357324c21b90aacdc92b037f7e871a42bc0f0fff6508e5aafda856df9fbf"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_encoder/siglip_encoder.py",
+          "bytes": 3407,
+          "sha256": "sha256:acd1b4b0b173be686fbd3e6b7aa421621501d4b4da94be1f2d7eebfb716313e5"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/multimodal_projector/builder.py",
+          "bytes": 1437,
+          "sha256": "sha256:19f127682ffad6a7bb71a35fc7a463dbb3eb76594180ba54931bee02331a0bd9"
+        },
+        {
+          "path": "vis_pruner_copy/llava/model/utils.py",
+          "bytes": 927,
+          "sha256": "sha256:a6beb41c51d7a124547188d10bf0b7f4ea613b1ecccf165601b96de525664241"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/__init__.py",
+          "bytes": 0,
+          "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/cli.py",
+          "bytes": 4718,
+          "sha256": "sha256:8732b39dac06e6094375acf86a0873f852e6ccc6a617334897bb2af802a0bbf4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/controller.py",
+          "bytes": 9949,
+          "sha256": "sha256:987ef3d635b25636d7e7b5fe58ada38331da47a2b61a079288848ed7c1a29231"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/gradio_web_server.py",
+          "bytes": 18873,
+          "sha256": "sha256:48ec823fd3675962a2811017ff4f55c52b76e207dc98bb008e13d334fc42ff2d"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/model_worker.py",
+          "bytes": 11176,
+          "sha256": "sha256:8ebb3d23906e25758e87823a9e1b461117c230e75d12c11bb424b56130cb775e"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/register_worker.py",
+          "bytes": 734,
+          "sha256": "sha256:ebd9ba00aa2b511d3bed8145bf6713fb93e884f2032ede37c361a9b46f8f9ed4"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/sglang_worker.py",
+          "bytes": 8678,
+          "sha256": "sha256:4f84a338daa4da8baae28bd606fbaa26881c0dbf04775f4e590bb4c085874d6d"
+        },
+        {
+          "path": "vis_pruner_copy/llava/serve/test_message.py",
+          "bytes": 2022,
+          "sha256": "sha256:ba1ca43e31211053d0e3f7cb966189c81b106278a93b45bd2c030b10e58b21e8"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llama_flash_attn_monkey_patch.py",
+          "bytes": 4404,
+          "sha256": "sha256:06ce5f55f3c1b2fdb4d0678ee7dfb8022cc627287d05f800287cd75fc0ad2cf6"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llama_xformers_attn_monkey_patch.py",
+          "bytes": 4916,
+          "sha256": "sha256:9fa5e222e76722fd3325ef0dd77d5e47378f6b6b6084b5c0f41eab90829d6fe9"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/llava_trainer.py",
+          "bytes": 11076,
+          "sha256": "sha256:b7b5d6f9b02db0a611dc82d9d6eac7862fb2a2e6b8486181d0d05a95d48a9f2c"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train.py",
+          "bytes": 38414,
+          "sha256": "sha256:f87eca266b79905df845efd6bc5e28a57fe10dd8eeaa8d08ea4de97d27ad7b06"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train_mem.py",
+          "bytes": 115,
+          "sha256": "sha256:7f8144e3428598160a53cf8ee245ace1339fc448c189f8baf56c358202e2ad31"
+        },
+        {
+          "path": "vis_pruner_copy/llava/train/train_xformers.py",
+          "bytes": 366,
+          "sha256": "sha256:92c93c66cddc4aa5c39e7f1064bc3c3901d69346bf89bee3f16380532daeae47"
+        },
+        {
+          "path": "vis_pruner_copy/llava/utils.py",
+          "bytes": 4003,
+          "sha256": "sha256:b51a3ef996597b7d8b7a54e280529985a7154992bd863209bdbc761b8b397102"
+        }
+      ]
+    }
+  ]
+}

@@ -27,7 +27,8 @@ The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI a
 | Isolated full-HTTP comparison | Complete; 10 trials, 900 measured requests plus 100 warmups, zero failures | [Verified report](../results/campaigns/2026-10-01/llava-oct01-isolated/report/report.md), [fixed protocol](measure/OCT01_PROTOCOL.md) |
 | Incremental HTTP observation overhead | Complete; 10 trials, 900 measured requests plus 100 warmups, zero failures; effect inconclusive | [Verified report](../results/campaigns/2026-10-01/llava-oct01-http-overhead/report/report.md), [observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) |
 | Long-instruction policy | Complete; 4 trials, 360 measured requests plus 40 warmups, zero failures; generated text median was one token, so this did not establish long-output behavior | [Verified report](../results/campaigns/2026-10-01/llava-oct01-workload-long/report/report.md) |
-| Mixed/original-question policies | Running in declared mixed/short order; 8 remaining prescribed descriptive trials | [Observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) and [workload manifest](measure/workloads/oct01/manifest.json) |
+| Mixed policy | Complete; 4 trials, 360 measured requests plus 40 warmups, zero failures; one capped response per pruned trial | [Verified report](../results/campaigns/2026-10-01/llava-oct01-workload-mixed/report/report.md) |
+| Original-question policy | Running; final 4 prescribed descriptive trials | [Observation protocol](measure/OCT01_OBSERVATION_PROTOCOL.md) and [workload manifest](measure/workloads/oct01/manifest.json) |
 
 The six identical baseline trials had per-trial p50 latencies from 515.57 to 558.52 ms: an 8.21% observed range and 0.61% median absolute deviation relative to the nearest-rank median. This is descriptive pilot spread, not a guaranteed detection threshold. Their 90 measured observations per trial do not support p95/p99 under this project's policy.
 
