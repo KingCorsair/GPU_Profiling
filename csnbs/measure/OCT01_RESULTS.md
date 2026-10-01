@@ -2,7 +2,7 @@
 
 The completed primary study supports a modest measured serving benefit from changing the existing configuration from 576 to 128 visual tokens: **13.95% more successful completions within the 90-second arrival window at 3 requests/second**. At 1 request/second, paired p50 HTTP latency fell **9.95%**. These results concern the recorded, instrumented, batch-one serving path and the existing 90-question dev workload. They do not establish unchanged accuracy or a maximum sustainable request rate.
 
-Primary, isolated HTTP and observation-overhead collection and raw verification are complete. The separately declared output-policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
+Primary, isolated HTTP, observation-overhead and long-instruction collection and raw verification are complete. Mixed and original-question policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
 
 ## Primary comparison
 
@@ -44,6 +44,12 @@ Defining signed latency overhead as `(on − off) / off`, the paired p50 estimat
 All 450 measured enabled-mode requests supplied valid token-contract and stage observations. Each enabled trial had a median of ten generated nonspecial text tokens, a range of 1–52, and natural EOS on every request; no enabled request reached the 64-step budget. The measured observation stage's per-trial p50 ranged from **0.079 to 0.089 ms**. That narrow stage excludes other costs introduced by returning metrics; the full-HTTP paired comparison is the overhead check. These counts describe the enabled follow-up and do not backfill the original primary records.
 
 The test leaves existing model-internal CUDA events, synchronization and diagnostic writes active in both legs. It does not estimate their total cost. Host-wall stage medians are not additive and do not isolate GPU prefill/decode.
+
+## Prompt-policy observations
+
+The [long-instruction policy](../../results/campaigns/2026-10-01/llava-oct01-workload-long/report/report.md) completed four trials: **360 measured requests and 40 warmups**, without failure. The appended three-sentence instruction did **not** produce long answers. Every trial's median was **one generated nonspecial text token** (range 1–17), or two generated steps including EOS (range 2–18). All 360 measured responses ended naturally; none reached the 64-step budget. Prompt text did get longer: each trial's formatted prompt-text median was 92 tokens, with range 82–99.
+
+Both variants completed every prescribed 1-RPS arrival within the observation window. The descriptive paired p50-latency reduction was 12.44%, but two paired blocks cannot resolve uncertainty under the frozen policy; no confidence interval, p95, p99 or capacity claim is made. These results describe a longer instruction and unexpectedly short generated answers. They do not isolate the effect of long generated output. The fixed protocol was preserved rather than retuning the prompt after observing its responses.
 
 ## Baseline and measurement checks
 
