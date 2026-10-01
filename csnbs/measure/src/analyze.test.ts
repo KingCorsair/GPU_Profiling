@@ -370,6 +370,14 @@ test('reports preserve instrumentation comparison scope and accept matched off/o
       token_contract:'llava-inputs-embeds-transformers-4.37.2-bos-v1',output_token_unavailable_reason:null,
       output_seed_tokens:1,returned_output_ids:2,generated_token_steps:1,generated_eos_tokens:1,generation_ended_with_eos:true,generated_text_tokens:0});
     trial.status='complete';trial.runDirectory=await save(t,run);
+    if(trial.variantIndex===1){
+      const {sampleCpuLoad}=await import('./cpu_resources.js');
+      const cpuLoad=sampleCpuLoad({platform:'linux',loadavg:()=>[1,2,3],cpus:()=>[{},{}],availableParallelism:()=>1});
+      const bytes=JSON.stringify({recordedAtUtc:'2026-10-01T00:00:00Z',kind:'sampled-device',fields:['uuid'],values:['GPU-fixture'],cpuLoad})+'\n';
+      await writeFile(join(trial.runDirectory,'resources.jsonl'),bytes);
+      Object.assign(run.manifest,{resourceSamples:{file:'resources.jsonl',count:1,sha256:`sha256:${createHash('sha256').update(bytes).digest('hex')}`}});
+      await writeFile(join(trial.runDirectory,'run.json'),JSON.stringify(run.manifest));
+    }
   }
   const campaignPath=join(directory,'campaign.json');await writeFile(campaignPath,JSON.stringify(campaign));
   const report=await buildReport(campaignPath,join(directory,'report'));
@@ -385,6 +393,8 @@ test('reports preserve instrumentation comparison scope and accept matched off/o
   assert.equal(on.hostObservations.hostWallStagesMs.generation_wall_ms!.p99,null);
   assert.equal(on.hostObservations.termination.eosTerminatedCount,240);
   assert.equal(off.hostObservations.termination.eosTerminatedCount,null);
+  assert.equal((on.resourceSamples!.samples[0]!.cpuLoad as Record<string,unknown>).availableParallelism,1);
+  assert.equal((on.resourceSamples!.samples[0]!.cpuLoad as Record<string,unknown>).loadAverage5m,2);
   const markdown=await readFile(join(directory,'report/report.md'),'utf8');
   assert.match(markdown,/unavailable \(isolated\)/);assert.match(markdown,/p50 latency: inconclusive/);
   assert.doesNotMatch(markdown,/2 RPS/);assert.match(markdown,/capacity not applicable/);

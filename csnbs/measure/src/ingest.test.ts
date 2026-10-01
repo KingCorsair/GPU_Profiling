@@ -6,6 +6,7 @@ import { join } from "node:path";
 import test from "node:test";
 import pg from "pg";
 import { ingestBundle, migrate, readImportBundle, readRunBundle } from "./ingest.js";
+import { sampleCpuLoad } from "./cpu_resources.js";
 
 type Fixture = { directory: string; manifest: Record<string, unknown>; requests: Record<string, unknown>[] };
 async function fixture(root: string, name: string, version = 2): Promise<Fixture> {
@@ -33,7 +34,8 @@ async function fixture(root: string, name: string, version = 2): Promise<Fixture
   };
   await writeFile(join(directory, "run.json"), JSON.stringify(manifest));
   await writeFile(join(directory, "requests.jsonl"), requests.map((request) => JSON.stringify(request)).join("\n") + "\n");
-  if (version === 2) await writeFile(join(directory, "resources.jsonl"), JSON.stringify({ recordedAtUtc: "2026-10-01T00:00:00.000Z", gpuMemoryMiB: 8192 }) + "\n");
+  if (version === 2) await writeFile(join(directory, "resources.jsonl"), JSON.stringify({ recordedAtUtc: "2026-10-01T00:00:00.000Z", gpuMemoryMiB: 8192,
+    cpuLoad: sampleCpuLoad({ platform: "linux", loadavg: () => [0.5, 1, 2], cpus: () => [{}, {}, {}, {}], availableParallelism: () => 2 }) }) + "\n");
   const result = { directory, manifest, requests };
   if (version === 2) await refreshHashes(result);
   return result;
@@ -253,6 +255,7 @@ test("real Postgres: campaign import is idempotent, preserves values, and rolls 
   assert.deepEqual(outcome, { phase: null, request_id: null, latency_ms: 9, successful: true });
   const resource = (await client.query("SELECT raw FROM benchmark.resource_samples WHERE run_id=$1", [prefix + "-b"])).rows[0].raw;
   assert.equal(resource.gpuMemoryMiB, 8192);
+  assert.deepEqual(resource.cpuLoad, bundle.runs[1]!.resources[0]!.cpuLoad, "CPU observations survive PostgreSQL JSON storage unchanged");
 
   await writeFile(join(b.directory, "run.json"), JSON.stringify(b.manifest, null, 2));
   const changed = await readRunBundle(b.directory);

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { percentile, summarizeRun, runQualityReasons, validateConfig, type LoadRun, type RequestResult, type RunManifest } from './loadgen.js';
+import { validateOptionalCpuLoad } from './cpu_resources.js';
 
 export type VerifiedResources = {
   file: 'resources.jsonl'; count: number; sha256: string; scope: string | null;
@@ -136,6 +137,7 @@ export async function readVerifiedResources(directory: string, descriptor: unkno
     const parsed: unknown = JSON.parse(line);
     invariant(parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed), 'Invalid resource sample record');
     const row = parsed as Record<string, unknown>;
+    validateOptionalCpuLoad(row.cpuLoad);
     invariant(typeof row.recordedAtUtc === 'string' && Number.isFinite(Date.parse(row.recordedAtUtc)), 'Invalid resource sample timestamp');
     if (row.kind === 'sampled-device') {
       invariant(Array.isArray(row.fields) && row.fields.every((key) => typeof key === 'string') && new Set(row.fields).size === row.fields.length, 'Invalid resource fields');

@@ -3,6 +3,7 @@ import { lstat, readFile, realpath, stat } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { validateOptionalCpuLoad } from "./cpu_resources.js";
 
 type JsonObject = Record<string, unknown>;
 type Artifact = {
@@ -169,7 +170,10 @@ export async function readRunBundle(runDirectory: string): Promise<RunBundle> {
     verifyDeclaredHash(resourceDescriptor, resourceRaw.bytes, "resourceSamples", manifest.schemaVersion === 2);
     resources = parseJsonl(resourceRaw.bytes, resourceFile);
     if (resources.length !== nonnegativeInteger(resourceDescriptor.count, "resourceSamples.count")) throw new Error("resourceSamples.count does not match the raw file");
-    for (const sample of resources) nullableDate(sample.recordedAtUtc, "resource.recordedAtUtc");
+    for (const sample of resources) {
+      nullableDate(sample.recordedAtUtc, "resource.recordedAtUtc");
+      validateOptionalCpuLoad(sample.cpuLoad);
+    }
     artifacts.push(resourceRaw.artifact);
   }
   // Include names and lengths as well as bytes' hashes; missing/added artifacts change identity.

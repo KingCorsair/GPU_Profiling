@@ -44,7 +44,11 @@ Changing intake/worker behavior creates a new serving variant and needs a fresh 
 
 ## Resource observations and overhead
 
-The campaign samples `nvidia-smi` outside request handling, approximately once per second: GPU UUID/name, utilization, used device memory, temperature, power and SM clock. Collection spans startup through cleanup, not just measurement. The copied `resources.jsonl` descriptor records count/hash and scope. Retain sample timestamps, units and collection errors; do not interpret missing samples as zero load. CPU-load sampling is not currently implemented.
+The campaign samples `nvidia-smi` outside request handling, approximately once per second: GPU UUID/name, utilization, used device memory, temperature, power and SM clock. Collection spans startup through cleanup, not just measurement. The copied `resources.jsonl` descriptor records count/hash and scope. Retain sample timestamps, units and collection errors; do not interpret missing samples as zero load.
+
+The updated monitor also captures `cpuLoad` from Node's OS APIs at each sampling tick: 1/5/15-minute OS load averages, logical CPU count and the OS estimate of available parallelism. These are host/container-visible system observations, not CPU-utilization percentages, per-process work, or an isolated container measurement. Load may include other workloads; no CPU normalization or inference about bottlenecks is performed. Each unavailable reading stays null with a reason, including unsupported Windows load averages. The same tick's CPU object is repeated on each GPU row, or retained beside a GPU-query error; do not count repeated GPU rows as independent CPU samples. [The field contract](contracts.md#optional-cpu-load-observations) defines validation and units.
+
+This sampler change applies only to future collections using its source revision. The frozen October 1 studies at `356df7d` and `e90148c` did not collect these CPU fields; their absence remains unknown and no historical files are rewritten.
 
 The largest observed memory sample is **peak sampled whole-device memory**. Short peaks between samples can be missed, and the value includes weights, workspaces, caches and other device allocations. Resource monitoring, service instrumentation and per-request event markers can introduce overhead. A matched enabled/disabled experiment on the same serving implementation is still required to quantify that overhead.
 

@@ -74,6 +74,24 @@ SIGINT, SIGTERM and an optional run deadline abort pending client waits and fina
 
 Record separate harness/server commits and dirty states, server-confirmed configuration/checkpoint, and **server-host** GPU identity. A laptop GPU lookup is not model-server provenance. Unknown metadata stays unknown. `quality.reportable` describes individual run checks only; it does not establish a statistically resolved optimization or complete experiment. Fake/smoke runs, interrupted runs, dirty/unknown source, missing model/checkpoint/configuration/GPU identity, incomplete dataset cycles, insufficient warmup or measured failures prevent this flag. Successful-only latency remains conditional on success and always has failure counts beside it.
 
+### Optional CPU-load observations
+
+Future `monitorResources()` collections always add a `cpuLoad` object to each existing GPU sample or GPU-error record. The field is optional in the reader for historical compatibility; absent old fields stay absent. This does not change GPU `kind`, `fields`, `values`, units or the descriptor's existing GPU-memory scope. CPU fields carry their own scope. Reports preserve the entire raw resource object and PostgreSQL preserves it in `resource_samples.raw`.
+
+| `cpuLoad` field | Meaning and validation |
+|---|---|
+| `schemaVersion`, `source`, `scope`, `platform` | `1`, `node:os`, `os-visible-host-or-container`, and Node's platform identifier. This does not claim process-only or container-only observation. |
+| `loadAverage1m`, `loadAverage5m`, `loadAverage15m` | OS system-activity load averages over 1, 5 and 15 minutes. Three finite nonnegative numbers, or three nulls with an unavailable reason. These are fractional load values, not CPU-utilization percentages. |
+| `logicalCpuCount` | Positive integer length of the OS logical-CPU inventory, or null with a reason when unavailable. It is not a container CPU quota or the available-parallelism estimate. |
+| `availableParallelism` | Positive integer OS estimate of parallelism available to the program, or null with a reason. Kept separately from logical CPU count. |
+| `unavailableReasons` | `{loadAverage, logicalCpuCount, availableParallelism}`: each null when the corresponding observation is valid, otherwise a nonempty reason. API errors do not fabricate zero readings. |
+
+Node [documents these OS observations](https://nodejs.org/docs/latest-v20.x/api/os.html#osloadavg), including Windows' unsupported load averages. The monitor records those as null rather than Node's Windows zero placeholders. Logical CPU inventory and [available parallelism](https://nodejs.org/docs/latest-v20.x/api/os.html#osavailableparallelism) have different meanings; neither is used to convert load into utilization.
+
+CPU reads occur once per monitor tick, near the record timestamp and before the asynchronous GPU query. The unchanged CPU object and timestamp are repeated if that tick has several GPUs; preserve this association rather than treating those rows as independent CPU observations. A GPU-query error can still contain valid CPU observations. Polling is approximate, and OS averages span time outside a short measurement window. Host/container visibility may include other workloads. No normalization, per-process utilization, or CPU/GPU bottleneck attribution is inferred.
+
+Reader and importer reject present CPU records with invalid numeric ranges/types, inconsistent availability reasons or Windows zero-load claims. Records without the field remain readable. The frozen October 1 `356df7d`/`e90148c` collections lack CPU observations; this source addition does not retrospectively fill them.
+
 ## Summary and analysis
 
 Warmup is never subtracted from measured rows; phases already separate it. Nearest-rank percentiles use `sorted[ceil(fraction * n) - 1]`. Every distribution carries its own sample count. p50 is descriptive at any positive count; p95 is null below 200 observations; p99 is null below 1000. Null reasons are recorded. These project gates are necessary sample checks, not promises of precision or independence.
