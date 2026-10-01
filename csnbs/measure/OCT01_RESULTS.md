@@ -2,7 +2,7 @@
 
 The completed primary study supports a modest measured serving benefit from changing the existing configuration from 576 to 128 visual tokens: **13.95% more successful completions within the 90-second arrival window at 3 requests/second**. At 1 request/second, paired p50 HTTP latency fell **9.95%**. These results concern the recorded, instrumented, batch-one serving path and the existing 90-question dev workload. They do not establish unchanged accuracy or a maximum sustainable request rate.
 
-Primary collection and verification are complete. Isolated HTTP and the separately declared observation/output-policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
+Primary and isolated HTTP collection and raw verification are complete. The separately declared observation/output-policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
 
 ## Primary comparison
 
@@ -26,6 +26,14 @@ Each primary trial has 270 successes, making its p95 eligible under the project 
 ![Primary campaign observations](../../results/campaigns/2026-10-01/llava-oct01-primary/report/campaign_overview.png)
 
 The throughput panel shows every saved trial. Other panels deliberately show only the first recorded pair at 3 RPS, with its run IDs; they are illustrative distributions, not the paired inference itself.
+
+## Isolated HTTP comparison
+
+The [isolated campaign](../../results/campaigns/2026-10-01/llava-oct01-isolated/report/report.md) completed five paired blocks, **900 measured requests and 100 warmups**, without failure. Each request included the full HTTP boundary and completed before the next began. There is no offered arrival rate; the saved rate parameter is only a campaign placeholder.
+
+Keeping 128 tokens reduced paired p50 HTTP latency by **13.48%** (95% paired-block bootstrap interval **10.32% to 16.94%**) and increased serial completion rate by **13.75%** (**12.44% to 16.47%**). Baseline trial p50 values ranged from 467.98 to 479.36 ms; pruned values ranged from 398.15 to 419.70 ms. Each trial has 90 measured observations, so p95/p99 remain unavailable.
+
+The isolated p50 effect, low-load p50 effect and overloaded-window p50 effect are different outcomes. The much larger latency reduction in the 3-RPS windows accompanies less outstanding client work, but these experiments do not directly measure server queue time or establish which GPU stage causes the change. They use different arrival processes and per-trial budgets, and no separate interaction test comparing their effect sizes was performed. Serial completion rate is not maximum serving capacity.
 
 ## Baseline and measurement checks
 
