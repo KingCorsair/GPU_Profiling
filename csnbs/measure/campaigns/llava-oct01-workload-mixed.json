@@ -1,0 +1,74 @@
+{
+  "campaignId": "llava-oct01-workload-mixed",
+  "purpose": "ab",
+  "endpoint": "http://127.0.0.1:8765/infer",
+  "datasetPath": "../workloads/oct01/mixed.json",
+  "rates": [
+    1
+  ],
+  "repetitions": 2,
+  "measuredRequests": 90,
+  "warmupRequests": 10,
+  "seed": 465,
+  "timeoutMs": 120000,
+  "startupTimeoutMs": 300000,
+  "settleMs": 1000,
+  "gpuExclusive": true,
+  "variants": [
+    {
+      "id": "baseline-A",
+      "command": [
+        "bash",
+        "scripts/start_model_server.sh"
+      ],
+      "env": {
+        "MODEL_SERVER_HOST": "127.0.0.1",
+        "MODEL_SERVER_PORT": "8765",
+        "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+        "VISUAL_TOKEN_NUM": "576",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "TOKENIZERS_PARALLELISM": "false",
+        "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+        "EXTENDED_HTTP_OBSERVATIONS": "1"
+      },
+      "expected": {
+        "model_id": "liuhaotian/llava-v1.5-7b",
+        "visual_token_num": 576,
+        "important_ratio": 0.5,
+        "max_new_tokens": 64,
+        "batch_size": 1,
+        "eos_policy": "natural",
+        "instrumentation": "handler-stage-token-observations-v2"
+      }
+    },
+    {
+      "id": "pruned-128",
+      "command": [
+        "bash",
+        "scripts/start_model_server.sh"
+      ],
+      "env": {
+        "MODEL_SERVER_HOST": "127.0.0.1",
+        "MODEL_SERVER_PORT": "8765",
+        "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+        "VISUAL_TOKEN_NUM": "128",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "TOKENIZERS_PARALLELISM": "false",
+        "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+        "EXTENDED_HTTP_OBSERVATIONS": "1"
+      },
+      "expected": {
+        "model_id": "liuhaotian/llava-v1.5-7b",
+        "visual_token_num": 128,
+        "important_ratio": 0.5,
+        "max_new_tokens": 64,
+        "batch_size": 1,
+        "eos_policy": "natural",
+        "instrumentation": "handler-stage-token-observations-v2"
+      }
+    }
+  ],
+  "runKind": "open-loop"
+}
