@@ -2,7 +2,7 @@
 
 The completed primary study supports a modest measured serving benefit from changing the existing configuration from 576 to 128 visual tokens: **13.95% more successful completions within the 90-second arrival window at 3 requests/second**. At 1 request/second, paired p50 HTTP latency fell **9.95%**. These results concern the recorded, instrumented, batch-one serving path and the existing 90-question dev workload. They do not establish unchanged accuracy or a maximum sustainable request rate.
 
-Primary and isolated HTTP collection and raw verification are complete. The separately declared observation/output-policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
+Primary, isolated HTTP and observation-overhead collection and raw verification are complete. The separately declared output-policy follow-ups are still collecting; their findings will be added here after verification. The live completion table is in [MEASUREMENT_STATUS.md](../MEASUREMENT_STATUS.md).
 
 ## Primary comparison
 
@@ -34,6 +34,16 @@ The [isolated campaign](../../results/campaigns/2026-10-01/llava-oct01-isolated/
 Keeping 128 tokens reduced paired p50 HTTP latency by **13.48%** (95% paired-block bootstrap interval **10.32% to 16.94%**) and increased serial completion rate by **13.75%** (**12.44% to 16.47%**). Baseline trial p50 values ranged from 467.98 to 479.36 ms; pruned values ranged from 398.15 to 419.70 ms. Each trial has 90 measured observations, so p95/p99 remain unavailable.
 
 The isolated p50 effect, low-load p50 effect and overloaded-window p50 effect are different outcomes. The much larger latency reduction in the 3-RPS windows accompanies less outstanding client work, but these experiments do not directly measure server queue time or establish which GPU stage causes the change. They use different arrival processes and per-trial budgets, and no separate interaction test comparing their effect sizes was performed. Serial completion rate is not maximum serving capacity.
+
+## Incremental HTTP observation overhead
+
+The [matched off/on campaign](../../results/campaigns/2026-10-01/llava-oct01-http-overhead/report/report.md) completed five isolated pairs, **900 measured requests and 100 warmups**, without failure. Both legs used 576 visual tokens and the same clean `e90148c` source; only extended HTTP observations changed.
+
+Defining signed latency overhead as `(on − off) / off`, the paired p50 estimate was **−0.45%**, with a 95% paired-block bootstrap interval of **−3.56% to +0.84%**. The interval crosses zero: this fixed-budget test is **inconclusive**, not proof that observation is free or that the two modes are equivalent. Serial completion-rate change was also inconclusive: **+0.21%**, interval **−1.23% to +2.77%**. No additional trials were added to force a conclusion.
+
+All 450 measured enabled-mode requests supplied valid token-contract and stage observations. Each enabled trial had a median of ten generated nonspecial text tokens, a range of 1–52, and natural EOS on every request; no enabled request reached the 64-step budget. The measured observation stage's per-trial p50 ranged from **0.079 to 0.089 ms**. That narrow stage excludes other costs introduced by returning metrics; the full-HTTP paired comparison is the overhead check. These counts describe the enabled follow-up and do not backfill the original primary records.
+
+The test leaves existing model-internal CUDA events, synchronization and diagnostic writes active in both legs. It does not estimate their total cost. Host-wall stage medians are not additive and do not isolate GPU prefill/decode.
 
 ## Baseline and measurement checks
 
