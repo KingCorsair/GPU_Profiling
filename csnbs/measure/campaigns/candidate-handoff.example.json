@@ -1,0 +1,80 @@
+{
+  "schema": "measurement-candidate-handoff",
+  "schemaVersion": 1,
+  "status": "template-incomplete-not-runnable",
+  "owner": "Amay",
+  "comparisonKind": "implementation",
+  "question": "Does the supplied serving change improve full-HTTP latency or measured throughput at fixed token count?",
+  "intendedChangedBehavior": null,
+  "baseline": {
+    "implementationId": null,
+    "gitCommit": null,
+    "containerImageDigest": null,
+    "checkoutDirectory": null,
+    "launchCommand": [],
+    "environment": {},
+    "effectiveHealthConfiguration": null
+  },
+  "candidate": {
+    "implementationId": null,
+    "gitCommit": null,
+    "containerImageDigest": null,
+    "checkoutDirectory": null,
+    "launchCommand": [],
+    "environment": {},
+    "effectiveHealthConfiguration": null
+  },
+  "fixedControlsToVerify": {
+    "modelId": "liuhaotian/llava-v1.5-7b",
+    "checkpointRevision": null,
+    "verifiedWeightHashes": null,
+    "visualTokenNum": 576,
+    "importantRatio": 0.5,
+    "promptTemplate": "llava_v1",
+    "dtype": null,
+    "attentionBackend": null,
+    "batchSize": 1,
+    "batchingPolicy": null,
+    "maxNewTokens": 64,
+    "doSample": false,
+    "useCache": true,
+    "eosPolicy": "natural",
+    "workloadHash": null
+  },
+  "correctnessEvidence": {
+    "artifact": null,
+    "realRemovalOrMasking": null,
+    "keptTokenSpatialOrder": null,
+    "positionMaskAndCacheChecks": null,
+    "supportedSettings": [],
+    "knownFailureLimits": []
+  },
+  "lifecycleEvidence": {
+    "contractArtifact": null,
+    "instrumentationOverheadArtifact": null,
+    "queueBoundaryAvailable": null,
+    "actualTokenCountsVerified": null,
+    "unavailableMetrics": []
+  },
+  "accuracyEvidenceFromSribhav": {
+    "artifact": null,
+    "lockedSplitHash": null,
+    "scorerRevision": null,
+    "scorerValidationArtifact": null,
+    "perCategoryResultsArtifact": null,
+    "randomScoringControlArtifact": null,
+    "matchingConfigurationHash": null
+  },
+  "experimentProtocol": {
+    "artifact": null,
+    "primaryMetric": "successfulThroughputWithinWindowRps",
+    "desiredResolutionPercent": null,
+    "measuredRequestsPerTrial": null,
+    "independentPairsPerRate": null,
+    "offeredRatesRps": [],
+    "warmupRequests": 10,
+    "seed": null,
+    "stoppingAndFailurePolicy": null,
+    "gpuReservationConfirmed": false
+  }
+}
