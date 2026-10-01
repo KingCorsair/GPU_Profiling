@@ -1,0 +1,4 @@
+[
+ {"question_id":"synthetic-1","category":"synthetic","source_dataset":"synthetic","image":"pixel.png","question":"Synthetic test one"},
+ {"question_id":"synthetic-2","category":"synthetic","source_dataset":"synthetic","image":"pixel.png","question":"Synthetic test two"}
+]

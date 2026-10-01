@@ -12,6 +12,12 @@ import base64
 import binascii
 import os
 import random
+import time
+
+if __package__ in (None, ""):
+    from benchmark_metadata import collect_provenance, checkpoint_provenance
+else:
+    from csnbs.benchmark_metadata import collect_provenance, checkpoint_provenance
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -19,6 +25,11 @@ from pydantic import BaseModel, Field
 
 MODE = os.environ.get("SERVER_MODE", "fake")
 SERVICE_NAME = "csnbs-llava-server"
+VISUAL_TOKEN_NUM = int(os.environ.get("VISUAL_TOKEN_NUM", "576"))
+MAX_NEW_TOKENS = int(os.environ.get("MAX_NEW_TOKENS", "64"))
+if not 1 <= VISUAL_TOKEN_NUM <= 576 or MAX_NEW_TOKENS < 1:
+    raise ValueError("invalid visual token or output token budget")
+PROVENANCE = collect_provenance()
 
 DEFAULT_MODEL_PATH = (
     Path(__file__).resolve().parents[1]
@@ -29,6 +40,8 @@ DEFAULT_MODEL_PATH = (
 MODEL_PATH = Path(
     os.environ.get("MODEL_PATH", str(DEFAULT_MODEL_PATH))
 )
+
+CHECKPOINT_PROVENANCE = checkpoint_provenance(MODEL_PATH)
 
 tokenizer = None
 model = None
@@ -48,7 +61,7 @@ if MODE == "model":
         # Overridable so A/B load-test runs (e.g. VisPruner 128 vs. unpruned
         # 576) can select this per-process without a code change; unset
         # keeps prior behavior (576, effectively unpruned) exactly.
-        visual_token_num=int(os.environ.get("VISUAL_TOKEN_NUM", "576")),
+        visual_token_num=VISUAL_TOKEN_NUM,
         important_ratio=0.5,
     )
     model.eval()
@@ -57,12 +70,15 @@ app = FastAPI()
 
 
 class InferRequest(BaseModel):
+    request_id: str | None = None
     image_b64: str = Field(..., description="Base64-encoded image bytes")
     question: str = Field(..., min_length=1)
 
 
 class InferResponse(BaseModel):
     answer: str
+    request_id: str | None = None
+    metrics: dict | None = None
 
 
 class HealthResponse(BaseModel):
@@ -70,6 +86,10 @@ class HealthResponse(BaseModel):
     pid: int
     mode: str
     model_loaded: bool
+    configuration: dict
+    source: dict
+    hardware: dict
+    runtime: dict
 
 
 _fake_slots = asyncio.Semaphore(16)
@@ -141,7 +161,7 @@ async def _infer_model(image: bytes, question: str) -> str:
             images=image_tensor,
             image_sizes=[pil_image.size],
             do_sample=False,
-            max_new_tokens=64,
+            max_new_tokens=MAX_NEW_TOKENS,
             use_cache=True,
         )
 
@@ -167,11 +187,25 @@ async def health() -> HealthResponse:
         pid=os.getpid(),
         mode=MODE,
         model_loaded=_model_loaded(),
+        configuration={
+            "model_id": (CHECKPOINT_PROVENANCE or {}).get("model_id") if MODE == "model" else "fake",
+            "checkpoint": str(MODEL_PATH) if MODE == "model" else None,
+            "download_provenance": CHECKPOINT_PROVENANCE,
+            "implementation": "vispruner-vendored-blocking-v1" if MODE == "model" else "fake-async-v1",
+            "visual_token_num": VISUAL_TOKEN_NUM, "important_ratio": 0.5,
+            "max_new_tokens": MAX_NEW_TOKENS, "do_sample": False, "use_cache": True,
+            "eos_policy": "natural", "prompt_template": "llava_v1", "batch_size": 1,
+            "dtype": str(next(model.parameters()).dtype) if _model_loaded() else None,
+            "instrumentation": "handler-service-wall-v1",
+            "queue_observation": "unavailable-blocking-handler",
+        },
+        **PROVENANCE,
     )
 
 
 @app.post("/infer", response_model=InferResponse)
 async def infer(req: InferRequest) -> InferResponse:
+    service_start = time.perf_counter()
     try:
         image = base64.b64decode(req.image_b64, validate=True)
     except (binascii.Error, ValueError):
@@ -184,7 +218,15 @@ async def infer(req: InferRequest) -> InferResponse:
     else:
         raise HTTPException(status_code=500, detail=f"unknown SERVER_MODE={MODE!r}")
 
-    return InferResponse(answer=answer)
+    return InferResponse(answer=answer, request_id=req.request_id, metrics={
+        "schema_version": 1,
+        "service_ms": (time.perf_counter() - service_start) * 1000,
+        "queue_ms": None,
+        "queue_unavailable_reason": "Handler entry does not observe socket arrival or pre-handler waiting",
+        "generation_wall_ms": None, "preprocess_ms": None, "postprocess_ms": None,
+        "generated_text_tokens": None, "prompt_text_tokens": None, "visual_tokens": None,
+        "token_unavailable_reason": "Actual token counts require a verified generation-wrapper contract",
+    })
 
 
 if __name__ == "__main__":

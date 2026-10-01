@@ -1,0 +1,69 @@
+name: Measurement validation
+on:
+  push:
+    paths: ['csnbs/**', 'results/loadgen/**', 'results/campaigns/**', 'results/calibration/**', 'scripts/run_loadgen_smoke.sh', '.github/workflows/measure.yml']
+  pull_request:
+    paths: ['csnbs/**', 'results/loadgen/**', 'results/campaigns/**', 'results/calibration/**', 'scripts/run_loadgen_smoke.sh', '.github/workflows/measure.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  measurement:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 24]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: benchmark
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: benchmark
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://benchmark:test-only@localhost:5432/benchmark
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: csnbs/measure/package-lock.json
+      - run: npm ci
+        working-directory: csnbs/measure
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: csnbs/measure
+      - name: Synthetic campaign through raw storage and report
+        run: |
+          npm --prefix csnbs/measure run campaign -- campaigns/cpu-integration.json --output "$RUNNER_TEMP/measurement-campaign"
+          npm --prefix csnbs/measure run report -- "$RUNNER_TEMP/measurement-campaign/campaign.json"
+          npm --prefix csnbs/measure run ingest -- "$RUNNER_TEMP/measurement-campaign/campaign.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-evidence-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/measurement-campaign
+  python-and-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r csnbs/requirements-validation.txt
+      - run: python -m pytest -q csnbs/test_load_harness.py csnbs/test_load_sweep.py csnbs/test_server_metrics.py csnbs/test_plot_load_comparison.py csnbs/test_gemma_server.py csnbs/test_qwen_server.py csnbs/test_plot_campaign.py
+        env:
+          SERVER_MODE: fake
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: csnbs/frontend/package-lock.json
+      - run: npm ci && npm test && npm run build
+        working-directory: csnbs/frontend

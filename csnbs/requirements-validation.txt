@@ -1,0 +1,6 @@
+# CPU-only test/report environment; production GPU pins remain in requirements.txt.
+fastapi==0.142.2
+httpx==0.28.1
+uvicorn==0.54.0
+pytest==9.1.1
+matplotlib==3.11.2
