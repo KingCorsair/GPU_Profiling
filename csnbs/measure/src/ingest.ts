@@ -73,6 +73,17 @@ function sha256(bytes: Buffer | string): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+function verifyDeclaredHash(descriptor: JsonObject, bytes: Buffer, label: string, required: boolean): void {
+  const declared = descriptor.sha256;
+  if (declared === undefined || declared === null) {
+    if (required) throw new Error(`${label}.sha256 is required for a version 2 run`);
+    return;
+  }
+  if (typeof declared !== "string" || !/^(?:sha256:)?[0-9a-f]{64}$/.test(declared) || declared.replace(/^sha256:/, "") !== sha256(bytes)) {
+    throw new Error(`${label} SHA-256 mismatch`);
+  }
+}
+
 function parseObject(bytes: Buffer, label: string): JsonObject {
   return object(JSON.parse(bytes.toString("utf8")), label);
 }
@@ -144,6 +155,7 @@ export async function readRunBundle(runDirectory: string): Promise<RunBundle> {
   const requestFile = requiredString(descriptor.file, "requests.file");
   if (requestFile === "run.json") throw new Error("requests.file must differ from run.json");
   const requestRaw = await readArtifact(runDirectory, requestFile, "requests");
+  verifyDeclaredHash(descriptor, requestRaw.bytes, "requests", manifest.schemaVersion === 2);
   const requests = parseJsonl(requestRaw.bytes, requestFile);
   if (requests.length !== nonnegativeInteger(descriptor.count, "requests.count")) throw new Error("requests.count does not match the raw file");
   validateRequests(requests);
@@ -154,6 +166,7 @@ export async function readRunBundle(runDirectory: string): Promise<RunBundle> {
     const resourceFile = requiredString(resourceDescriptor.file, "resourceSamples.file");
     if (artifacts.some((entry) => entry.relativePath === resourceFile)) throw new Error("Resource file duplicates another artifact");
     const resourceRaw = await readArtifact(runDirectory, resourceFile, "resources");
+    verifyDeclaredHash(resourceDescriptor, resourceRaw.bytes, "resourceSamples", manifest.schemaVersion === 2);
     resources = parseJsonl(resourceRaw.bytes, resourceFile);
     if (resources.length !== nonnegativeInteger(resourceDescriptor.count, "resourceSamples.count")) throw new Error("resourceSamples.count does not match the raw file");
     for (const sample of resources) nullableDate(sample.recordedAtUtc, "resource.recordedAtUtc");

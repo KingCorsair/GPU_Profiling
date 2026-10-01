@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -34,7 +34,17 @@ async function fixture(root: string, name: string, version = 2): Promise<Fixture
   await writeFile(join(directory, "run.json"), JSON.stringify(manifest));
   await writeFile(join(directory, "requests.jsonl"), requests.map((request) => JSON.stringify(request)).join("\n") + "\n");
   if (version === 2) await writeFile(join(directory, "resources.jsonl"), JSON.stringify({ recordedAtUtc: "2026-10-01T00:00:00.000Z", gpuMemoryMiB: 8192 }) + "\n");
-  return { directory, manifest, requests };
+  const result = { directory, manifest, requests };
+  if (version === 2) await refreshHashes(result);
+  return result;
+}
+
+async function refreshHashes(source: Fixture): Promise<void> {
+  for (const key of ["requests", "resourceSamples"]) {
+    const descriptor = source.manifest[key] as Record<string, unknown> | undefined;
+    if (descriptor) descriptor.sha256 = "sha256:" + createHash("sha256").update(await readFile(join(source.directory, descriptor.file as string))).digest("hex");
+  }
+  await writeFile(join(source.directory, "run.json"), JSON.stringify(source.manifest));
 }
 
 async function temp(t: { after: (fn: () => Promise<void>) => void }): Promise<string> {
@@ -95,6 +105,7 @@ test("V2 warmup and measurement may restart sequence zero with distinct request 
     { ...source.requests[0], phase: "warmup", requestId: "phase-local:warmup:0" },
     { ...source.requests[0], phase: "measurement", requestId: "phase-local:measurement:0" },
   ].map((request) => JSON.stringify(request)).join("\n") + "\n");
+  await refreshHashes(source);
   assert.equal((await readRunBundle(source.directory)).requests.length, 2);
 });
 
@@ -110,10 +121,25 @@ test("rejects mismatched counts, duplicate identities, malformed JSONL, and inva
     [[request, { ...source.requests[1], latencyMs: "ten" }], /finite/],
   ] as const) {
     await writeFile(join(source.directory, "requests.jsonl"), records.map((record) => JSON.stringify(record)).join("\n") + "\n");
+    await refreshHashes(source);
     await assert.rejects(readRunBundle(source.directory), pattern);
   }
   await writeFile(join(source.directory, "requests.jsonl"), "{invalid}\n");
+  await refreshHashes(source);
   await assert.rejects(readRunBundle(source.directory), /Invalid JSONL/);
+});
+
+test("first import rejects tampered request/resource bytes and missing V2 hashes", async (t) => {
+  const root = await temp(t);
+  for (const file of ["requests.jsonl", "resources.jsonl"]) {
+    const source = await fixture(root, `tampered-${file}`);
+    await writeFile(join(source.directory, file), (await readFile(join(source.directory, file), "utf8")) + "\n");
+    await assert.rejects(readRunBundle(source.directory), /SHA-256 mismatch/);
+  }
+  const missing = await fixture(root, "missing-v2-hash");
+  delete (missing.manifest.requests as Record<string, unknown>).sha256;
+  await writeFile(join(missing.directory, "run.json"), JSON.stringify(missing.manifest));
+  await assert.rejects(readRunBundle(missing.directory), /sha256 is required/);
 });
 
 test("artifact references cannot traverse directories or follow an escaping symlink", async (t) => {
