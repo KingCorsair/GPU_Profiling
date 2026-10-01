@@ -57,7 +57,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r csnbs/requirements-validation.txt
-      - run: python -m pytest -q csnbs/test_load_harness.py csnbs/test_load_sweep.py csnbs/test_server_metrics.py csnbs/test_plot_load_comparison.py csnbs/test_gemma_server.py csnbs/test_qwen_server.py csnbs/test_plot_campaign.py
+      - run: python -m pytest -q csnbs/test_load_harness.py csnbs/test_load_sweep.py csnbs/test_server_metrics.py csnbs/test_plot_load_comparison.py csnbs/test_gemma_server.py csnbs/test_qwen_server.py csnbs/test_plot_campaign.py csnbs/test_export_campaign.py
         env:
           SERVER_MODE: fake
       - uses: actions/setup-node@v4
