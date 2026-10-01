@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {readVerifiedRun,comparePairs,baselineRepeatability,comparabilityReasons,type VerifiedRun} from './analyze.js';
 import {classifyCapacity,summarizeCapacityBracket} from './capacity.js';
-import {percentile,type RequestResult} from './loadgen.js';
+import {percentile,summarizePercentiles,type RequestResult} from './loadgen.js';
 import {verifyCampaign,verifyTrialRun,type Campaign} from './campaign.js';
 const format=(n:number|null|undefined,d=2)=>n==null?'unavailable':n.toFixed(d);
 const escape=(s:string)=>s.replaceAll('|','\\|').replaceAll('\n',' ');
@@ -19,6 +19,40 @@ export function characterizeWorkload(requests: RequestResult[]) {
  };
  return {measuredRequests:measured.length,categoryCounts,sourceDatasetCounts,generatedTextTokens:tokenSummary('generated_text_tokens'),promptTextTokens:tokenSummary('prompt_text_tokens'),visualTokens:tokenSummary('visual_tokens'),
   outputCharacters:tokenSummary('output_characters')};
+}
+const hostWallStageKeys=['base64_decode_ms','preprocess_ms','generation_wall_ms','postprocess_ms','observation_wall_ms'] as const;
+const outputTokenContract='llava-inputs-embeds-transformers-4.37.2-bos-v1';
+/** Successful measured observations only; each metric keeps its own coverage and tail gates. */
+export function summarizeHostObservations(requests:RequestResult[],configuration:Record<string,unknown>|null){
+ const measured=requests.filter(row=>row.phase==='measurement'),successful=measured.filter(row=>row.outcome==='success');
+ const finiteNonnegative=(value:unknown):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
+ const integer=(value:unknown):value is number=>finiteNonnegative(value)&&Number.isSafeInteger(value);
+ const coverage=(observedCount:number)=>({observedCount,missingOrInvalidCount:successful.length-observedCount,
+  reason:observedCount===0?'No valid observations in successful measured requests':observedCount<successful.length?'Observed for only some successful measured requests':null});
+ const stages=Object.fromEntries(hostWallStageKeys.map(key=>{
+  const values=successful.filter(row=>row.serverMetrics?.schema_version===2).map(row=>row.serverMetrics?.[key]).filter(finiteNonnegative);
+  return [key,{...summarizePercentiles(values),...coverage(values.length)}];
+ }));
+ const configured=configuration?.max_new_tokens;
+ const configuredMaxNewTokens=integer(configured)&&configured>0?configured:null;
+ const validated=successful.flatMap(row=>{
+  const metrics=row.serverMetrics;
+  if(metrics?.schema_version!==2||metrics.token_contract!==outputTokenContract||metrics.output_token_unavailable_reason!==null||configuredMaxNewTokens===null)return [];
+  const steps=metrics.generated_token_steps,eos=metrics.generated_eos_tokens,ended=metrics.generation_ended_with_eos,textTokens=metrics.generated_text_tokens;
+  if(!integer(steps)||steps<1||steps>configuredMaxNewTokens||metrics.output_seed_tokens!==1||metrics.returned_output_ids!==steps+1
+   ||!integer(eos)||eos>1||typeof ended!=='boolean'||ended!==(eos===1)||!integer(textTokens)||textTokens>steps-eos
+   ||(!ended&&steps!==configuredMaxNewTokens))return [];
+  return [{steps,ended}];
+ });
+ const steps=validated.map(row=>row.steps);
+ const count=(predicate:(row:typeof validated[number])=>boolean)=>validated.length?validated.filter(predicate).length:null;
+ return {measuredRequests:measured.length,successfulMeasuredRequests:successful.length,hostWallStagesMs:stages,
+  generatedTokenSteps:{...summarizePercentiles(steps),...coverage(steps.length),min:steps.length?Math.min(...steps):null,max:steps.length?Math.max(...steps):null},
+  termination:{...coverage(validated.length),configuredMaxNewTokens,tokenContract:outputTokenContract,
+   eosTerminatedCount:count(row=>row.ended),reachedConfiguredMaxCount:count(row=>row.steps===configuredMaxNewTokens),
+   eosAtConfiguredMaxCount:count(row=>row.ended&&row.steps===configuredMaxNewTokens),
+   capHitWithoutEosCount:count(row=>!row.ended&&row.steps===configuredMaxNewTokens)},
+  note:'Host-wall stages are conditional on successful measured requests; per-stage medians are not additive and do not separate GPU prefill/decode. Generated steps include EOS; reaching the configured budget can coincide with EOS.'};
 }
 function sameConfiguration(a:unknown,b:unknown):boolean {
  const sorted=(value:unknown):unknown=>Array.isArray(value)?value.map(sorted):value!==null&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([left],[right])=>left.localeCompare(right)).map(([key,item])=>[key,sorted(item)])):value;
@@ -42,7 +76,8 @@ export async function buildReport(campaignPath:string,output:string){
    directory:relative(output,directory),summary:run.manifest.summary,capacity:classifyCapacity(run),
    latenciesMs:rows.filter(r=>r.outcome==='success').map(r=>r.latencyMs!),timeline,
    quality:run.manifest.quality,workload:run.manifest.workload,source:run.manifest.source,server:run.manifest.server,
-   requestsSha256:run.manifest.requests.sha256,attempts:trial.attempts??[],characterization:characterizeWorkload(run.requests),resourceSamples:run.resources??null});
+   requestsSha256:run.manifest.requests.sha256,attempts:trial.attempts??[],characterization:characterizeWorkload(run.requests),
+   hostObservations:summarizeHostObservations(run.requests,run.manifest.server.configuration),resourceSamples:run.resources??null});
  }
  const comparisons=[];const repeatability=[];
  const sham=campaign.spec.purpose==='baseline'||campaign.spec.purpose==='aa';
@@ -96,6 +131,17 @@ export async function buildReport(campaignPath:string,output:string){
   '| Trial | Variant | Offered RPS | Successes / offered | Window RPS | RPS including drain | p50 ms | p95 ms | p99 ms | Drain ms | Evidence |',
   '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|'];
  for(const r of runs){const s=r.summary;lines.push(`| ${r.trialId} | ${escape(r.variant)} | ${r.runKind==='isolated'?'unavailable (isolated)':r.rate} | ${s.successfulRequests} / ${s.totalRequests} | ${format(s.successfulThroughputWithinWindowRps)} | ${format(s.successfulThroughputIncludingDrainRps)} | ${format(s.successfulRequestLatencyMs.p50)} | ${format(s.successfulRequestLatencyMs.p95)} | ${format(s.successfulRequestLatencyMs.p99)} | ${format(s.drainMs)} | [raw manifest](${r.directory}/run.json) |`);}
+ lines.push('','## Observed host-wall stages','',
+  'Only successful measured requests contribute. Each cell is a separate p50 in milliseconds with its observed count; absent observations remain unavailable. Per-stage medians are not additive. These host-wall durations do not isolate GPU prefill, decode or kernel time. The JSON retains independently gated p95/p99 (200/1000 observations).','',
+  'Boundaries: base64 is handler entry through validated decoding; preprocessing covers image/prompt preparation and existing device transfers; generation covers the entire unchanged model.generate call including its existing synchronizations and diagnostic writes; postprocessing covers batch_decode and strip; observation covers token-contract checks, the extra post-decode output host copy and answer character counting. Service time also contains work outside these named stages.','',
+  '| Trial | Base64 p50 ms (n) | Preprocess p50 ms (n) | Generation wall p50 ms (n) | Postprocess p50 ms (n) | Observation p50 ms (n) | Successful measured |',
+  '|---|---:|---:|---:|---:|---:|---:|');
+ for(const r of runs){const observed=r.hostObservations;lines.push(`| ${r.trialId} | ${hostWallStageKeys.map(key=>{const stage=observed.hostWallStagesMs[key]!;return `${format(stage.p50)} (${stage.observedCount})`;}).join(' | ')} | ${observed.successfulMeasuredRequests} |`);}
+ lines.push('','## Observed generation lengths and stopping','',
+  'Counts require the validated output-ID contract; a configured maximum is never substituted for an observed length. Generated steps include terminal EOS and other special IDs. Reached-budget counts include EOS at the budget; cap without EOS distinguishes budget termination. Missing/invalid observations stay unavailable, including all counts when coverage is zero.','',
+  '| Trial | Configured max | Observed / successful | Steps min / p50 / max | EOS terminated | Reached budget | EOS at budget | Cap without EOS |',
+  '|---|---:|---:|---:|---:|---:|---:|---:|');
+ for(const r of runs){const observed=r.hostObservations,s=observed.generatedTokenSteps,t=observed.termination;lines.push(`| ${r.trialId} | ${format(t.configuredMaxNewTokens,0)} | ${t.observedCount} / ${observed.successfulMeasuredRequests} | ${[s.min,s.p50,s.max].map(value=>format(value,0)).join(' / ')} | ${format(t.eosTerminatedCount,0)} | ${format(t.reachedConfiguredMaxCount,0)} | ${format(t.eosAtConfiguredMaxCount,0)} | ${format(t.capHitWithoutEosCount,0)} |`);}
  lines.push('','## Paired comparisons','');
  for(const comparison of comparisons){for(const [name,c] of [[runKind==='isolated'?'serial completion rate':'window throughput',comparison.throughput],['p50 latency',comparison.latency]] as const){lines.push(`- ${rateLabel(comparison.rate)}, ${name}: ${c.conclusion}; ${c.pairCount} pairs; effect ${format(c.effectPercent)}% (positive means improved); 95% interval ${c.ci95?c.ci95.map(v=>format(v)).join(' to ')+'%':'unavailable'}. ${c.reasons.join('; ')}`);}}
  lines.push('','## Baseline repeatability','');

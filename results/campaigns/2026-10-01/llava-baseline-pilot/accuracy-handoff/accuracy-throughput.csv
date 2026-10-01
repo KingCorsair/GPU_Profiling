@@ -1,1 +1,1 @@
-campaignId,runId,variant,offeredRps,successfulThroughputWithinWindowRps,p50Ms,accuracy,accuracySampleCount,evaluationId,evaluationSplitSha256,requestsSha256,scope
+campaignId,runId,variant,runKind,offeredRps,successfulThroughputWithinWindowRps,p50Ms,accuracy,accuracySampleCount,evaluationId,evaluationSplitSha256,requestsSha256,scope

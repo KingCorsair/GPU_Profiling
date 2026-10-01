@@ -187,9 +187,12 @@ def join_evidence(report: dict[str, Any], accuracy: dict[str, Any] | None = None
     require(set(by_identity) == set(identities), "Missing accuracy for one or more serving configurations")
     for run in runs:
         evaluation = by_identity[canonical(execution_identity(run))]
+        run_kind = run.get("runKind", report.get("runKind"))
+        require(run_kind in (None, "open-loop", "isolated", "smoke"), "Unknown run kind")
         result["points"].append({
             "campaignId": report["campaignId"], "runId": run["runId"], "variant": run["variant"],
-            "offeredRps": run["rate"], "successfulThroughputWithinWindowRps": run["summary"]["successfulThroughputWithinWindowRps"],
+            "runKind": run_kind, "offeredRps": run["rate"] if run_kind in ("open-loop", "smoke") else None,
+            "successfulThroughputWithinWindowRps": run["summary"]["successfulThroughputWithinWindowRps"],
             "p50Ms": run["summary"].get("successfulRequestLatencyMs", {}).get("p50"),
             "accuracy": evaluation["overall"]["accuracy"], "accuracySampleCount": evaluation["overall"]["sampleCount"],
             "evaluationId": evaluation["evaluationId"], "evaluationSplitSha256": evaluation["split"]["sha256"],
@@ -213,10 +216,10 @@ def export_join(report_path: Path, accuracy_path: Path | None, output: Path) -> 
     result.update(generatedAtUtc=datetime.now(timezone.utc).isoformat(), inputs={"report": report_source, "accuracy": accuracy_source})
     output.mkdir(parents=True, exist_ok=False)
     (output / "accuracy-throughput.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
-    fields = ["campaignId", "runId", "variant", "offeredRps", "successfulThroughputWithinWindowRps", "p50Ms",
+    fields = ["campaignId", "runId", "variant", "runKind", "offeredRps", "successfulThroughputWithinWindowRps", "p50Ms",
               "accuracy", "accuracySampleCount", "evaluationId", "evaluationSplitSha256", "requestsSha256", "scope"]
     with (output / "accuracy-throughput.csv").open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(result["points"])
     return result

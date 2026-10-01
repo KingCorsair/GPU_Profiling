@@ -26,8 +26,8 @@ Use a separate clean checkout under `/workspace` on the existing pod. Keep logs/
 2. Download the pinned LLaVA checkpoint using `scripts/download_models.sh llava` (the pinned, no-install downloader) or the already-installed `huggingface_hub.snapshot_download` at revision `4481d270cc22fd5c4d1bb5df129622006ccd9234` into an ignored/external model directory.
 3. Verify the downloaded bytes with `python csnbs/verify_checkpoint.py /path/to/checkpoint`. This records a checkpoint provenance file. Set `BENCHMARK_IMAGE_DIGEST` to the actual immutable image digest when available; absence remains null.
 4. Edit a copy of `campaigns/llava-baseline-pilot.json` for the verified model path. First run the six identical baseline trials and inspect spread, failures and dispatch fidelity. This pilot has 90 measured requests per trial, so neither p95 nor p99 is reportable.
-5. The supplied `llava-token-ab.json` is a separately declared five-pair, four-rate protocol using 270 requests per trial (p95 eligible after sufficient successes, p99 unavailable). It is a substantial GPU run; examine the pilot before executing it. Do not keep adding favorable trials or silently replace failed trials.
-6. Report each offered rate separately. To study long outputs, declare a separate workload/output policy, inspect actual generated lengths when supplied by the serving owner, and repeat matched pairs. Raising `max_new_tokens` alone does not ensure longer responses.
+5. The selected [October 1 protocol](OCT01_PROTOCOL.md) uses five pairs at each of 1 and 3 RPS, followed by isolated HTTP trials. The broader four-rate `llava-token-ab.json` remains an unexecuted example. Both use 270 requests per load trial (p95 eligible after sufficient successes, p99 unavailable). Examine the pilot before executing a substantial GPU study. Do not keep adding favorable trials or silently replace failed trials.
+6. Report each offered rate separately. The [observation follow-up](OCT01_OBSERVATION_PROTOCOL.md) declares separate instrumentation and short/long/mixed output-policy studies. Inspect actual generated lengths and repeat matched pairs. Raising `max_new_tokens` alone does not ensure longer responses.
 
 ```sh
 npm --prefix csnbs/measure run campaign -- campaigns/llava-baseline-pilot.json --plan
@@ -43,9 +43,9 @@ After collection stops, copy the whole campaign directory from the pod, includin
 ```sh
 python csnbs/export_campaign.py /tmp/copied-pod-campaign results/campaigns/2026-10-01/llava-baseline-pilot \
   --source-root /workspace/rithvik-results/llava-baseline-pilot
-npm --prefix csnbs/measure run report -- results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
+npm --prefix csnbs/measure run report -- ../../results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
 python csnbs/plot_campaign.py --report results/campaigns/2026-10-01/llava-baseline-pilot/report/report.json
-DATABASE_URL=postgresql://... npm --prefix csnbs/measure run ingest -- results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
+DATABASE_URL=postgresql://... npm --prefix csnbs/measure run ingest -- ../../results/campaigns/2026-10-01/llava-baseline-pilot/campaign.json
 ```
 
 Choose an unused destination; existing directories are never overwritten. `campaign.source.json` preserves the original manifest bytes. The portable `campaign.json` changes only trial and attempt artifact paths to relative paths; specification, hash, schedule, statuses and all raw run/request/resource bytes stay unchanged. `export-provenance.json` records the original/exported hashes, file inventory and path mappings. Rebuild the report from the portable manifest to verify the moved evidence and refresh report links before importing that finalized snapshot. Importing the identical snapshot twice is a no-op; importing a different snapshot under an existing campaign ID is rejected.
@@ -58,4 +58,4 @@ Active locks, running trials/attempts, escaping paths, symlinks and missing comp
 
 Nearest-rank p50 is descriptive; p95 is withheld below 200 successful requests and p99 below 1,000. Requests repeated inside one run are not independent trial replication. Paired comparisons bootstrap whole matched trial blocks, require at least five pairs, reject mismatched controls, and return improvement, regression or inconclusive. A confidence interval spanning zero is not equivalence.
 
-The current LLaVA HTTP server preserves the serving owner's execution path. It exposes handler-to-answer wall time and request correlation, but cannot observe arrival before its blocked event loop. Queue time, GPU prefill/decode timings and verified actual token counts remain null. Sampled device memory is not exact KV-cache memory. Accuracy/scorer results, random-scoring controls and batching implementations remain owner inputs; this pipeline does not manufacture them.
+The current LLaVA HTTP server preserves the serving owner's execution path. It exposes handler-to-answer wall time and request correlation, but cannot observe arrival before its blocked event loop. Queue time and GPU prefill/decode timings remain unavailable. Actual token counts are null in default mode and in the frozen primary study; [extended observations](OCT01_OBSERVATION_PROTOCOL.md) can record counts when the pinned wrapper contract validates. Sampled device memory is not exact KV-cache memory. Accuracy/scorer results, random-scoring controls and batching implementations remain owner inputs; this pipeline does not manufacture them.

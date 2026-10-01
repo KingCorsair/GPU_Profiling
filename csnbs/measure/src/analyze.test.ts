@@ -296,6 +296,62 @@ test('workload characterization preserves category/source counts and observed ac
   assert.match(observed.reason!,/only some/);
 });
 
+test('host-wall stage summaries exclude warmup/failures, retain missing observations and use canonical tail gates', async () => {
+  const {summarizeHostObservations}=await import('./report.js');
+  const run=fixture('host-stages'),rows=run.requests.filter(row=>row.phase==='measurement');
+  const absent=summarizeHostObservations(run.requests,run.manifest.server.configuration);
+  assert.equal(absent.hostWallStagesMs.generation_wall_ms!.observedCount,0);
+  assert.equal(absent.hostWallStagesMs.generation_wall_ms!.p50,null);
+  assert.equal(absent.termination.eosTerminatedCount,null);
+  assert.equal(absent.termination.configuredMaxNewTokens,64);
+  for(let index=0;index<200;index++)Object.assign(rows[index]!.serverMetrics!,{schema_version:2,preprocess_ms:index});
+  Object.assign(rows[0]!.serverMetrics!,{base64_decode_ms:0,generation_wall_ms:7});
+  Object.assign(rows[1]!.serverMetrics!,{base64_decode_ms:-1,observation_wall_ms:NaN});
+  Object.assign(rows[2]!.serverMetrics!,{base64_decode_ms:'invalid',observation_wall_ms:Infinity});
+  Object.assign(run.requests[0]!.serverMetrics!,{schema_version:2,preprocess_ms:100000,base64_decode_ms:100000});
+  rows[239]!.outcome='http-error';Object.assign(rows[239]!.serverMetrics!,{schema_version:2,preprocess_ms:100000});
+  const observed=summarizeHostObservations(run.requests,run.manifest.server.configuration);
+  assert.equal(observed.measuredRequests,240);assert.equal(observed.successfulMeasuredRequests,239);
+  const stage=observed.hostWallStagesMs.preprocess_ms!;
+  assert.equal(stage.observedCount,200);assert.equal(stage.missingOrInvalidCount,39);
+  assert.equal(stage.p50,99);assert.equal(stage.p95,189);assert.equal(stage.p99,null);
+  assert.equal(observed.hostWallStagesMs.base64_decode_ms!.p50,0);assert.equal(observed.hostWallStagesMs.base64_decode_ms!.observedCount,1);
+  assert.equal(observed.hostWallStagesMs.observation_wall_ms!.p50,null);
+  const many=Array.from({length:1000},(_,index)=>({...rows[0]!,serverMetrics:{schema_version:2,generation_wall_ms:index}}));
+  const tails=summarizeHostObservations(many,run.manifest.server.configuration).hostWallStagesMs.generation_wall_ms!;
+  assert.equal(tails.p95,949);assert.equal(tails.p99,989);
+});
+
+test('generation observations distinguish EOS at the cap, cap without EOS and missing/invalid output contracts', async () => {
+  const {summarizeHostObservations}=await import('./report.js');
+  const run=fixture('output-observations'),rows=run.requests.filter(row=>row.phase==='measurement');
+  const metric=(steps:number,ended:boolean)=>({schema_version:2,token_contract:'llava-inputs-embeds-transformers-4.37.2-bos-v1',
+    output_token_unavailable_reason:null,output_seed_tokens:1,returned_output_ids:steps+1,generated_token_steps:steps,
+    generated_eos_tokens:ended?1:0,generation_ended_with_eos:ended,generated_text_tokens:steps-(ended?1:0)});
+  rows[0]!.serverMetrics=metric(1,true);rows[1]!.serverMetrics=metric(64,false);rows[2]!.serverMetrics=metric(64,true);
+  rows[3]!.serverMetrics={...metric(4,true),prompt_token_unavailable_reason:'Prompt truncated',token_unavailable_reason:'Prompt truncated'};
+  rows[4]!.serverMetrics={...metric(2,true),output_token_unavailable_reason:'Unknown output contract'};
+  rows[5]!.serverMetrics={...metric(2,true),token_contract:'unknown-contract'};
+  rows[6]!.serverMetrics={...metric(2,true),returned_output_ids:100};
+  rows[7]!.serverMetrics=metric(65,true);rows[8]!.serverMetrics=metric(63,false);
+  rows[9]!.serverMetrics={...metric(2,true),generated_eos_tokens:0};
+  rows[10]!.serverMetrics={...metric(2,true),generated_text_tokens:2};
+  rows[11]!.serverMetrics={...metric(2,true),schema_version:1};
+  rows[12]!.serverMetrics={...metric(2,true),generated_token_steps:'2'};
+  rows[13]!.serverMetrics=metric(3,true);rows[13]!.outcome='invalid-response';
+  run.requests[0]!.serverMetrics=metric(10,true);
+  const observed=summarizeHostObservations(run.requests,run.manifest.server.configuration);
+  assert.equal(observed.generatedTokenSteps.observedCount,4);assert.equal(observed.generatedTokenSteps.min,1);
+  assert.equal(observed.generatedTokenSteps.p50,4);assert.equal(observed.generatedTokenSteps.max,64);
+  assert.equal(observed.generatedTokenSteps.p95,null);assert.equal(observed.generatedTokenSteps.p99,null);
+  assert.equal(observed.termination.eosTerminatedCount,3);assert.equal(observed.termination.reachedConfiguredMaxCount,2);
+  assert.equal(observed.termination.eosAtConfiguredMaxCount,1);assert.equal(observed.termination.capHitWithoutEosCount,1);
+  assert.equal(observed.termination.missingOrInvalidCount,235);
+  const unknown=summarizeHostObservations(run.requests,null);
+  assert.equal(unknown.termination.configuredMaxNewTokens,null);assert.equal(unknown.generatedTokenSteps.observedCount,0);
+  assert.equal(unknown.termination.capHitWithoutEosCount,null);
+});
+
 test('reports preserve instrumentation comparison scope and accept matched off/on configurations', async (t) => {
   const {planCampaign}=await import('./campaign.js');
   const {buildReport}=await import('./report.js');
@@ -309,6 +365,10 @@ test('reports preserve instrumentation comparison scope and accept matched off/o
     const run=fixture(trial.trialId,20);Object.assign(run.manifest.server.configuration!,campaign.spec.variants[trial.variantIndex]!.expected);
     run.manifest.runKind='isolated';run.manifest.config.runKind='isolated';
     run.manifest.timing.plannedEndMs=120520;run.manifest.timing.finishedMs=120520;refreshSummary(run);
+    if(trial.variantIndex===1)for(const row of run.requests.filter(row=>row.phase==='measurement'))Object.assign(row.serverMetrics!,{
+      schema_version:2,base64_decode_ms:0.1,preprocess_ms:1,generation_wall_ms:15,postprocess_ms:0.2,observation_wall_ms:0.3,
+      token_contract:'llava-inputs-embeds-transformers-4.37.2-bos-v1',output_token_unavailable_reason:null,
+      output_seed_tokens:1,returned_output_ids:2,generated_token_steps:1,generated_eos_tokens:1,generation_ended_with_eos:true,generated_text_tokens:0});
     trial.status='complete';trial.runDirectory=await save(t,run);
   }
   const campaignPath=join(directory,'campaign.json');await writeFile(campaignPath,JSON.stringify(campaign));
@@ -319,9 +379,18 @@ test('reports preserve instrumentation comparison scope and accept matched off/o
   assert.equal(report.comparisons[0]!.latency.pairCount,1);
   assert.ok(report.comparisons[0]!.latency.reasons.every(reason=>!reason.includes('Unmatched')));
   assert.ok(report.limitations.some(reason=>reason.includes('does not estimate total instrumentation overhead')));
+  const on=report.runs.find(run=>run.variant==='on')!,off=report.runs.find(run=>run.variant==='off')!;
+  assert.equal(on.hostObservations.hostWallStagesMs.generation_wall_ms!.p50,15);
+  assert.equal(on.hostObservations.hostWallStagesMs.generation_wall_ms!.p95,15);
+  assert.equal(on.hostObservations.hostWallStagesMs.generation_wall_ms!.p99,null);
+  assert.equal(on.hostObservations.termination.eosTerminatedCount,240);
+  assert.equal(off.hostObservations.termination.eosTerminatedCount,null);
   const markdown=await readFile(join(directory,'report/report.md'),'utf8');
   assert.match(markdown,/unavailable \(isolated\)/);assert.match(markdown,/p50 latency: inconclusive/);
   assert.doesNotMatch(markdown,/2 RPS/);assert.match(markdown,/capacity not applicable/);
+  assert.match(markdown,/Per-stage medians are not additive/);assert.match(markdown,/do not isolate GPU prefill/);
+  assert.match(markdown,/15\.00 \(240\)/);assert.match(markdown,/unavailable \(0\)/);
+  assert.match(markdown,/EOS at budget/);assert.match(markdown,/cap without EOS/i);
 });
 
 test('baseline reports combine both identical legs for latency spread and never narrate A/A noise as an optimization', async (t) => {

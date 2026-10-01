@@ -11,7 +11,7 @@ from csnbs.join_accuracy_throughput import execution_identity, export_join, join
 
 def fixture():
     run = {
-        "runId": "synthetic-trial-1", "variant": "synthetic-baseline", "rate": 2,
+        "runId": "synthetic-trial-1", "variant": "synthetic-baseline", "rate": 2, "runKind": "open-loop",
         "requestsSha256": "sha256:" + "a" * 64, "quality": {"reportable": True, "reasons": []},
         "server": {"mode": "model", "modelLoaded": True, "error": None, "modelId": "synthetic-model",
                    "checkpointRevision": "synthetic-checkpoint", "source": {"gitCommit": "a" * 40, "gitDirty": False},
@@ -89,6 +89,16 @@ class JoinTests(unittest.TestCase):
         report["runs"][0]["server"]["configuration"]["download_provenance"]["files"][0]["sha256"] = "c" * 64
         with self.assertRaisesRegex(ValueError, "identity"):
             join_evidence(report, accuracy)
+
+    def test_isolated_and_unknown_run_kinds_have_no_offered_load(self):
+        report, accuracy = fixture()
+        self.assertEqual(join_evidence(report, accuracy)["points"][0]["offeredRps"], 2)
+        report["runs"][0]["runKind"] = "isolated"
+        point = join_evidence(report, accuracy)["points"][0]
+        self.assertEqual(point["runKind"], "isolated")
+        self.assertIsNone(point["offeredRps"])
+        del report["runs"][0]["runKind"]
+        self.assertIsNone(join_evidence(report, accuracy)["points"][0]["offeredRps"])
 
     def test_invalid_or_missing_owner_evidence_is_rejected(self):
         report, source = fixture()
