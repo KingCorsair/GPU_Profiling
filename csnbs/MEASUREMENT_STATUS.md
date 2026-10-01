@@ -1,6 +1,6 @@
 # Rithvik's measurement work
 
-The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI and CI are implemented. The October 1 GPU studies use fixed saved protocols; the collection table below distinguishes completed evidence from work still running. This document covers Rithvik's scope. The shared serving and accuracy implementations remain with Amay and Sribhav.
+The TypeScript measurement pipeline, PostgreSQL storage, reports, benchmark UI and CI are implemented. The October 1 GPU studies use fixed saved protocols; the collection table below distinguishes completed evidence from work still running. Read the [results and interpretation](measure/OCT01_RESULTS.md) for the verified findings. This document covers Rithvik's scope. The shared serving and accuracy implementations remain with Amay and Sribhav.
 
 ## Implemented and verified
 
