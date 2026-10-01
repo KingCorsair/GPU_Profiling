@@ -2,6 +2,8 @@
 
 The canonical client is TypeScript in this directory. It records full HTTP latency with a monotonic clock, separate completed warmup, fixed seeded workload replay, durable raw outcomes, declared tail gates and explicit failure records. The Python load generator and September historical report remain readable reference implementations.
 
+Use the [component walkthrough](WALKTHROUGH.md) to rehearse the timing, experimental units, evidence trail, and limits aloud.
+
 Node 20.19+ is supported; Node 20 is the deployment baseline and CI also checks Node 24. Run `npm ci`, `npm run typecheck`, `npm test`, and `npm run build` here. The local test suite uses loopback HTTP. GPU runtime dependencies come from the existing Docker image; do not install Python packages on a running pod.
 
 ## End-to-end CPU validation
