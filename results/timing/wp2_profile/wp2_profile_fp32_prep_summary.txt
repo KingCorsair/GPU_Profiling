@@ -1,0 +1,44 @@
+visual_token_num=128 batch=1 prompt_len=66
+git commit: 945abe6e31   GPU: NVIDIA A40   vision_tower dtype=torch.float32   cpu_threads=4
+
+mean prepare_inputs_labels_for_multimodal: 49.74 ms
+mean generate(max_new_tokens=1) [prep + prefill fwd]: 207.73 ms
+prep as % of prefill request: 23.9%
+
+TOP 15 OPS BY CUDA TIME
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::linear         3.14%      22.492ms        11.27%      80.804ms      55.345us       0.000us         0.00%     238.355ms     163.257us          1460  
+                                            aten::addmm         3.99%      28.604ms         7.02%      50.315ms      34.462us     233.266ms        65.31%     238.355ms     163.257us          1460  
+                                 ampere_sgemm_128x64_tn         0.00%       0.000us         0.00%       0.000us       0.000us     137.287ms        38.44%     137.287ms     286.015us           480  
+                                 ampere_sgemm_32x128_tn         0.00%       0.000us         0.00%       0.000us       0.000us      92.426ms        25.88%      92.426ms      96.277us           960  
+                                              aten::bmm         3.30%      23.650ms         5.28%      37.854ms      36.398us      41.321ms        11.57%      44.696ms      42.977us          1040  
+                                            prep_iter_2         1.82%      13.057ms        10.83%      77.627ms      77.627ms       0.000us         0.00%      43.058ms      43.058ms             1  
+                                            prep_iter_0         1.84%      13.184ms         9.35%      67.025ms      67.025ms       0.000us         0.00%      42.497ms      42.497ms             1  
+                                            prep_iter_3         1.82%      13.069ms         9.25%      66.348ms      66.348ms       0.000us         0.00%      41.943ms      41.943ms             1  
+                                            prep_iter_4         1.90%      13.636ms        11.20%      80.292ms      80.292ms       0.000us         0.00%      40.724ms      40.724ms             1  
+                                            prep_iter_1         1.80%      12.879ms         9.56%      68.516ms      68.516ms       0.000us         0.00%      40.305ms      40.305ms             1  
+                                            prep_iter_5         1.87%      13.431ms         9.37%      67.174ms      67.174ms       0.000us         0.00%      35.805ms      35.805ms             1  
+                                            prep_iter_7         1.93%      13.836ms         9.39%      67.316ms      67.316ms       0.000us         0.00%      35.706ms      35.706ms             1  
+                                            prep_iter_6         1.84%      13.192ms        10.61%      76.054ms      76.054ms       0.000us         0.00%      35.703ms      35.703ms             1  
+                                            prep_iter_9         1.93%      13.852ms        10.60%      76.015ms      76.015ms       0.000us         0.00%      35.665ms      35.665ms             1  
+                                            prep_iter_8         1.89%      13.526ms         9.84%      70.515ms      70.515ms       0.000us         0.00%      35.642ms      35.642ms             1  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 716.893ms
+Self CUDA time total: 357.169ms
+
+
+Total self CPU time in region:  716.89 ms  (over 10 iters)
+GPU busy in region (kernel rows only): 357.17 ms  (over 10 iters)
+  of which big matmul/attn/conv kernels: 274.59 ms (76.9%)
+  of which everything else (gather/index/cat/argsort/pad/etc.): 82.58 ms (23.1%)
+CPU time / GPU busy ratio in region: 2.01x (>>1 means launch/dispatch overhead dominates actual GPU work)
+
+[cross-check] same GPU time attributed at the aten level: 387.05 ms -- should be close to the kernel-row figure above. These are two views of the same work; adding them is the double-count.
+[cross-check] largest kernels NOT classified as big matmul/attn/conv:
+       19.41 ms  void (anonymous namespace)::softmax_warp_forward<float, float, float, 10, false, false>(fl
+       12.34 ms  void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, 
+        8.81 ms  void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, 
+        8.31 ms  void at::native::vectorized_elementwise_kernel<4, at::native::sigmoid_kernel_cuda(at::Tens
+        7.21 ms  void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native:

@@ -1,0 +1,3778 @@
+{
+ "metadata": {
+  "run_id": "wp2_layer1_1",
+  "purpose": "WP2 Layer-1 correctness, FP32 vs FP16 vision tower",
+  "run_timestamp_utc": "2026-10-02T01:10:18.017934+00:00",
+  "git_commit": "be4ed773f978e8f5de19fde51149d7956bb45dbe",
+  "git_dirty": true,
+  "git_dirty_files": [
+   ".gitignore"
+  ],
+  "gpu": "NVIDIA A40",
+  "torch_version": "2.2.2+cu121",
+  "shipped_vision_tower_dtype": "torch.float16",
+  "arms": {
+   "fp32": "torch.float32",
+   "fp16": "torch.float16"
+  },
+  "configs": [
+   576,
+   128
+  ],
+  "selection_config": 128,
+  "important_ratio": 0.5,
+  "max_new_tokens": 64,
+  "dataset_path": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+  "n_images": 90
+ },
+ "summary": {
+  "exact_text": {
+   "576": {
+    "identical": 90,
+    "n": 90,
+    "fraction": 1.0,
+    "pass": true,
+    "by_category": {
+     "coarse_description": [
+      15,
+      15
+     ],
+     "counting": [
+      15,
+      15
+     ],
+     "fine_attributes": [
+      15,
+      15
+     ],
+     "object_presence": [
+      15,
+      15
+     ],
+     "ocr": [
+      15,
+      15
+     ],
+     "spatial_reasoning": [
+      15,
+      15
+     ]
+    }
+   },
+   "128": {
+    "identical": 80,
+    "n": 90,
+    "fraction": 0.8888888888888888,
+    "pass": true,
+    "by_category": {
+     "coarse_description": [
+      15,
+      15
+     ],
+     "counting": [
+      13,
+      15
+     ],
+     "fine_attributes": [
+      15,
+      15
+     ],
+     "object_presence": [
+      13,
+      15
+     ],
+     "ocr": [
+      10,
+      15
+     ],
+     "spatial_reasoning": [
+      14,
+      15
+     ]
+    }
+   }
+  },
+  "determinism": {
+   "576": {
+    "identical": 90,
+    "n": 90,
+    "pass": true
+   },
+   "128": {
+    "identical": 90,
+    "n": 90,
+    "pass": true
+   }
+  },
+  "selection": {
+   "all": {
+    "n": 90,
+    "mask_identical": 0,
+    "mask_overlap_fraction": 0.7440972222222222,
+    "mask_overlap_min": 88,
+    "attention_half_overlap_fraction": 0.9925347222222223
+   },
+   "bench_dev_images": {
+    "n": 20,
+    "mask_identical": 0,
+    "mask_overlap_fraction": 0.74375,
+    "mask_overlap_min": 90,
+    "attention_half_overlap_fraction": 0.990625
+   }
+  },
+  "features": {
+   "cosine_whole_map_min": 0.9981613159179688,
+   "cosine_whole_map_mean": 0.9996747096379598,
+   "cosine_per_token_min": 0.408016562461853,
+   "images_with_a_token_below_bar": 90,
+   "pass": false
+  }
+ },
+ "rows": [
+  {
+   "question_id": "textvqa_34628",
+   "category": "ocr",
+   "question": "what is the name of the runner on the left?",
+   "reference_answers": [
+    "willis ",
+    "willis",
+    "willis",
+    "willis",
+    "willis",
+    "willis",
+    "willis",
+    "willis",
+    "willis",
+    "willis"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The name of the runner on the left is Willis.",
+     "fp16_text": "The name of the runner on the left is Willis.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "The name of the runner on the left is Willis.",
+     "fp16_text": "The name of the runner on the left is Willis.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998887777328491,
+    "cosine_per_token_min": 0.896497905254364,
+    "cosine_per_token_mean": 0.9996033906936646
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34620",
+   "category": "ocr",
+   "question": "how many items can you get for $5?",
+   "reference_answers": [
+    "3",
+    "3",
+    "3",
+    "3",
+    "3 for $5",
+    "3",
+    "3",
+    "3",
+    "3",
+    "3"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "In the image, there are four items available for $5 each. These items are colorful cakes or frosting, which are displayed in a store. The four items are placed in a row, and each one is priced at $5.",
+     "fp16_text": "In the image, there are four items available for $5 each. These items are colorful cakes or frosting, which are displayed in a store. The four items are placed in a row, and each one is priced at $5.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 54
+    },
+    "128": {
+     "fp32_text": "At the store, you can get a package of 3 Tuff Stuff Camouflage Cake Mix and a package of 3 Tuff Stuff Blue Fondant for $5.",
+     "fp16_text": "At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 30
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998832941055298,
+    "cosine_per_token_min": 0.9897938966751099,
+    "cosine_per_token_mean": 0.9998192191123962
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34614",
+   "category": "ocr",
+   "question": "what does the light sign read on the farthest right window?",
+   "reference_answers": [
+    "bud light",
+    "bud light",
+    "bud light",
+    "bud light",
+    "all 2 liters",
+    "bud light",
+    "bud light",
+    "bud light",
+    "bud light",
+    "bud light"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The light sign on the farthest right window reads \"all lit.\"",
+     "fp16_text": "The light sign on the farthest right window reads \"all lit.\"",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    },
+    "128": {
+     "fp32_text": "The light sign on the farthest right window reads \"3.29.\"",
+     "fp16_text": "The light sign on the farthest right window reads \"all night.\"",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998029470443726,
+    "cosine_per_token_min": 0.9913155436515808,
+    "cosine_per_token_mean": 0.9998382925987244
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 90,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "textvqa_34638",
+   "category": "ocr",
+   "question": "whats the lowest number yard line that you can see?",
+   "reference_answers": [
+    "30",
+    "30",
+    "30",
+    "30",
+    "30",
+    "30",
+    "30",
+    "30",
+    "30",
+    "30"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+     "fp16_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 23
+    },
+    "128": {
+     "fp32_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+     "fp16_text": "The lowest number yard line that I can see in the image is the 30-yard line.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 23
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998535513877869,
+    "cosine_per_token_min": 0.9178597927093506,
+    "cosine_per_token_mean": 0.9997837543487549
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "textvqa_34633",
+   "category": "ocr",
+   "question": "are these bottles of pepsi?",
+   "reference_answers": [
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, these are bottles of Pepsi.",
+     "fp16_text": "Yes, these are bottles of Pepsi.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, the image shows a row of bottles of Pepsi.",
+     "fp16_text": "Yes, the image shows a row of bottles of Pepsi.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 16
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997694492340088,
+    "cosine_per_token_min": 0.903350830078125,
+    "cosine_per_token_mean": 0.9996997117996216
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "textvqa_34610",
+   "category": "ocr",
+   "question": "who is at the center of all of this?",
+   "reference_answers": [
+    "bryan owens",
+    "alexa curtis",
+    "bryan owens",
+    "bryan owens",
+    "bryan owens",
+    "bryan owens",
+    "bryan owens",
+    "bryan owens",
+    "mahou",
+    "agile experience design makeup"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The center of attention in this scene is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, and his focus is on the board as he",
+     "fp16_text": "The center of attention in this scene is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, and his focus is on the board as he",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 65
+    },
+    "128": {
+     "fp32_text": "The center of attention in this image is a person who is wearing a red hat and is surrounded by a group of people. They are likely the focus of the conversation or event taking place in the room. The presence of the person in the red hat suggests that they might be a notable figure or the main subject of",
+     "fp16_text": "The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 65
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998074769973755,
+    "cosine_per_token_min": 0.9672253727912903,
+    "cosine_per_token_mean": 0.999724268913269
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 90,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34608",
+   "category": "ocr",
+   "question": "what is the time?",
+   "reference_answers": [
+    "5:41",
+    "5:41",
+    "8:00",
+    "5:41",
+    "5:40",
+    "5:41",
+    "5:42",
+    "5:41",
+    "8:00",
+    "5:41"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The time on the watch is 10:10.",
+     "fp16_text": "The time on the watch is 10:10.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "The time on the watch is 10:10.",
+     "fp16_text": "The time on the watch is 10:10.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999144077301025,
+    "cosine_per_token_min": 0.9875972867012024,
+    "cosine_per_token_mean": 0.9999008178710938
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "textvqa_34618",
+   "category": "ocr",
+   "question": "what brand is the bottle with red label?",
+   "reference_answers": [
+    "red label",
+    "johnnie walker",
+    "jonnie walker",
+    "black label",
+    "red label",
+    "johnny walker",
+    "answering does not require reading text in the image",
+    "red label",
+    "johnnie walker",
+    "jonnie walker"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The bottle with a red label is a bottle of Jack Daniel's whiskey.",
+     "fp16_text": "The bottle with a red label is a bottle of Jack Daniel's whiskey.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 21
+    },
+    "128": {
+     "fp32_text": "The bottle with a red label is Jack Daniel's whiskey.",
+     "fp16_text": "The bottle with a red label is Jack Daniel's whiskey.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999179840087891,
+    "cosine_per_token_min": 0.9225820899009705,
+    "cosine_per_token_mean": 0.9997615814208984
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 99,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34616",
+   "category": "ocr",
+   "question": "is this denny's?",
+   "reference_answers": [
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "pet center",
+    "yes",
+    "yes",
+    "one man show",
+    "yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, this is a Denny's restaurant sign.",
+     "fp16_text": "Yes, this is a Denny's restaurant sign.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "Yes, this is a Denny's restaurant sign.",
+     "fp16_text": "Yes, this is a Denny's restaurant sign.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998421669006348,
+    "cosine_per_token_min": 0.9557589888572693,
+    "cosine_per_token_mean": 0.9997150897979736
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34622",
+   "category": "ocr",
+   "question": "what is one of the brands being advertised?",
+   "reference_answers": [
+    "yamaha",
+    "yamaha",
+    "yamaha",
+    "yamaha",
+    "yahama",
+    "yamaha",
+    "yamaha",
+    "yamaha",
+    "yamaha",
+    "peugeot"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "One of the brands being advertised in the image is Yamaha.",
+     "fp16_text": "One of the brands being advertised in the image is Yamaha.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    },
+    "128": {
+     "fp32_text": "One of the brands being advertised in the image is Yamaha.",
+     "fp16_text": "One of the brands being advertised is Yamaha.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9993598461151123,
+    "cosine_per_token_min": 0.617731511592865,
+    "cosine_per_token_mean": 0.9988314509391785
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34613",
+   "category": "ocr",
+   "question": "what candy bar is down there on the bottom?",
+   "reference_answers": [
+    "hersheys",
+    "hershey's",
+    "hersheys",
+    "hershey's",
+    "hershey's",
+    "hershey's",
+    "hershey's",
+    "hershey's",
+    "hershey's",
+    "hershey's"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+     "fp16_text": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 25
+    },
+    "128": {
+     "fp32_text": "The candy bar down on the bottom is a Hershey's chocolate bar.",
+     "fp16_text": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 25
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997861385345459,
+    "cosine_per_token_min": 0.9170213341712952,
+    "cosine_per_token_mean": 0.9996392726898193
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 100,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "textvqa_34637",
+   "category": "ocr",
+   "question": "what does the picture say the other ride is?",
+   "reference_answers": [
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom",
+    "your mom"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The picture says \"your other ride is a bicycle.\"",
+     "fp16_text": "The picture says \"your other ride is a bicycle.\"",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "The picture says \"your other ride\" on it.",
+     "fp16_text": "The picture says \"your other ride\" on it.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9994356632232666,
+    "cosine_per_token_min": 0.8511419296264648,
+    "cosine_per_token_mean": 0.9991226196289062
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 99,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34643",
+   "category": "ocr",
+   "question": "was the ruler made in 2002?",
+   "reference_answers": [
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "yes",
+    "2002",
+    "yes",
+    "yes",
+    "yes",
+    "yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, the ruler in the image was made in 2002.",
+     "fp16_text": "Yes, the ruler in the image was made in 2002.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 19
+    },
+    "128": {
+     "fp32_text": "Yes, the ruler was made in 2002.",
+     "fp16_text": "Yes, the ruler was made in 2002.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 16
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999009370803833,
+    "cosine_per_token_min": 0.9722833037376404,
+    "cosine_per_token_mean": 0.9998566508293152
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 104,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "textvqa_34632",
+   "category": "ocr",
+   "question": "who is the author of the book?",
+   "reference_answers": [
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli",
+    "gioconda belli"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The author of the book is Jorge Luis Borges.",
+     "fp16_text": "The author of the book is Jorge Luis Borges.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "The author of the book is Jorge Luis Borges.",
+     "fp16_text": "The author of the book is Jorge Luis Borges.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997955560684204,
+    "cosine_per_token_min": 0.9500133395195007,
+    "cosine_per_token_mean": 0.9997625350952148
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "textvqa_34623",
+   "category": "ocr",
+   "question": "what year was this taken?",
+   "reference_answers": [
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012",
+    "2012"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "This image was taken on January 14, 2012.",
+     "fp16_text": "This image was taken on January 14, 2012.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 18
+    },
+    "128": {
+     "fp32_text": "This image was taken on January 14, 2012.",
+     "fp16_text": "This image was taken on January 14, 2012.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 18
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9988883137702942,
+    "cosine_per_token_min": 0.6446671485900879,
+    "cosine_per_token_mean": 0.999029278755188
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000427034.jpg",
+   "category": "counting",
+   "question": "Is there a dog in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998490810394287,
+    "cosine_per_token_min": 0.9455777406692505,
+    "cosine_per_token_mean": 0.9996907711029053
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000434479.jpg",
+   "category": "counting",
+   "question": "Are there two pieces of pizza in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No, there is only one piece of pizza in the image.",
+     "fp16_text": "No, there is only one piece of pizza in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 16
+    },
+    "128": {
+     "fp32_text": "No, there is only one piece of pizza in the image.",
+     "fp16_text": "No, there is only one piece of pizza in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 16
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998331069946289,
+    "cosine_per_token_min": 0.6667392253875732,
+    "cosine_per_token_mean": 0.9992298483848572
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000438304.jpg",
+   "category": "counting",
+   "question": "Are there two tennis rackets in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two tennis rackets in the picture.",
+     "fp16_text": "Yes, there are two tennis rackets in the picture.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "Yes, there are two tennis rackets in the picture.",
+     "fp16_text": "Yes, there are two tennis rackets in the picture.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9994152784347534,
+    "cosine_per_token_min": 0.8816322088241577,
+    "cosine_per_token_mean": 0.9992793202400208
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_count/000000565045.jpg",
+   "category": "counting",
+   "question": "Are there two bath towels in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two bath towels in the picture.",
+     "fp16_text": "Yes, there are two bath towels in the picture.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "Yes, there are two bath towels in the picture.",
+     "fp16_text": "Yes, there are two bath towels in the picture.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9994275569915771,
+    "cosine_per_token_min": 0.701124370098114,
+    "cosine_per_token_mean": 0.9993571043014526
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_count/000000357816.jpg",
+   "category": "counting",
+   "question": "Are there four people in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are four people in the image.",
+     "fp16_text": "Yes, there are four people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there are four people in the image.",
+     "fp16_text": "No, there are only three people in the image.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999432384967804,
+    "cosine_per_token_min": 0.9139037132263184,
+    "cosine_per_token_mean": 0.9989187717437744
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 91,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000006040.jpg",
+   "category": "counting",
+   "question": "Is there a train in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes, there is a train in the picture.",
+     "fp16_text": "Yes, there is a train in the picture.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9994128346443176,
+    "cosine_per_token_min": 0.8488084077835083,
+    "cosine_per_token_mean": 0.9994915723800659
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 99,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "mme_count/000000195918.jpg",
+   "category": "counting",
+   "question": "Is there a total of two display devices in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two display devices in the image.",
+     "fp16_text": "Yes, there are two display devices in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there are two display devices in the image.",
+     "fp16_text": "Yes, there are two display devices in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9988391399383545,
+    "cosine_per_token_min": 0.5118321180343628,
+    "cosine_per_token_mean": 0.9984280467033386
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_count/000000372819.jpg",
+   "category": "counting",
+   "question": "Are there four dogs appear in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are four dogs in the image.",
+     "fp16_text": "Yes, there are four dogs in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there are four dogs in the image.",
+     "fp16_text": "Yes, there are four dogs in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9993188977241516,
+    "cosine_per_token_min": 0.6930817365646362,
+    "cosine_per_token_mean": 0.9983099699020386
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000289059.jpg",
+   "category": "counting",
+   "question": "Is there a total of two person appear in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two people in the image.",
+     "fp16_text": "Yes, there are two people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there are two people in the image.",
+     "fp16_text": "Yes, there are two people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998652338981628,
+    "cosine_per_token_min": 0.982087254524231,
+    "cosine_per_token_mean": 0.9998083114624023
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000044279.jpg",
+   "category": "counting",
+   "question": "Is there a total of two people in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two people in the image.",
+     "fp16_text": "Yes, there are two people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there are two people in the image.",
+     "fp16_text": "Yes, there are two people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999043345451355,
+    "cosine_per_token_min": 0.990135908126831,
+    "cosine_per_token_mean": 0.99992436170578
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000410612.jpg",
+   "category": "counting",
+   "question": "Is there only one ship in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.99991375207901,
+    "cosine_per_token_min": 0.9294467568397522,
+    "cosine_per_token_mean": 0.9996973872184753
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_count/000000335954.jpg",
+   "category": "counting",
+   "question": "Are there two bowls in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are two bowls in this image.",
+     "fp16_text": "Yes, there are two bowls in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there are two bowls in the image.",
+     "fp16_text": "Yes, there are two bowls in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998592734336853,
+    "cosine_per_token_min": 0.9443954825401306,
+    "cosine_per_token_mean": 0.9997997283935547
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000290081.jpg",
+   "category": "counting",
+   "question": "Is there only one bowl in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9995905756950378,
+    "cosine_per_token_min": 0.8647351861000061,
+    "cosine_per_token_mean": 0.9995101094245911
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 89,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000430286.jpg",
+   "category": "counting",
+   "question": "Are there three remotes in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are three remotes in this image.",
+     "fp16_text": "Yes, there are three remotes in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "No, there are only two remotes in the image.",
+     "fp16_text": "Yes, there are three remotes in this image.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9992700815200806,
+    "cosine_per_token_min": 0.4833054542541504,
+    "cosine_per_token_mean": 0.9985764026641846
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 89,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_count/000000556000.jpg",
+   "category": "counting",
+   "question": "Are there four people in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are four people in the image.",
+     "fp16_text": "Yes, there are four people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there are four people in the image.",
+     "fp16_text": "Yes, there are four people in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998290538787842,
+    "cosine_per_token_min": 0.9517959356307983,
+    "cosine_per_token_mean": 0.9997164607048035
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 88,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_position/000000211825.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the cake on the left side of the camera? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999442100524902,
+    "cosine_per_token_min": 0.981245756149292,
+    "cosine_per_token_mean": 0.9998724460601807
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_position/000000395801.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the clock above people? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9981613159179688,
+    "cosine_per_token_min": 0.6389074921607971,
+    "cosine_per_token_mean": 0.9986069798469543
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000204871.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the car on the right side of the fire hydrant in the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9984879493713379,
+    "cosine_per_token_min": 0.7328858375549316,
+    "cosine_per_token_mean": 0.9993470311164856
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 89,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000007281.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the sea behind people in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999090433120728,
+    "cosine_per_token_min": 0.9876376390457153,
+    "cosine_per_token_mean": 0.9998615980148315
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_position/000000472046.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the pineapple on the left of the pot in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999315738677979,
+    "cosine_per_token_min": 0.9918044209480286,
+    "cosine_per_token_mean": 0.9999271035194397
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 99,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_position/000000048504.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the gray elephant in front of the brown elephant? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999494552612305,
+    "cosine_per_token_min": 0.9864861965179443,
+    "cosine_per_token_mean": 0.9999024271965027
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_position/000000395701.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the TV on the left of the bookshelf? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999740481376648,
+    "cosine_per_token_min": 0.8557851314544678,
+    "cosine_per_token_mean": 0.9990971684455872
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000062808.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the phone above the pizza in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997482299804688,
+    "cosine_per_token_min": 0.8909772038459778,
+    "cosine_per_token_mean": 0.9996024370193481
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 90,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "gqa_n414992_6",
+   "category": "spatial_reasoning",
+   "question": "What is the airplane flying above?",
+   "reference_answers": [
+    "ocean"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The airplane is flying above a beach with people on it.",
+     "fp16_text": "The airplane is flying above a beach with people on it.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "The airplane is flying above a beach where a group of people is standing.",
+     "fp16_text": "The airplane is flying above a beach with people on it.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996870756149292,
+    "cosine_per_token_min": 0.8841191530227661,
+    "cosine_per_token_mean": 0.9995747804641724
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 101,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "gqa_n578564_13",
+   "category": "spatial_reasoning",
+   "question": "What is hanging above the chalkboard?",
+   "reference_answers": [
+    "picture"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "A painting is hanging above the chalkboard.",
+     "fp16_text": "A painting is hanging above the chalkboard.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "A painting is hanging above the chalkboard.",
+     "fp16_text": "A painting is hanging above the chalkboard.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996441602706909,
+    "cosine_per_token_min": 0.9509296417236328,
+    "cosine_per_token_mean": 0.9995825886726379
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000056127.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the light above the fire hydrant in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997745752334595,
+    "cosine_per_token_min": 0.7901633977890015,
+    "cosine_per_token_mean": 0.999523401260376
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 90,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000014038.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the refrigerator on the left side of the picture? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996250867843628,
+    "cosine_per_token_min": 0.9305278658866882,
+    "cosine_per_token_mean": 0.9995846152305603
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 99,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "mme_position/000000477955.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the person under the kite? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997634291648865,
+    "cosine_per_token_min": 0.8379577398300171,
+    "cosine_per_token_mean": 0.9993197321891785
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000458410.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the TV on the left of the lamp? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9995521903038025,
+    "cosine_per_token_min": 0.8482165336608887,
+    "cosine_per_token_mean": 0.9995351433753967
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_position/000000426241.jpg",
+   "category": "spatial_reasoning",
+   "question": "Is the white mouse on the right of the black keyboard? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996779561042786,
+    "cosine_per_token_min": 0.9024224281311035,
+    "cosine_per_token_mean": 0.9994415640830994
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "gqa_n309148_109",
+   "category": "object_presence",
+   "question": "Are there any red fire trucks?",
+   "reference_answers": [
+    "no"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a red fire truck in the image.",
+     "fp16_text": "Yes, there is a red fire truck in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "Yes, there is a red fire truck in the image.",
+     "fp16_text": "Yes, there is a red fire truck in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996051788330078,
+    "cosine_per_token_min": 0.9279308319091797,
+    "cosine_per_token_mean": 0.9995547533035278
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "gqa_n207708_55",
+   "category": "object_presence",
+   "question": "Is there a pear beneath the appliance that looks silver and black?",
+   "reference_answers": [
+    "no"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a pear beneath the silver and black appliance.",
+     "fp16_text": "Yes, there is a pear beneath the silver and black appliance.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    },
+    "128": {
+     "fp32_text": "Yes, there is a pear beneath the silver and black appliance.",
+     "fp16_text": "Yes, there is a pear beneath the silver and black appliance.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 17
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9993699789047241,
+    "cosine_per_token_min": 0.8664844036102295,
+    "cosine_per_token_mean": 0.9995399117469788
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 89,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_existence/000000494427.jpg",
+   "category": "object_presence",
+   "question": "Is there a laptop in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998946189880371,
+    "cosine_per_token_min": 0.9501999616622925,
+    "cosine_per_token_mean": 0.999787449836731
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000009590.jpg",
+   "category": "object_presence",
+   "question": "Is there a bottle in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9995456337928772,
+    "cosine_per_token_min": 0.8217453956604004,
+    "cosine_per_token_mean": 0.9992348551750183
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000537812.jpg",
+   "category": "object_presence",
+   "question": "Is there a chair in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998782873153687,
+    "cosine_per_token_min": 0.9734829664230347,
+    "cosine_per_token_mean": 0.9998847246170044
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000015746.jpg",
+   "category": "object_presence",
+   "question": "Is there a fire hydrant in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a fire hydrant in this image.",
+     "fp16_text": "Yes, there is a fire hydrant in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "Yes, there is a fire hydrant in this image.",
+     "fp16_text": "Yes, there is a fire hydrant in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998488426208496,
+    "cosine_per_token_min": 0.9828718900680542,
+    "cosine_per_token_mean": 0.9997618794441223
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_existence/000000037751.jpg",
+   "category": "object_presence",
+   "question": "Is there a backpack in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a backpack in the image.",
+     "fp16_text": "Yes, there is a backpack in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a backpack in the image.",
+     "fp16_text": "Yes, there is a backpack in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997736215591431,
+    "cosine_per_token_min": 0.9752123951911926,
+    "cosine_per_token_mean": 0.9998044967651367
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 102,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000050145.jpg",
+   "category": "object_presence",
+   "question": "Is there a bicycle in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes, there is a bicycle in the image.",
+     "fp16_text": "Yes, there is a bicycle in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996190071105957,
+    "cosine_per_token_min": 0.698255717754364,
+    "cosine_per_token_mean": 0.99894779920578
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 91,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000007816.jpg",
+   "category": "object_presence",
+   "question": "Is there a motorcycle in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes, there is a motorcycle in the image.",
+     "fp16_text": "Yes, there is a motorcycle in this image.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998940229415894,
+    "cosine_per_token_min": 0.9741857647895813,
+    "cosine_per_token_mean": 0.9997586011886597
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_existence/000000572956.jpg",
+   "category": "object_presence",
+   "question": "Is there a motorcycle in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a motorcycle in this image.",
+     "fp16_text": "Yes, there is a motorcycle in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a motorcycle in this image.",
+     "fp16_text": "Yes, there is a motorcycle in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998867511749268,
+    "cosine_per_token_min": 0.9635692238807678,
+    "cosine_per_token_mean": 0.9998289942741394
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 91,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "gqa_n473688_116",
+   "category": "object_presence",
+   "question": "Are there both toothbrushes and mats in this picture?",
+   "reference_answers": [
+    "no"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a mirror.",
+     "fp16_text": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a mirror.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 29
+    },
+    "128": {
+     "fp32_text": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a bathroom mirror.",
+     "fp16_text": "No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.",
+     "text_identical": false,
+     "ids_identical": false,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 30
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998719692230225,
+    "cosine_per_token_min": 0.9674001932144165,
+    "cosine_per_token_mean": 0.9997788667678833
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 102,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000007108.jpg",
+   "category": "object_presence",
+   "question": "Is there a elephant in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997893571853638,
+    "cosine_per_token_min": 0.9409620761871338,
+    "cosine_per_token_mean": 0.9997613430023193
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_existence/000000061418.jpg",
+   "category": "object_presence",
+   "question": "Is there a chair in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes, there is a chair in the image.",
+     "fp16_text": "Yes, there is a chair in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999839186668396,
+    "cosine_per_token_min": 0.9566964507102966,
+    "cosine_per_token_mean": 0.9997718334197998
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 91,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_existence/000000541952.jpg",
+   "category": "object_presence",
+   "question": "Is there a clock in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a clock in this image.",
+     "fp16_text": "Yes, there is a clock in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    },
+    "128": {
+     "fp32_text": "Yes, there is a clock in this image.",
+     "fp16_text": "Yes, there is a clock in this image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 12
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997200965881348,
+    "cosine_per_token_min": 0.8651575446128845,
+    "cosine_per_token_mean": 0.9991223812103271
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 103,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_existence/000000424521.jpg",
+   "category": "object_presence",
+   "question": "Is there a skateboard in this image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999312162399292,
+    "cosine_per_token_min": 0.9816282391548157,
+    "cosine_per_token_mean": 0.9998624324798584
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000144.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of vineyard? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999247789382935,
+    "cosine_per_token_min": 0.988996148109436,
+    "cosine_per_token_mean": 0.9998942613601685
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000193.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of ice floe? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997091889381409,
+    "cosine_per_token_min": 0.893796443939209,
+    "cosine_per_token_mean": 0.999426543712616
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000089.jpg",
+   "category": "coarse_description",
+   "question": "Is this photo taken in a place of martial arts gym? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997779130935669,
+    "cosine_per_token_min": 0.9645323753356934,
+    "cosine_per_token_mean": 0.9997498393058777
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 100,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000165.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of playground? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997686743736267,
+    "cosine_per_token_min": 0.8775432705879211,
+    "cosine_per_token_mean": 0.9996445178985596
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000162.jpg",
+   "category": "coarse_description",
+   "question": "Does this image describe a place of train station platform? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999118447303772,
+    "cosine_per_token_min": 0.9858911633491516,
+    "cosine_per_token_mean": 0.999878466129303
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 104,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000164.jpg",
+   "category": "coarse_description",
+   "question": "Does this image describe a place of lake natural? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998288154602051,
+    "cosine_per_token_min": 0.9390835762023926,
+    "cosine_per_token_mean": 0.9997212886810303
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000011.jpg",
+   "category": "coarse_description",
+   "question": "Is this photo taken in a place of baseball field? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998471736907959,
+    "cosine_per_token_min": 0.8865875005722046,
+    "cosine_per_token_mean": 0.9996786117553711
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000009.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of forest broadleaf? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9994035959243774,
+    "cosine_per_token_min": 0.8321563601493835,
+    "cosine_per_token_mean": 0.999164879322052
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000072.jpg",
+   "category": "coarse_description",
+   "question": "Does this image describe a place of fire escape? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997022151947021,
+    "cosine_per_token_min": 0.9328356981277466,
+    "cosine_per_token_mean": 0.9994456768035889
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 91,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000127.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of temple asia? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.998472273349762,
+    "cosine_per_token_min": 0.6385816335678101,
+    "cosine_per_token_mean": 0.9988008141517639
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 100,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000106.jpg",
+   "category": "coarse_description",
+   "question": "Is this picture captured in a place of desert sand? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996902942657471,
+    "cosine_per_token_min": 0.9715210199356079,
+    "cosine_per_token_mean": 0.9996919631958008
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 100,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000052.jpg",
+   "category": "coarse_description",
+   "question": "Is this photo taken in a place of ice skating rink indoor? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999449253082275,
+    "cosine_per_token_min": 0.9969384670257568,
+    "cosine_per_token_mean": 0.9999217987060547
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000163.jpg",
+   "category": "coarse_description",
+   "question": "Is this photo taken in a place of chalet? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996869564056396,
+    "cosine_per_token_min": 0.9515585899353027,
+    "cosine_per_token_mean": 0.9997323155403137
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000022.jpg",
+   "category": "coarse_description",
+   "question": "Is this photo taken in a place of recreation room? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999885618686676,
+    "cosine_per_token_min": 0.817049503326416,
+    "cosine_per_token_mean": 0.9996049404144287
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 62
+   }
+  },
+  {
+   "question_id": "mme_scene/Places365_val_00000108.jpg",
+   "category": "coarse_description",
+   "question": "Does this image describe a place of burial chamber? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "No.",
+     "fp16_text": "No.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 4
+    },
+    "128": {
+     "fp32_text": "No.",
+     "fp16_text": "No.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 4
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9993864297866821,
+    "cosine_per_token_min": 0.408016562461853,
+    "cosine_per_token_mean": 0.9988550543785095
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_color/000000492992.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a white bird in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a white bird in the image.",
+     "fp16_text": "Yes, there is a white bird in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a white bird in the image.",
+     "fp16_text": "Yes, there is a white bird in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999750018119812,
+    "cosine_per_token_min": 0.9226378202438354,
+    "cosine_per_token_mean": 0.9996865391731262
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000006723.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a red brick building in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a red brick building in the image.",
+     "fp16_text": "Yes, there is a red brick building in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "Yes, there is a red brick building in the image.",
+     "fp16_text": "Yes, there is a red brick building in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997802972793579,
+    "cosine_per_token_min": 0.8608492016792297,
+    "cosine_per_token_mean": 0.9996235966682434
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_color/000000377723.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a blue bus in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a blue bus in the image.",
+     "fp16_text": "Yes, there is a blue bus in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a blue bus in the image.",
+     "fp16_text": "Yes, there is a blue bus in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999373555183411,
+    "cosine_per_token_min": 0.9961951971054077,
+    "cosine_per_token_mean": 0.999920129776001
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000370208.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a red bicycle with white handlebars in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a red bicycle with white handlebars in the image.",
+     "fp16_text": "Yes, there is a red bicycle with white handlebars in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 19
+    },
+    "128": {
+     "fp32_text": "Yes, there is a red bicycle with white handlebars in the image.",
+     "fp16_text": "Yes, there is a red bicycle with white handlebars in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 19
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999033212661743,
+    "cosine_per_token_min": 0.9591065049171448,
+    "cosine_per_token_mean": 0.9997637271881104
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000012120.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a blue court in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a blue court in the image.",
+     "fp16_text": "Yes, there is a blue court in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a blue court in the image.",
+     "fp16_text": "Yes, there is a blue court in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997298717498779,
+    "cosine_per_token_min": 0.8327017426490784,
+    "cosine_per_token_mean": 0.9995034337043762
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_color/000000053994.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a gray wall in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes",
+     "fp16_text": "Yes",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    },
+    "128": {
+     "fp32_text": "No",
+     "fp16_text": "No",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 3
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997281432151794,
+    "cosine_per_token_min": 0.9457472562789917,
+    "cosine_per_token_mean": 0.9996806383132935
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 94,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000492362.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a skateboard with red wheels in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a skateboard with red wheels in the image.",
+     "fp16_text": "Yes, there is a skateboard with red wheels in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 18
+    },
+    "128": {
+     "fp32_text": "Yes, there is a skateboard with red wheels in the image.",
+     "fp16_text": "Yes, there is a skateboard with red wheels in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 18
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997617602348328,
+    "cosine_per_token_min": 0.9284119009971619,
+    "cosine_per_token_mean": 0.9996941089630127
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 101,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_color/000000047112.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a white plate in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a white plate in the image.",
+     "fp16_text": "Yes, there is a white plate in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a white plate in the image.",
+     "fp16_text": "Yes, there is a white plate in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998352527618408,
+    "cosine_per_token_min": 0.9159858226776123,
+    "cosine_per_token_mean": 0.9997410178184509
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 93,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000512929.jpg",
+   "category": "fine_attributes",
+   "question": "Are there any green beans in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are green beans in the image.",
+     "fp16_text": "Yes, there are green beans in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there are green beans in the image.",
+     "fp16_text": "Yes, there are green beans in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9996123313903809,
+    "cosine_per_token_min": 0.8889750838279724,
+    "cosine_per_token_mean": 0.9997372031211853
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 95,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000047121.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a black cat in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a black cat in the image.",
+     "fp16_text": "Yes, there is a black cat in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a black cat in the image.",
+     "fp16_text": "Yes, there is a black cat in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9989458322525024,
+    "cosine_per_token_min": 0.6462334394454956,
+    "cosine_per_token_mean": 0.9990745186805725
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 98,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000014831.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a brown and white animal in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a brown and white animal in the image.",
+     "fp16_text": "Yes, there is a brown and white animal in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    },
+    "128": {
+     "fp32_text": "Yes, there is a brown and white animal in the image.",
+     "fp16_text": "Yes, there is a brown and white animal in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 15
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997086524963379,
+    "cosine_per_token_min": 0.8737151026725769,
+    "cosine_per_token_mean": 0.9995572566986084
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "mme_color/000000057597.jpg",
+   "category": "fine_attributes",
+   "question": "Are there any red shoes in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there are red shoes in the image.",
+     "fp16_text": "Yes, there are red shoes in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there are red shoes in the image.",
+     "fp16_text": "Yes, there are red shoes in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9997192621231079,
+    "cosine_per_token_min": 0.8643877506256104,
+    "cosine_per_token_mean": 0.9993884563446045
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 96,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000563758.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a red scarf in the image?  Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a red scarf in the image.",
+     "fp16_text": "Yes, there is a red scarf in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    },
+    "128": {
+     "fp32_text": "Yes, there is a red scarf in the image.",
+     "fp16_text": "Yes, there is a red scarf in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 14
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9999047517776489,
+    "cosine_per_token_min": 0.9861519932746887,
+    "cosine_per_token_mean": 0.9998712539672852
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 90,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  },
+  {
+   "question_id": "gqa_n235859_1",
+   "category": "fine_attributes",
+   "question": "Who is wearing the dress?",
+   "reference_answers": [
+    "women"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "The woman is wearing the dress.",
+     "fp16_text": "The woman is wearing the dress.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 10
+    },
+    "128": {
+     "fp32_text": "The woman is wearing the dress.",
+     "fp16_text": "The woman is wearing the dress.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 10
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.9998931884765625,
+    "cosine_per_token_min": 0.9627216458320618,
+    "cosine_per_token_mean": 0.9998471140861511
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 97,
+    "attention_half_size": 64,
+    "attention_half_overlap": 64
+   }
+  },
+  {
+   "question_id": "mme_color/000000008277.jpg",
+   "category": "fine_attributes",
+   "question": "Is there a white plate in the image? Please answer yes or no.",
+   "reference_answers": [
+    "Yes"
+   ],
+   "configs": {
+    "576": {
+     "fp32_text": "Yes, there is a white plate in the image.",
+     "fp16_text": "Yes, there is a white plate in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    },
+    "128": {
+     "fp32_text": "Yes, there is a white plate in the image.",
+     "fp16_text": "Yes, there is a white plate in the image.",
+     "text_identical": true,
+     "ids_identical": true,
+     "fp16_deterministic": true,
+     "fp16_output_tokens": 13
+    }
+   },
+   "features": {
+    "cosine_whole_map": 0.999901533126831,
+    "cosine_per_token_min": 0.994499146938324,
+    "cosine_per_token_mean": 0.9999120235443115
+   },
+   "selection": {
+    "kept": 128,
+    "kept_fp16": 128,
+    "mask_identical": false,
+    "mask_overlap": 92,
+    "attention_half_size": 64,
+    "attention_half_overlap": 63
+   }
+  }
+ ]
+}

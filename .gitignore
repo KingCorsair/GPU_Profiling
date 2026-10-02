@@ -22,3 +22,6 @@ ScienceQA/data/scienceqa/images/
 # scripts/profile_full_request.py.
 results/timing/*_trace.json
 results/timing/ab_trace_*.json
+
+# WP2 profiler traces (15-45MB each); the *_summary.txt / *_kernels.txt files are the tracked evidence.
+results/timing/wp2_profile/*_trace.json

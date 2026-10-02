@@ -1,0 +1,44 @@
+vision tower only -- vision_tower(images, output_attentions=True), batch=1
+git commit: 945abe6e31   GPU: NVIDIA A40   vision_tower dtype=torch.float32   cpu_threads=4
+
+CUDA-event time per call, 50 back-to-back calls, no profiler:
+  p50 35.38 ms   p95 36.19 ms   min 35.12   max 36.40
+GPU busy per call under the profiler (kernel rows only): 34.47 ms
+  (event time well above GPU busy => the GPU waited on the CPU to issue kernels)
+
+KERNEL FAMILIES (10 calls)
+  family                                             ms/call   % GPU  launches/call
+  FP32 SIMT GEMM (ampere_sgemm_*)                      27.97    81.2          193.0
+  softmax                                               1.95     5.7           24.0
+  LayerNorm                                             0.35     1.0           50.0
+  everything else                                       4.20    12.2          293.0
+
+SOFTMAX KERNELS (template args = input, output[, accumulate] dtypes):
+     1.95 ms/call  void (anonymous namespace)::softmax_warp_forward<float, float, float, 10, false, false>(float*, float const*, int, int, int, bool const*, int, bool)
+
+LAYERNORM KERNELS (template args = input, output[, accumulate] dtypes):
+     0.35 ms/call  void at::native::(anonymous namespace)::vectorized_layer_norm_kernel<float, float>(int, float, float const*, float const*, float const*, float*, float*, float*)
+
+ALL GEMM KERNELS:
+    14.10 ms/call  x48   ampere_sgemm_128x64_tn
+     9.80 ms/call  x96   ampere_sgemm_32x128_tn
+     2.10 ms/call  x24   ampere_sgemm_128x128_nn
+     1.88 ms/call  x24   ampere_sgemm_128x128_tn
+     0.08 ms/call  x1    void implicit_convolve_sgemm<float, float, 128, 5, 5, 3, 3, 3, 1, false, false, true>(int, int, int, float const*, int, float*, float const*
+
+TOP 15 KERNELS BY GPU TIME:
+    14.10 ms/call  x48   ampere_sgemm_128x64_tn
+     9.80 ms/call  x96   ampere_sgemm_32x128_tn
+     2.10 ms/call  x24   ampere_sgemm_128x128_nn
+     1.95 ms/call  x24   void (anonymous namespace)::softmax_warp_forward<float, float, float, 10, false, false>(float*, float const*, int, int, int, bool const*, in
+     1.88 ms/call  x24   ampere_sgemm_128x128_tn
+     1.24 ms/call  x24   void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<flo
+     0.89 ms/call  x48   void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<flo
+     0.84 ms/call  x24   void at::native::vectorized_elementwise_kernel<4, at::native::sigmoid_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const
+     0.73 ms/call  x96   void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&):
+     0.42 ms/call  x49   void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, at::detail::Array<char*, 3> >(int, at::native::CUDAFun
+     0.35 ms/call  x50   void at::native::(anonymous namespace)::vectorized_layer_norm_kernel<float, float>(int, float, float const*, float const*, float const*, flo
+     0.08 ms/call  x1    void implicit_convolve_sgemm<float, float, 128, 5, 5, 3, 3, 3, 1, false, false, true>(int, int, int, float const*, int, float*, float const*
+     0.05 ms/call  x48   Memset (Device)
+     0.02 ms/call  x1    void at::native::(anonymous namespace)::CatArrayBatchedCopy<float, unsigned int, 3, 64, 64>(float*, at::native::(anonymous namespace)::CatAr
+     0.01 ms/call  x1    void at::native::(anonymous namespace)::indexSelectLargeIndex<float, long, unsigned int, 2, 2, -2, true>(at::cuda::detail::TensorInfo<float,

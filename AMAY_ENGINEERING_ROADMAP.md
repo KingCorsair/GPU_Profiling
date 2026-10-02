@@ -117,6 +117,11 @@ n=10, warmup=10, A40):
 | decode | 711.8 ms | 652.1 ms |
 | output tokens | 25.2 | 24.3 |
 
+*This table predates WP1 and WP2: its `multimodal_prep` row was measured with the FP32
+tower and includes the CPU-throttling stall found in WP1. With the FP16 tower and the
+4-thread pin, `prepare_inputs_labels_for_multimodal` is 24.47 ms at 128
+(`wp2_profile_fp16_prep_summary.txt`). The decode and prefill rows are unaffected by WP2.*
+
 **DERIVED from the above:** decode is **80.2%** of mean request latency. The whole prep path
 — everything VisPruner touches — is 5.6%. Decode costs 28.2 ms/token. Stdev 565.1 ms at
 n=10 gives a standard error of ±179 ms, which is 20% of the mean.
@@ -133,7 +138,9 @@ source, both cheap to fix, both load-bearing:
   `if device_map != 'auto'` — and `'auto'` is the default at `builder.py:26`. The cast never
   runs. Confirmed in `prep_trace.json`: FP32 `ampere_sgemm_*` is **265.95 ms = 75.4% of
   prep-path kernel time**, against 6.18 ms (1.8%) in the FP16 GEMM family, which is
-  `mm_projector` alone. → **WP2**
+  `mm_projector` alone. → **WP2**. **Fixed 2026-10-02** (`caf19fe`): the FP32 sgemm share
+  is now 0.0% and `vision_tower` is 14.35 ms at 576, down from 33.98 ms. See the status
+  block at the top of WP2.
 - **The server blocks its own event loop.** `csnbs/server.py:91` — `async def _infer_model(...)`
   calls `model.generate()` synchronously with no `await`. FastAPI does not offload
   `async def` handlers to a threadpool, so per-request CPU work (base64 decode `:176`, PIL
@@ -365,6 +372,36 @@ A benchmark that can reliably detect a 20 ms change in a single component.
 ## WP2 — FP16 Vision Tower
 
 **2.5 days. Depends on WP1. Supersedes the old Phase 1a.**
+
+> **Status: DONE 2026-10-02.** The change is commit `caf19fe` (`clip_encoder.py:30`). All
+> four §9 criteria hold; detail and file locations are in `STATUS.md`. The sections below
+> are kept as written before the work, so their numbers describe the FP32 tower. The
+> re-baselined vision-path numbers are:
+>
+> | Quantity | Before (FP32) | After (FP16) | Source |
+> |---|---|---|---|
+> | `vision_tower` p50, CUDA events, 576 | 33.98 ms | **14.35 ms** (−57.8%) | `bench_dev` 4-run A/B |
+> | `vision_tower` p50, CUDA events, 128 | 34.00 ms | **13.68 ms** (−59.8%) | `bench_dev` 4-run A/B |
+> | `vision_tower` p50, towers interleaved in one process | 34.20 ms | 11.02 ms | `wp2_diag_1`, a diagnostic |
+> | `ampere_sgemm_*` share of prep GPU time | 75.4% | **0.0%** | `wp2_profile_{fp32,fp16}` |
+> | Tower GPU busy per call | 34.47 ms | 9.05 ms | `wp2_profile_*_tower_kernels.txt` |
+> | Prep-region GPU busy per call | 35.7 ms | 11.4 ms | `wp2_profile_*_prep_summary.txt` |
+> | `prepare_inputs_labels_for_multimodal` wall at 128 | 49.74 ms | 24.47 ms | same, mean of 10 |
+> | CPU time / GPU busy in the prep region | 2.01× | 4.63× | same |
+>
+> - **MEASURED — the FP16 tower is CPU-launch-bound.** Its CUDA-event time equals the CPU
+>   time spent issuing its kernels (ratio 1.00; FP32: 3.22). Any further vision-path win
+>   needs fewer kernel launches, not faster GEMMs.
+> - **MEASURED — end-to-end is about −2%**, indicative only (`wp2_diag_1`: 1019.6 → 995.3 ms
+>   at 128). That is the Amdahl-sized result §3 predicted. The reportable figure is WP6's.
+> - **MEASURED — accuracy gates.** TextVQA on 1,000 questions: 57.62% → 57.65% at 576 and
+>   56.50% → 56.75% at 128, no regression outside noise. Exact-text match on 90 dev images:
+>   100% at 576, 88.9% at 128. Output is deterministic. Softmax and the GEMMs still
+>   accumulate in FP32.
+> - **MEASURED — two things did not come out as §8 assumed.** At 128 the pruner keeps a
+>   different token set on every image (74.4% of kept tokens shared), and the feature-cosine
+>   bar of 0.999 is missed in 6 of 90 images (min 0.99816). Neither moved TextVQA accuracy.
+>   Layer 3 from Sribhav is still to come.
 
 ### 1. Problem
 

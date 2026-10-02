@@ -2,18 +2,16 @@
 
 ## Current State
 
-* **Current work package: WP2 — FP16 Vision Tower. In progress, paused 2026-09-22.**
-* Done: the implementation, and the performance A/B (4 same-pod `bench_dev` runs plus an interleaved diagnostic). The ≥20% `vision_tower` gate passes by a wide margin.
-* Not done: profiler verification, Layer-1 correctness, Layer-2 TextVQA, a Layer-3 request to Sribhav, and re-baselining the numbers in the docs.
-* **Next task:** profiler verification with `scripts/profile_multimodal_prep.py`. The FP32 state is prepared on branch `wp2-profile-fp32`. See `HANDOFF.md`.
-* WP3 has not started.
+* **WP2 — FP16 Vision Tower is closed (2026-10-02).** All four roadmap §9 criteria hold. The FP16 change (`caf19fe`) stays.
+* **Current work package: WP3 — Server Diagnostic.** Not started as a tracked WP. A first attempt was begun and stopped on 2026-10-02; its scripts and partial data are parked outside the repo at `/workspace/wp3_parked/` (see `HANDOFF.md`).
+* Open from WP2, not blocking: the Layer-3 per-category request to Sribhav.
 * Blockers: none.
-* Last updated: 2026-09-22
+* Last updated: 2026-10-02
 
 ## Month-One Progress
 
 * [x] WP1 — Controlled Benchmark (2026-09-07; component timing and noise floor 2026-09-11)
-* [~] WP2 — FP16 Vision Tower: implementation and performance done; verification and correctness open
+* [x] WP2 — FP16 Vision Tower (2026-10-02; Layer-3 confirmation from Sribhav still to come)
 * [ ] WP3 — Server Diagnostic
 * [ ] WP4 — Request Queue
 * [ ] WP5 — Static Batching MVP
@@ -82,6 +80,58 @@ Nothing else changed. The wrapper's casts at `clip_encoder.py:64,70` follow `sel
 * The FP16 bench_dev runs happened to catch more of these episodes: 42–71% of their trials were in the slow state, against 0–5% for FP32.
 * Neither cgroup throttling nor steal time sees these slowdowns. `bench_dev`'s checks cannot detect them.
 
+### Profiler verification (2026-10-02)
+
+`scripts/profile_multimodal_prep.py`, FP32 at `945abe6` (run 2026-10-01) and FP16 at `be4ed77` (run 2026-10-02), same pod. Files: `results/timing/wp2_profile/wp2_profile_{fp32,fp16}_{prep_summary,tower_kernels}.txt`. The raw `*_trace.json` files are git-ignored.
+
+| | FP32 | FP16 |
+|---|---|---|
+| `ampere_sgemm_*` share of prep-region GPU time (summed from the raw trace) | **75.4%** | **0.0%** |
+| `ampere_sgemm_*` share of tower-only GPU time | 81.2% | 0.0% |
+| FP16 tensor-core GEMM share, tower only | 0.0% | 66.8% |
+| Tower GPU busy per call (kernel rows) | 34.47 ms | 9.05 ms |
+| Tower CUDA-event p50, 50 back-to-back calls | 35.38 ms | 10.40 ms |
+| Prep region GPU busy per call | 35.7 ms | 11.4 ms |
+| `prepare_inputs_labels_for_multimodal` wall, mean of 10 | 49.74 ms | 24.47 ms |
+| CPU time / GPU busy in the prep region | 2.01× | 4.63× |
+
+* The FP16 GEMMs are `ampere_fp16_s16816gemm_*`, `ampere_fp16_s1688gemm_*` and `cutlass_75_tensorop_f16_s1688gemm_*`: FP16 tensor cores with **FP32 accumulate**. No FP16-accumulate (`h16816`) kernel appears.
+* Softmax is `softmax_warp_forward<c10::Half, c10::Half, float>`: FP16 in and out, **FP32 accumulate**. LayerNorm is `vectorized_layer_norm_kernel<c10::Half, float>`.
+* The tower's time in the trace agrees with the benchmark (FP32 ≈ 34 ms, FP16 ≈ 10–14 ms).
+* Do not compare the two summaries' `generate(max_new_tokens=1)` lines (207.73 vs 89.02 ms). That loop has no warm-up of its own, so it includes a cold first call.
+
+### Layer-1 correctness (2026-10-02)
+
+`scripts/wp2_layer1_correctness.py`, run `wp2_layer1_1`: all 90 dev images, greedy, both towers in one process. Files: `results/wp2_correctness/wp2_layer1_1.{json,txt}`.
+
+| Check | Result | Bar | |
+|---|---|---|---|
+| Exact text, FP32 vs FP16, vtn=576 | 90/90 identical | ≥85% | PASS |
+| Exact text, FP32 vs FP16, vtn=128 | 80/90 identical (88.9%) | ≥85% | PASS |
+| Determinism, FP16 run twice, both configs | 90/90 identical output ids | identical | PASS |
+| Softmax still accumulates in FP32 (from the trace) | yes | yes | PASS |
+| Pre-projector feature cosine, per image over the 576-token map | min 0.99816, median 0.99978; 6 of 90 images at or below 0.999 | >0.999 | **MISS** |
+| Token selection at vtn=128 | 0/90 images keep the identical token set; 74.4% of kept tokens shared | report only | — |
+
+* **The ten changed answers at 128 are not spread evenly:** OCR 5 of 15, counting 2 of 15, object presence 2 of 15, spatial reasoning 1 of 15. Two counting answers flip between yes and no. Whether they got better or worse is Sribhav's call (Layer 3).
+* **Why the token set changes on every image.** The attention-ranked half is 99.25% shared, so the top-attention tokens barely move. The other half comes from VisPruner's duplicate-removal loop (`llava_arch.py`, `encode_images`), which pairs tokens by their position in the attention ranking. Read from the code, not measured: a few near-tied tokens swapping rank would re-pair everything after them, so a tiny numeric change can produce a large change in which tokens survive.
+* **Why the cosine bar is missed.** A follow-up on 20 images (not saved as a script) found no NaN or infinity, and peak activations of about 210, far below FP16's limit of 65,504. The difference builds up gradually from layer 11 onward. The mean per-token cosine stays above 0.9995 at every layer; a median of 13 of 576 tokens per image fall below 0.999 and 3 below 0.99. This is rounding accumulating in a few tokens, not an overflow.
+* The roadmap attaches no stop rule to the cosine bar. The deciding gate is Layer 2.
+
+### Layer-2 TextVQA gate (2026-10-02)
+
+`scripts/wp2_layer2_textvqa.py`, run `wp2_layer2_1`: 1,000 questions from `eval/textvqa/llava_textvqa_val_v051_ocr.jsonl` (seed 20261002), official `m4c_evaluator.py`, every question answered by both towers in one process. Files: `results/wp2_correctness/wp2_layer2_1*`.
+
+| Config | FP32 | FP16 | Difference | Paired 95% interval | Answers changed | Scores changed |
+|---|---|---|---|---|---|---|
+| vtn=576 (the roadmap's gate) | 57.62% | 57.65% | +0.03 pp | 0.00 to +0.09 pp | 7 | 1 (FP16 higher) |
+| vtn=128 (added after Layer 1) | 56.50% | 56.75% | +0.25 pp | −0.74 to +1.25 pp | 76 | 33 (19 higher, 14 lower) |
+
+* **Gate: PASS.** No regression outside noise at either config, so the change is not reverted.
+* The 22 questions on images that are in the locked test set were removed before sampling (rule 11).
+* `python -m llava.eval.eval_textvqa` on the four answer files reproduces the same four accuracies.
+* The TextVQA images are not in git. `scripts/download_textvqa_subset.py` fetches the annotations and the 916 images this subsample uses into `/workspace/datasets/textvqa`.
+
 ### How to use these numbers
 
 | Result | Status |
@@ -91,27 +141,25 @@ Nothing else changed. The wrapper's casts at `clip_encoder.py:64,70` follow `sel
 | ≥20% gate | **PASS** |
 | End-to-end ≈ −2% | **Indicative only**, from the diagnostic and from post-hoc fast-state filtering. The bench_dev A/B cannot resolve it. |
 | FP16 tower is launch-bound | Measured in the diagnostic (event time / CPU issue time = 1.00) |
+| FP32 sgemm share 75.4% → 0.0% | Trace pair, `wp2_profile_{fp32,fp16}` |
+| TextVQA 57.62% → 57.65% at 576; 56.50% → 56.75% at 128 | Layer-2 gate, 1,000-question subsample. A development gate, not the project's accuracy result; that is Sribhav's. |
 
 None of these are serving numbers. Reportable serving results come from WP6 and Rithvik's harness.
 
-### Remaining before WP2 can close
+### Closing WP2 against roadmap §9
 
-1. **Profiler verification** (roadmap WP2 §5 step 6, §9 criterion 2). Produce an FP32 trace and an FP16 trace, and confirm:
-   * `ampere_sgemm_*` is gone, replaced by FP16 tensor-core GEMMs with FP32 accumulate;
-   * softmax and LayerNorm dtypes;
-   * softmax is not `<Half,Half,Half>`, i.e. it still accumulates in FP32;
-   * the tower's time in the trace is consistent with the benchmark.
-2. **Layer-1 correctness.** No script exists yet.
-   * exact-text match, greedy, 90 dev images, both configs (bar: ≥85%);
-   * token-selection equivalence;
-   * cosine similarity of pre-projector features > 0.999;
-   * determinism.
+| Criterion | Result |
+|---|---|
+| 1. `vision_tower` CUDA time drops by at least 20% | **PASS**: −58% / −60% |
+| 2. `ampere_sgemm_*` replaced by the FP16 GEMM family | **PASS**: 75.4% → 0.0% of prep GPU time |
+| 3. Layer-2 TextVQA unchanged within noise | **PASS**: +0.03 pp at 576 |
+| 4. Output deterministic across repeated runs | **PASS**: 90/90 at both configs |
 
-   Note: `clip_encoder.forward` returns `image_attentions` without casting, so VisPruner now ranks tokens on FP16 attention. The selected tokens may differ; this check will show whether they do.
-3. **Layer-2 TextVQA.** 1,000-question subsample, FP32 vs FP16 at 576, scored with `m4c_evaluator.py`. Revert the change if it regresses beyond noise.
-4. **Layer 3.** Request per-category accuracy from Sribhav. Asynchronous; don't block on it.
-5. **Re-baseline** the vision-path numbers in `AMAY_ENGINEERING_ROADMAP.md` and `AMAY_TRACE_PLAN.md`. Then close WP2 here.
-6. Decide whether to report an end-to-end figure, or leave it to the WP6 load benchmark.
+Left open:
+
+* **Layer 3.** Per-category accuracy on the locked eval set, FP32 (`e295fd0`) vs FP16 (`caf19fe`), from Sribhav. Ask him to look at OCR and counting at 128 in particular. The request has not been sent yet. If OCR regresses there, the roadmap says revert.
+* **End-to-end figure.** Not reported from WP2. About −2% is indicative only; the reportable number comes from the WP6 load benchmark.
+* **Feature-cosine bar.** Missed in 6 of 90 images, as described above. Accepted on the strength of Layer 2.
 
 ## Completed Work
 
@@ -146,6 +194,7 @@ None of these are serving numbers. Reportable serving results come from WP6 and 
   * **Randomise run order across states** (e.g. ABBA), per rule 10.
   * For short, launch-bound regions like the FP16 tower, **interleave both states in one process** when possible. Host CPU slowdowns aren't caught by the throttle check.
 * Code states used in WP2: FP32 = `e295fd0`, FP16 = `caf19fe`. They differ by one line.
+* **New after WP2's correctness checks:** for an accuracy A/B of a change inside the model, load both states in one process and answer every question with both, so the comparison is paired. Exclude locked-test images from any gate that decides whether a change is kept.
 
 ## Important Decisions / Findings
 
@@ -163,5 +212,7 @@ None of these are serving numbers. Reportable serving results come from WP6 and 
   * Now that the FP16 tower is CPU-bound, CPU contention in the server matters even more.
   * Check `nr_throttled` before and after the rps 2.0 run.
   * The fix is in Rithvik's server, so agree it with him.
+* **`/workspace` quota.** A 7 GB download failed with a write error on 2026-10-02 when `du -sh /workspace` reached about 59 GB, so the volume appears to be capped near 60 GB, not the ~100 GB `CLAUDE.md` states. About 53 GB is in use. Check the pod's configured volume size.
+* **Stashed timing rows.** `git stash list` holds 10 rows that an interrupted profile run appended to `results/timing/llava_llama_timing.json` on 2026-10-01. They are log lines with no use; `git stash drop` removes them.
 * **Git host key.** This pod's `~/.ssh/known_hosts` lacked GitHub's host key; it was added by hand on 2026-09-21. Add it to the Dockerfile's boot `CMD` so it survives pod restarts. Not done.
 * **`CLAUDE.md`.** Add two entries to "Gotchas already hit": the CPU-throttling stall and the missing `known_hosts` entry. Not done.

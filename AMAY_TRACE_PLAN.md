@@ -23,6 +23,26 @@ One call to `prepare_inputs_labels_for_multimodal`: **48.0 ms real wall**, **35.
 | **C** `mm_projector` (576 tok) | `encode_images` :185 | 0.32 ms | 0.9% | 3 | negligible |
 | **D** gather + splice + pad/mask | `prepare_inputs...` :272, :296-390 | **0.079 ms** | **0.2%** | 49 | 2.18 ms profiled CPU wall. 9 syncs, 17 `nonzero`, 5 `item`. |
 
+> **Re-baselined 2026-10-02, after P1 (FP16 vision tower, commit `caf19fe`).** The table
+> above is the FP32 baseline and is kept for the record. From the new trace pair
+> (`results/timing/wp2_profile/wp2_profile_{fp32,fp16}_*`, same pod, 4 CPU threads):
+>
+> | | FP32 | FP16 |
+> |---|---|---|
+> | One call to `prepare_inputs_labels_for_multimodal`, real wall | 49.74 ms | **24.47 ms** |
+> | GPU busy in that call | 35.7 ms | **11.4 ms** |
+> | Phase A (tower only) GPU busy | 34.47 ms | **9.05 ms** |
+> | Phase A share of prep GPU busy | ~96% | ~80% |
+> | FP32 `ampere_sgemm_*` share of prep GPU time | 75.4% | **0.0%** |
+> | Overhead budget (wall minus GPU busy) | 14.0 ms | **13.1 ms** |
+> | CPU time / GPU busy | 2.01× | **4.63×** |
+>
+> Phases B–D were not re-split; prep GPU busy minus the tower leaves about 2.3 ms for them,
+> against 2.46 ms before. Phase A's share comes from two separate traces (tower-only and
+> whole-prep), so treat it as approximate. **Phase A is no longer compute-bound:** the FP16
+> tower's CUDA-event time equals its CPU issue time, so it is now launch-bound like phase B,
+> and more than half of a prep call's wall time is now overhead rather than GPU work.
+
 **The overhead budget is 12.5 ms.** Real wall (48.0) minus GPU busy (35.5). That is the entire
 prize available to every launch-overhead / sync / fusion fix in this document combined, and
 essentially all of it sits in phase B.
@@ -149,6 +169,22 @@ rather than reported as a win.
 ---
 
 ## P1 — FP32 → FP16 vision tower
+
+> **Status: DONE 2026-10-02** as WP2 of `AMAY_ENGINEERING_ROADMAP.md`; results in
+> `STATUS.md`. Against this section's own targets:
+>
+> - Phase A GPU busy 33.02 ms → target < 15 ms: **9.05 ms**. Prep wall 48 ms → target
+>   < 30 ms: **24.47 ms**. The trace shows FP16 tensor-core GEMMs and no `ampere_sgemm_*`.
+> - `lm_forward_time` flat: prefill moved −0.7% / −0.8% in the `bench_dev` A/B.
+> - **Token selection is not bit-identical, as predicted, and by more than near-tie swaps
+>   suggest:** at 128 every one of 90 dev images keeps a different token set, with 74.4% of
+>   kept tokens shared. The attention-ranked half is 99.25% shared; the change is in the
+>   duplicate-removal half. No Jaccard threshold was agreed with Sribhav beforehand, and
+>   only 128 was measured, on 90 images rather than 200.
+> - Accuracy: TextVQA on 1,000 questions is unchanged within noise at 576 and 128. The
+>   signed-off dev accuracy delta is Sribhav's and is still to come.
+> - No NaN or infinity in the FP16 hidden states on 20 dev images.
+> - Peak GPU memory was not re-measured.
 
 **Problem being fixed.** The CLIP ViT runs in FP32. Trace evidence: all 144 ViT `aten::addmm`
 rows carry `Input type: ['float','float','float']`; the patch embed is

@@ -1,0 +1,25 @@
+WP2 Layer-1 correctness 'wp2_layer1_1' -- NVIDIA A40  git=be4ed773f9 (DIRTY)
+90 dev images, greedy, max_new_tokens=64, important_ratio=0.5; FP32 and FP16 towers in one process
+
+1. Exact text, FP32 vs FP16, vtn=576: 90/90 identical (100.0%)  bar >= 85%  PASS
+     by category: coarse_description 15/15  counting 15/15  fine_attributes 15/15  object_presence 15/15  ocr 15/15  spatial_reasoning 15/15
+1. Exact text, FP32 vs FP16, vtn=128: 80/90 identical (88.9%)  bar >= 85%  PASS
+     by category: coarse_description 15/15  counting 13/15  fine_attributes 15/15  object_presence 13/15  ocr 10/15  spatial_reasoning 14/15
+2. Token selection at vtn=128, all dev images: 0/90 images keep the identical token set; 74.41% of kept tokens shared (worst image 88/128); attention-ranked half 99.25% shared
+2. Token selection at vtn=128, first 20 (the bench_dev set): 0/20 images keep the identical token set; 74.38% of kept tokens shared (worst image 90/128); attention-ranked half 99.06% shared
+3. Pre-projector features, cosine FP32 vs FP16, per image over the whole 576-token map: min 0.998161, mean 0.999675  bar > 0.999  FAIL
+     single worst token across all images: 0.408017 (90 images have a token at or below the bar)
+4. Determinism, FP16 run twice, vtn=576: 90/90 identical output ids  PASS
+4. Determinism, FP16 run twice, vtn=128: 90/90 identical output ids  PASS
+
+Answers that differ (FP32 -> FP16):
+  vtn=128 textvqa_34620 [ocr] 'At the store, you can get a package of 3 Tuff Stuff Camouflage Cake Mix and a package of 3 Tuff Stuff Blue Fondant for $5.' -> 'At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.'
+  vtn=128 textvqa_34614 [ocr] 'The light sign on the farthest right window reads "3.29."' -> 'The light sign on the farthest right window reads "all night."'
+  vtn=128 textvqa_34610 [ocr] 'The center of attention in this image is a person who is wearing a red hat and is surrounded by a group of people. They are likely the focus of the conversation or event taking place in the room. The presence of the person in the red hat suggests that they might be a notable figure or the main subject of' -> 'The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone'
+  vtn=128 textvqa_34622 [ocr] 'One of the brands being advertised in the image is Yamaha.' -> 'One of the brands being advertised is Yamaha.'
+  vtn=128 textvqa_34613 [ocr] "The candy bar down on the bottom is a Hershey's chocolate bar." -> "A Hershey's chocolate bar is down on the bottom of the pile of snow."
+  vtn=128 mme_count/000000357816.jpg [counting] 'Yes, there are four people in the image.' -> 'No, there are only three people in the image.'
+  vtn=128 mme_count/000000430286.jpg [counting] 'No, there are only two remotes in the image.' -> 'Yes, there are three remotes in this image.'
+  vtn=128 gqa_n414992_6 [spatial_reasoning] 'The airplane is flying above a beach where a group of people is standing.' -> 'The airplane is flying above a beach with people on it.'
+  vtn=128 mme_existence/000000007816.jpg [object_presence] 'Yes, there is a motorcycle in the image.' -> 'Yes, there is a motorcycle in this image.'
+  vtn=128 gqa_n473688_116 [object_presence] 'No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a bathroom mirror.' -> 'No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.'

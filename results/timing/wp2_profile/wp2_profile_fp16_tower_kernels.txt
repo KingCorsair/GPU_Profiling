@@ -1,0 +1,44 @@
+vision tower only -- vision_tower(images, output_attentions=True), batch=1
+git commit: be4ed773f9   GPU: NVIDIA A40   vision_tower dtype=torch.float16   cpu_threads=4
+
+CUDA-event time per call, 50 back-to-back calls, no profiler:
+  p50 10.40 ms   p95 11.63 ms   min 10.13   max 11.84
+GPU busy per call under the profiler (kernel rows only): 9.05 ms
+  (event time well above GPU busy => the GPU waited on the CPU to issue kernels)
+
+KERNEL FAMILIES (10 calls)
+  family                                             ms/call   % GPU  launches/call
+  FP16 tensor-core GEMM, FP32 accumulate                6.05    66.8          193.0
+  softmax                                               0.87     9.6           24.0
+  LayerNorm                                             0.25     2.8           50.0
+  everything else                                       1.88    20.8          272.0
+
+SOFTMAX KERNELS (template args = input, output[, accumulate] dtypes):
+     0.87 ms/call  void (anonymous namespace)::softmax_warp_forward<c10::Half, c10::Half, float, 10, false, false>(c10::Half*, c10::Half const*, int, int, int, bool const*, int, b
+
+LAYERNORM KERNELS (template args = input, output[, accumulate] dtypes):
+     0.25 ms/call  void at::native::(anonymous namespace)::vectorized_layer_norm_kernel<c10::Half, float>(int, float, c10::Half const*, c10::Half const*, c10::Half const*, float*,
+
+ALL GEMM KERNELS:
+     1.67 ms/call  x96   ampere_fp16_s16816gemm_fp16_64x128_ldg8_relu_f2f_stages_32x6_tn
+     1.32 ms/call  x24   ampere_fp16_s1688gemm_fp16_128x128_ldg8_relu_f2f_stages_32x1_tn
+     1.25 ms/call  x24   ampere_fp16_s16816gemm_fp16_128x128_ldg8_relu_f2f_stages_32x5_tn
+     1.01 ms/call  x24   void cutlass::Kernel<cutlass_75_tensorop_f16_s1688gemm_f16_64x64_tn_align1>(cutlass_75_tensorop_f16_s1688gemm_f16_64x64_tn_align1::Params)
+     0.68 ms/call  x24   void cutlass::Kernel<cutlass_75_tensorop_f16_s1688gemm_f16_64x64_nn_align1>(cutlass_75_tensorop_f16_s1688gemm_f16_64x64_nn_align1::Params)
+
+TOP 15 KERNELS BY GPU TIME:
+     1.67 ms/call  x96   ampere_fp16_s16816gemm_fp16_64x128_ldg8_relu_f2f_stages_32x6_tn
+     1.32 ms/call  x24   ampere_fp16_s1688gemm_fp16_128x128_ldg8_relu_f2f_stages_32x1_tn
+     1.25 ms/call  x24   ampere_fp16_s16816gemm_fp16_128x128_ldg8_relu_f2f_stages_32x5_tn
+     1.01 ms/call  x24   void cutlass::Kernel<cutlass_75_tensorop_f16_s1688gemm_f16_64x64_tn_align1>(cutlass_75_tensorop_f16_s1688gemm_f16_64x64_tn_align1::Params)
+     0.87 ms/call  x24   void (anonymous namespace)::softmax_warp_forward<c10::Half, c10::Half, float, 10, false, false>(c10::Half*, c10::Half const*, int, int, int,
+     0.68 ms/call  x24   void cutlass::Kernel<cutlass_75_tensorop_f16_s1688gemm_f16_64x64_nn_align1>(cutlass_75_tensorop_f16_s1688gemm_f16_64x64_nn_align1::Params)
+     0.52 ms/call  x24   void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::Mu
+     0.49 ms/call  x96   void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&):
+     0.37 ms/call  x48   void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::Mu
+     0.29 ms/call  x24   void at::native::vectorized_elementwise_kernel<4, at::native::sigmoid_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const
+     0.25 ms/call  x50   void at::native::(anonymous namespace)::vectorized_layer_norm_kernel<c10::Half, float>(int, float, c10::Half const*, c10::Half const*, c10::
+     0.15 ms/call  x49   void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, at::detail::Array<char*, 3> >(int, at::native::CUD
+     0.12 ms/call  x1    void cutlass_cudnn_infer::Kernel<cutlass_tensorop_f16_s16816fprop_optimized_f16_128x128_32x3_nhwc_align8>(cutlass_tensorop_f16_s16816fprop_o
+     0.03 ms/call  x2    void cudnn::ops::nchwToNhwcKernel<__half, __half, float, false, true, (cudnnKernelDataType_t)0>(cudnn::ops::nchw2nhwc_params_t<float>, __hal
+     0.01 ms/call  x1    void at::native::(anonymous namespace)::CatArrayBatchedCopy<c10::Half, unsigned int, 3, 64, 64>(c10::Half*, at::native::(anonymous namespace

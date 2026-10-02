@@ -1,0 +1,9 @@
+WP2 Layer-2 TextVQA 'wp2_layer2_1' -- NVIDIA A40  git=be4ed773f9 (DIRTY)
+1000 questions (seed 20261002) of 4978 eligible (22 on locked-test images excluded), greedy, max_new_tokens=128, important_ratio=0.5; official m4c scorer; FP32 and FP16 towers in one process
+
+vtn=576: FP32 57.62%   FP16 57.65%   difference +0.03 pp (paired bootstrap 95% interval +0.00 to +0.09 pp)
+  answers changed: 7/1000; scores changed: 1 (1 higher with FP16, 0 lower)
+  no regression outside noise
+vtn=128: FP32 56.50%   FP16 56.75%   difference +0.25 pp (paired bootstrap 95% interval -0.74 to +1.25 pp)
+  answers changed: 76/1000; scores changed: 33 (19 higher with FP16, 14 lower)
+  no regression outside noise

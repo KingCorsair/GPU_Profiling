@@ -1,112 +1,56 @@
-# Handoff — resume point (paused 2026-09-22)
+# Handoff — resume point (2026-10-02)
 
-The full detail is in `STATUS.md`. This file covers only what's needed to pick up again. The previous handoff, about fixing the `vis_pruner_copy` submodule and download, is resolved; it's in git history before this commit.
+The full detail is in `STATUS.md`. This file covers only what's needed to pick up again.
 
 ## Where we are
 
-**WP2 — FP16 Vision Tower, in progress.** The implementation and the performance A/B are done. Verification and correctness are open. WP3 has not started.
+**WP2 — FP16 Vision Tower is closed.** All four roadmap §9 criteria hold, and the FP16 change (`caf19fe`) stays. **WP3 — Server Diagnostic is next.**
 
-## What WP2 changed
+## Where the WP2 close-out lives
 
-* Commit `caf19fe`, parent `e295fd0`. One line: `clip_encoder.py:30`, `CLIPVisionModel.from_pretrained(..., torch_dtype=torch.float16)`.
-* Why it was needed: the CLIP tower loads separately from the LLaVA checkpoint, using a float32 config. The intended FP16 cast (`builder.py:155`) is gated on `device_map != 'auto'`, so it never ran.
-* Code states: FP32 = `e295fd0`, FP16 = `caf19fe`. They differ only by that line.
+* `scripts/wp2_layer1_correctness.py`, `scripts/wp2_layer2_textvqa.py`, `scripts/download_textvqa_subset.py`
+* `results/wp2_correctness/` (Layer 1 and Layer 2 outputs)
+* `results/timing/wp2_profile/` (the FP32 and FP16 summaries; the raw `*_trace.json` files are git-ignored and exist only on the pod)
 
-## Measured results (NVIDIA A40, same pod)
+The Layer 1 and Layer 2 outputs record commit `be4ed77` with a dirty tree, because the scripts that produced them were committed afterwards, in the close-out commit. The model code they ran is `be4ed77`'s.
 
-* **`bench_dev` A/B**, 4 runs in order FP32 → FP16 → FP16 → FP32. `vision_tower` p50:
-  * vtn=576: 33.98 → 14.35 ms (**−57.8%, 2.37×**)
-  * vtn=128: 34.00 → 13.68 ms (**−59.8%, 2.49×**)
-  * Rerun spread: at most 0.21 ms.
-  * **The ≥20% gate passes.**
-* **Interleaved diagnostic `wp2_diag_1`**, vtn=128: **34.20 → 11.02 ms (−67.8%, 3.10×)**.
-* Prefill and `mm_projector` are unchanged.
+## WP2 results in one place
 
-## What the jitter diagnostic established
+| | Result |
+|---|---|
+| `vision_tower` p50, bench_dev A/B | 33.98 → 14.35 ms at 576, 34.00 → 13.68 ms at 128 (−58% / −60%) |
+| FP32 `ampere_sgemm_*` share of prep GPU time | 75.4% → 0.0% |
+| Softmax and GEMM accumulate | still FP32 |
+| Exact text, FP32 vs FP16, 90 dev images | 100% identical at 576, 88.9% at 128 |
+| Determinism, FP16 twice | identical at both configs |
+| TextVQA, 1,000 questions | 57.62% → 57.65% at 576; 56.50% → 56.75% at 128 |
+| Feature cosine > 0.999 | missed in 6 of 90 images (min 0.99816) |
+| Token selection at 128 | different on every image; 74.4% of kept tokens shared |
 
-* **The FP16 tower is CPU/kernel-launch-bound.** Its CUDA-event time equals its CPU issue time (ratio 1.00; FP32: 3.22).
-* **The FP16 runs' per-trial wander came from host CPU slowdowns** that lasted tens of seconds. FP16's launch-bound tower exposes them; FP32's GPU-bound tower hid them.
-* **FP16 does not change downstream work.** Against neighbouring FP32 trials in the same process: `prep_other` +0.14 ms, decode −0.04 ms/token.
-* **No GPU clock effect:** the SM clock held at 1740 MHz with no throttle reasons.
-* The throttle check can't see these slowdowns.
+## Left open from WP2
 
-## What's reportable
+1. **Send the Layer-3 request to Sribhav.** Per-category accuracy on the locked eval set, FP32 (`e295fd0`) vs FP16 (`caf19fe`), with OCR and counting at 128 called out: those are the categories where answers changed in Layer 1. Non-blocking. If OCR regresses there, revert the one-line change.
+2. **End-to-end speed-up** is left to WP6. Do not quote one from WP2.
 
-* **Official WP2 component result:** the bench_dev 4-run p50, −58% / −60% (2.4–2.5×).
-* **The 3.10× figure:** a diagnostic that controls for host noise. Always quote it with that label.
-* **End-to-end ≈ −2%: indicative only.** The bench_dev A/B shows −0.2%, which is inside run-to-run noise.
-* None of these are serving numbers; those come from WP6 and Rithvik's harness.
+## Next task: WP3 — Server Diagnostic
 
-## Remaining before WP2 can close
+Roadmap WP3: measure how many milliseconds per request are CPU work that could overlap GPU work but doesn't. It gates WP4.
 
-1. **Profiler verification — the next task.**
-2. **Layer-1 correctness.** A script is still to be written.
-   * exact-text match on 90 dev images (≥85%);
-   * token-selection equivalence;
-   * pre-projector cosine > 0.999;
-   * determinism.
+A first attempt was started and stopped on 2026-10-02. It is parked outside the repo at `/workspace/wp3_parked/` (see its `README.txt`):
 
-   Watch-out: `image_attentions` isn't cast back to FP16's input dtype, so VisPruner now ranks tokens on FP16 attention.
-3. **Layer-2 TextVQA:** 1,000-question subsample, FP32 vs FP16 at 576, `m4c_evaluator.py`.
-4. **Layer 3:** request per-category accuracy from Sribhav (asynchronous).
-5. **Re-baseline** the vision-path numbers in `AMAY_ENGINEERING_ROADMAP.md` and `AMAY_TRACE_PLAN.md`, then close WP2 in `STATUS.md`.
+* `scripts/wp3_diag_server.py` serves `csnbs/server.py` unmodified and instruments it from outside: an event-loop heartbeat and per-request stage timestamps. Nothing in `csnbs/` changes.
+* `scripts/wp3_run_diag.py` drives it with the existing `csnbs/measure` load generator, with the two configs and a 4-thread pin interleaved.
+* `scripts/wp3_analyze.py` produces the service-time decomposition.
+* `results/timing/wp3_diag/wp3_diag_1` was **stopped early**: 4 of 8 sessions are complete. Do not treat it as a finished run.
 
-## Next task: profiler verification (prepared, not yet run)
+Nothing from that attempt has been analysed or reported. To resume, move the scripts back into `scripts/` and start a fresh run ID.
 
-**Goal:** show that the FP32 `ampere_sgemm_*` vision kernels were replaced by FP16 tensor-core GEMMs (names containing `s16816gemm`, `xmma`, `f16f16_f16f32` or `tensorop_f16`), with FP32 accumulate.
+Before running WP3: agree the instrumentation approach with Rithvik, since it concerns his server.
 
-Also check:
+## Open carry-overs
 
-* softmax and LayerNorm dtypes, including that softmax is **not** `<c10::Half, c10::Half, c10::Half>`;
-* any FP16-accumulate GEMMs (`h16816`), which the script flags;
-* whether the tower's time in the trace matches the benchmark (FP32 ≈ 34 ms, FP16 ≈ 11 ms).
-
-**Script:** `scripts/profile_multimodal_prep.py`, commit `71010a5`.
-
-* It now takes `--run-id` and writes to `results/timing/wp2_profile/<run-id>_{prep_trace.json, prep_summary.txt, tower_trace.json, tower_kernels.txt}`. It refuses to overwrite.
-* It adds a **tower-only** profile. This is needed because VisPruner's selection loop runs FP16 matmuls in both states.
-* The old `results/timing/prep_trace.json` / `prep_summary.txt` (`c317688`, older pod, no thread pin) must stay unchanged.
-
-**States:**
-
-| Run | Branch | Commit | Model state |
-|---|---|---|---|
-| FP32 | `wp2-profile-fp32` (local) | `945abe6` = `e295fd0` + the profiler-script commit, cherry-picked | FP32 tower |
-| FP16 | `main` | contains `caf19fe` and the same profiler script | FP16 tower |
-
-The two states differ in model code only by the one `clip_encoder.py:30` line. The profiler script is identical in both.
-
-If the branch is ever lost, recreate it:
-
-```bash
-git checkout -b wp2-profile-fp32 e295fd0 && git cherry-pick 71010a5
-```
-
-**Before each run:**
-
-* the tracked tree is clean;
-* `nvidia-smi` shows no compute apps;
-* no python, server or load-generator process is running;
-* the run ID is unused.
-
-**Commands.** Run FP32 first, then validate, then run FP16:
-
-```bash
-cd /workspace/GPU_Profiling
-git checkout wp2-profile-fp32
-python scripts/profile_multimodal_prep.py --run-id wp2_profile_fp32
-# validate, then:
-git checkout main
-python scripts/profile_multimodal_prep.py --run-id wp2_profile_fp16
-```
-
-**Expect:**
-
-* FP32: `vision_tower dtype=torch.float32`, `ampere_sgemm_*`, `softmax_warp_forward<float, float, float…>`, `vectorized_layer_norm_kernel<float, float>`.
-* FP16: `torch.float16`, `ampere_fp16_s16816gemm_*` or `sm80_xmma_gemm_f16f16_f16f32_*`, `softmax_warp_forward<c10::Half, c10::Half, float…>`.
-
-## Open carry-overs (not WP2)
-
-* **WP3:** the server sets no torch thread count, so it likely hits the throttling stall. This matters more now that the FP16 tower is CPU-bound. It needs Rithvik.
-* **Git host key:** add GitHub's host key to `~/.ssh/known_hosts` in the Dockerfile's boot `CMD`, so pushes work after a pod restart.
-* **`CLAUDE.md`:** add two gotchas, the CPU-throttling stall and the missing `known_hosts` entry.
+* **`/workspace` quota:** writes failed at about 59 GB used. The volume looks capped near 60 GB; about 53 GB is in use.
+* **Stash:** `git stash list` holds 10 stray rows from `results/timing/llava_llama_timing.json`. Safe to drop.
+* **WP3:** the server sets no torch thread count, so it likely hits the throttling stall.
+* **Git host key:** add GitHub's host key to `~/.ssh/known_hosts` in the Dockerfile's boot `CMD`.
+* **`CLAUDE.md`:** add the CPU-throttling stall and the missing `known_hosts` entry to the gotchas.
