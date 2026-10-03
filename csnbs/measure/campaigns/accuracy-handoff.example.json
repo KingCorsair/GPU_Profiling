@@ -1,0 +1,7 @@
+{
+  "schema": "owner-aggregate-accuracy",
+  "schemaVersion": 1,
+  "status": "pending",
+  "reason": "Existing evaluation artifacts are available, but validated aggregate accuracy matching this pilot's execution identity, checkpoint files, locked split, scorer evidence and per-category accounting has not been supplied.",
+  "evaluations": []
+}

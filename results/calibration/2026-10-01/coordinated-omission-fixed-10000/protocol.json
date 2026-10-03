@@ -1,0 +1,53 @@
+{
+  "schema": "coordinated-omission-protocol",
+  "schemaVersion": 1,
+  "recordedBeforeCollectionUtc": "2026-10-01T20:03:13.553Z",
+  "synthetic": true,
+  "reportableGpuResult": false,
+  "requestedServiceDelayMs": 2,
+  "measuredRequestsPerCondition": 10000,
+  "warmupRequestsPerCondition": 10,
+  "seed": 465,
+  "conditions": [
+    {
+      "id": "open-loop-r750",
+      "mode": "open-loop",
+      "targetRps": 750
+    },
+    {
+      "id": "open-loop-r250",
+      "mode": "open-loop",
+      "targetRps": 250
+    },
+    {
+      "id": "closed-loop-r750",
+      "mode": "closed-loop",
+      "targetRps": 750
+    },
+    {
+      "id": "closed-loop-r250",
+      "mode": "closed-loop",
+      "targetRps": 250
+    }
+  ],
+  "primaryComparison": "Sent-to-complete p95 alongside delivered arrival rate and reference-horizon delivery counts",
+  "fixedBudget": true,
+  "independentReplicatesPerCondition": 1,
+  "requestTimeoutMs": 60000,
+  "source": {
+    "gitCommit": "eca05f541d2a9a07529f55f6ff4149b43c2552af",
+    "gitDirty": true,
+    "demoSha256": "sha256:9d9cd68d2d5fcb92606146e229a4e8f4e385b27e9c01bc621558dbbc61aa49dd",
+    "canonicalLoadgenSha256": "sha256:0586ed9de34a3c42d30169c2ef151a59ba3a066eb4e84072c573e90fac5882e9",
+    "node": "v24.13.0",
+    "platform": "darwin"
+  },
+  "limitations": [
+    "Synthetic CPU serial service; no model, GPU speedup, production capacity, or accuracy conclusion.",
+    "Requested timer delay is not exact service time. Actual queue and service durations are recorded separately.",
+    "One trial per condition; correlated requests are descriptive samples, not independent experimental replications.",
+    "Closed-loop sends every predeclared request eventually but suppresses arrivals during the reference N/RPS horizon.",
+    "10,000 observations allow descriptive tail calculation; they do not guarantee precise or stationary tails.",
+    "Client and server use separate processes on the same host; host scheduling and transport remain part of results."
+  ]
+}

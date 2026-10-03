@@ -1,0 +1,366 @@
+{
+  "schema": "loadgen-campaign",
+  "schemaVersion": 2,
+  "campaignId": "llava-oct01-http-overhead",
+  "spec": {
+    "campaignId": "llava-oct01-http-overhead",
+    "purpose": "ab",
+    "endpoint": "http://127.0.0.1:8765/infer",
+    "datasetPath": "/workspace/rithvik-measure-observations-20261001/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+    "rates": [
+      1
+    ],
+    "repetitions": 5,
+    "measuredRequests": 90,
+    "warmupRequests": 10,
+    "seed": 465,
+    "timeoutMs": 120000,
+    "startupTimeoutMs": 300000,
+    "settleMs": 1000,
+    "gpuExclusive": true,
+    "variants": [
+      {
+        "id": "observations-off",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+          "EXTENDED_HTTP_OBSERVATIONS": "0"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural",
+          "instrumentation": "handler-service-wall-v1"
+        }
+      },
+      {
+        "id": "observations-on",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+          "EXTENDED_HTTP_OBSERVATIONS": "1"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural",
+          "instrumentation": "handler-stage-token-observations-v2"
+        }
+      }
+    ],
+    "runKind": "isolated",
+    "comparisonKind": "instrumentation"
+  },
+  "specHash": "15f4ecbe62d9d92671de2fbafed6f1bc94d379c729caeef71f9199886532584f",
+  "createdAtUtc": "2026-10-01T21:26:57.813Z",
+  "schedule": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p4-v1",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p4-v0",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p5-v0",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p5-v1",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 1
+    }
+  ],
+  "trials": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v0-a76aa0fa/runs/2026-10-01T21-27-08.701Z_rps-1_c8bbb446",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v0-a76aa0fa",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v0-a76aa0fa",
+          "startedAtUtc": "2026-10-01T21:26:57.943Z",
+          "finishedAtUtc": "2026-10-01T21:27:52.726Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v0-a76aa0fa/runs/2026-10-01T21-27-08.701Z_rps-1_c8bbb446",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v1-53853771/runs/2026-10-01T21-28-03.259Z_rps-1_0375b2e8",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v1-53853771",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v1-53853771",
+          "startedAtUtc": "2026-10-01T21:27:52.781Z",
+          "finishedAtUtc": "2026-10-01T21:28:46.806Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p1-v1-53853771/runs/2026-10-01T21-28-03.259Z_rps-1_0375b2e8",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v1-73802a94/runs/2026-10-01T21-28-57.004Z_rps-1_757a463b",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v1-73802a94",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v1-73802a94",
+          "startedAtUtc": "2026-10-01T21:28:46.870Z",
+          "finishedAtUtc": "2026-10-01T21:29:39.987Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v1-73802a94/runs/2026-10-01T21-28-57.004Z_rps-1_757a463b",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v0-bcb36e5a/runs/2026-10-01T21-29-50.942Z_rps-1_9de3a774",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v0-bcb36e5a",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v0-bcb36e5a",
+          "startedAtUtc": "2026-10-01T21:29:40.048Z",
+          "finishedAtUtc": "2026-10-01T21:30:35.246Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p2-v0-bcb36e5a/runs/2026-10-01T21-29-50.942Z_rps-1_9de3a774",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v0-541d9ffa/runs/2026-10-01T21-30-46.224Z_rps-1_5193b512",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v0-541d9ffa",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v0-541d9ffa",
+          "startedAtUtc": "2026-10-01T21:30:35.306Z",
+          "finishedAtUtc": "2026-10-01T21:31:30.011Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v0-541d9ffa/runs/2026-10-01T21-30-46.224Z_rps-1_5193b512",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v1-3f6b45f4/runs/2026-10-01T21-31-40.754Z_rps-1_afa109e5",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v1-3f6b45f4",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v1-3f6b45f4",
+          "startedAtUtc": "2026-10-01T21:31:30.075Z",
+          "finishedAtUtc": "2026-10-01T21:32:24.396Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p3-v1-3f6b45f4/runs/2026-10-01T21-31-40.754Z_rps-1_afa109e5",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p4-v1",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v1-4871d9e4/runs/2026-10-01T21-32-35.212Z_rps-1_d646f819",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p4-v1-4871d9e4",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v1-4871d9e4",
+          "startedAtUtc": "2026-10-01T21:32:24.506Z",
+          "finishedAtUtc": "2026-10-01T21:33:18.205Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v1-4871d9e4/runs/2026-10-01T21-32-35.212Z_rps-1_d646f819",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p4-v0",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v0-bd163dda/runs/2026-10-01T21-33-29.815Z_rps-1_65e081fe",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p4-v0-bd163dda",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v0-bd163dda",
+          "startedAtUtc": "2026-10-01T21:33:18.266Z",
+          "finishedAtUtc": "2026-10-01T21:34:13.114Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p4-v0-bd163dda/runs/2026-10-01T21-33-29.815Z_rps-1_65e081fe",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p5-v0",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v0-f6c2e25c/runs/2026-10-01T21-34-23.850Z_rps-1_2724c8a2",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p5-v0-f6c2e25c",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v0-f6c2e25c",
+          "startedAtUtc": "2026-10-01T21:34:13.178Z",
+          "finishedAtUtc": "2026-10-01T21:35:07.721Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v0-f6c2e25c/runs/2026-10-01T21-34-23.850Z_rps-1_2724c8a2",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p5-v1",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v1-5449e4fb/runs/2026-10-01T21-35-18.466Z_rps-1_b225da6d",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p5-v1-5449e4fb",
+          "directory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v1-5449e4fb",
+          "startedAtUtc": "2026-10-01T21:35:07.781Z",
+          "finishedAtUtc": "2026-10-01T21:36:02.743Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-http-overhead/r1-p5-v1-5449e4fb/runs/2026-10-01T21-35-18.466Z_rps-1_b225da6d",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

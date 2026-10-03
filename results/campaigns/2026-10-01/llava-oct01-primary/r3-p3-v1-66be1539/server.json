@@ -1,0 +1,117 @@
+{
+  "healthUrl": "http://127.0.0.1:8765/health",
+  "service": "csnbs-llava-server",
+  "pid": 7639,
+  "modelId": "liuhaotian/llava-v1.5-7b",
+  "checkpointRevision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+  "configuration": {
+    "model_id": "liuhaotian/llava-v1.5-7b",
+    "checkpoint": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+    "download_provenance": {
+      "model_id": "liuhaotian/llava-v1.5-7b",
+      "revision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+      "verified_at_utc": "2026-10-01T19:47:35.124931+00:00",
+      "verification": "Each file checked against pinned Hub LFS SHA256 or Git blob SHA1",
+      "files": [
+        {
+          "file": ".gitattributes",
+          "bytes": 1519,
+          "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+        },
+        {
+          "file": "README.md",
+          "bytes": 1397,
+          "sha256": "a3101de0395b4517cee96f040d4feae45a99bde2fcfb2af54060bf54f3353b47"
+        },
+        {
+          "file": "config.json",
+          "bytes": 1161,
+          "sha256": "f112de882e31171a105f0d3f69d9e6e8700a40149f0944f4b507d3a41789e492"
+        },
+        {
+          "file": "generation_config.json",
+          "bytes": 124,
+          "sha256": "e453057ea6a89d902d7326b3addbe312a7a6c8faabf777a521c9f2d563f79b8d"
+        },
+        {
+          "file": "mm_projector.bin",
+          "bytes": 41961085,
+          "sha256": "be33a3b477e091832a3c8a9fabf5769c43b4cb2c161fc8c464b7bb214f16143a"
+        },
+        {
+          "file": "pytorch_model-00001-of-00002.bin",
+          "bytes": 9976634558,
+          "sha256": "492fdfa63cf314097d99da81a3586d54a97adc1471a0ae0535f5caa269b86314"
+        },
+        {
+          "file": "pytorch_model-00002-of-00002.bin",
+          "bytes": 3542276251,
+          "sha256": "c0eb94eb3fa578a4c63567f2eca6b0acf6a44a891c257aca0df88ffa891de72e"
+        },
+        {
+          "file": "pytorch_model.bin.index.json",
+          "bytes": 27068,
+          "sha256": "487578d3f7ec21c057596d0f9dc71084acc349eb8f13bd8b5af86c26460f2d31"
+        },
+        {
+          "file": "special_tokens_map.json",
+          "bytes": 438,
+          "sha256": "719833ff26ac897a3ec8ed946028a135de2a351470af59b4008744ab1f0ee9b7"
+        },
+        {
+          "file": "tokenizer.model",
+          "bytes": 499723,
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 749,
+          "sha256": "cf01145c6de57f061991ff871e85d0402c38481f968daea8874c431cd0c7740f"
+        }
+      ]
+    },
+    "implementation": "vispruner-vendored-blocking-v1",
+    "visual_token_num": 128,
+    "important_ratio": 0.5,
+    "max_new_tokens": 64,
+    "do_sample": false,
+    "use_cache": true,
+    "eos_policy": "natural",
+    "prompt_template": "llava_v1",
+    "batch_size": 1,
+    "dtype": "torch.float16",
+    "instrumentation": "handler-service-wall-v1",
+    "queue_observation": "unavailable-blocking-handler"
+  },
+  "error": null,
+  "mode": "model",
+  "modelLoaded": true,
+  "hardware": {
+    "gpuModels": [
+      "NVIDIA A40"
+    ],
+    "devices": [
+      {
+        "name": "NVIDIA A40",
+        "uuid": "GPU-de4f53e9-e41b-315f-2f08-b2d46d37523a",
+        "driver_version": "595.91.07",
+        "memory_total_mib": "46068"
+      }
+    ],
+    "source": "server-nvidia-smi",
+    "error": null
+  },
+  "source": {
+    "gitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+    "gitDirty": false,
+    "containerImage": null
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "torch": "2.2.2",
+    "transformers": "4.37.2",
+    "fastapi": "0.141.1",
+    "uvicorn": "0.52.1"
+  },
+  "startupMs": 9304.572499000002
+}

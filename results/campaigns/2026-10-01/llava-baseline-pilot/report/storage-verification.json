@@ -1,0 +1,205 @@
+{
+  "schema": "measurement-storage-verification",
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-10-01T20:09:22.403Z",
+  "campaignId": "llava-baseline-pilot",
+  "campaignSha256": "aa623465e782e06c27c4a9ed0768b7adf50886c181d16e6a46fda16c3422ccf9",
+  "reportSha256": "5ede4f15297ef07b5346b7890b9f5161ff9fdacbfb8753c6ee04e8bef8383620",
+  "databaseVersion": "17.10",
+  "firstImport": {
+    "insertedRuns": 6,
+    "existingRuns": 0,
+    "campaignId": "llava-baseline-pilot"
+  },
+  "secondImport": {
+    "insertedRuns": 0,
+    "existingRuns": 6,
+    "campaignId": "llava-baseline-pilot"
+  },
+  "totals": {
+    "runs": 6,
+    "trials": 6,
+    "requests": 600,
+    "measurement": 540,
+    "warmup": 60,
+    "resourceSamples": 704
+  },
+  "checks": {
+    "canonicalRawVerification": true,
+    "reportSummaryAndHashesMatchRaw": true,
+    "storedRunAndTrialManifestsMatchRaw": true,
+    "storedRequestAndResourceJsonMatchRaw": true,
+    "allArtifactHashesAndByteLengthsMatch": true,
+    "secondImportInsertedNoRows": true
+  },
+  "runs": [
+    {
+      "runId": "2026-10-01T19-53-48.853Z_rps-1_c77c2c8c",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 141,
+      "bundleSha256": "f3ee82b824cdb6a1141ffb3e8f1360f70a333cf41bbc0de8b82c16962bc41f1b",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "02967daaf23d4f315e9a2974343d42d1e79ef761ab23076b48ad601c8f680a5a",
+          "byteLength": 11834
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "59dfc0cb1559a3ed55e898d4751cbc437bcf6001066a2cf134ccb7ee779681ee",
+          "byteLength": 99210
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "c822d3b2d8240db10979e8cf8fdc67a8633c2f16d2b2e77d6589762c2c7e58d4",
+          "byteLength": 37158
+        }
+      ]
+    },
+    {
+      "runId": "2026-10-01T19-55-36.562Z_rps-1_9d105bb1",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 107,
+      "bundleSha256": "4a667c213655014850d204ffecf1b86007f40af930af4b46198ca010c8aeb657",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "e1c7b20ef4c31fcaab44e15384b768a9e8d41cecf962dcd9ab4006271d4137d4",
+          "byteLength": 11830
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "7e4ba39a75d86bee6518a4976abcbd4021ece16a11c52889ca7603a396c95758",
+          "byteLength": 99419
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "74297f91b7677f9d3f33ab9f4637a79144bcddc6b62a0eeaeab703f0e5e311ea",
+          "byteLength": 28276
+        }
+      ]
+    },
+    {
+      "runId": "2026-10-01T19-57-23.626Z_rps-1_76fab203",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 106,
+      "bundleSha256": "730ab9ac57f52c2832af9aed28e26bada700863c1140ff4272078844771b4c38",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "6dcd71b366289fc46558867abeb36871fe68fa6f38bd7fb4fac0dd6f19f019dd",
+          "byteLength": 11834
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "f75899b18f2e922b0c47d370feee5e1e903c3723b26179c06a24e533a5a10085",
+          "byteLength": 99163
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "dfd9e1f25c07675040391872aba517e0a65e9a593b94b26a2a4e0e8ce35c2ac9",
+          "byteLength": 27971
+        }
+      ]
+    },
+    {
+      "runId": "2026-10-01T19-59-38.390Z_rps-1_4765f54a",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 135,
+      "bundleSha256": "09673b0d9dc2f759622defccfffb68e999ecf7c9a60a88859035a843c5846d46",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "6024270b7043427185d378b5a3c835de6e9991ff932042f3b9b95b047aa7401d",
+          "byteLength": 11834
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "ee49fa04aa23fe947068103db542db1b2dc1f4ed28ae3f151bb9e62832ff2b99",
+          "byteLength": 99177
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "7756b2c3e795d1b82399a4d2ed10aee77d1df10205039f966c9e9295d85c6f65",
+          "byteLength": 35593
+        }
+      ]
+    },
+    {
+      "runId": "2026-10-01T20-01-24.962Z_rps-1_8e7d86e4",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 107,
+      "bundleSha256": "0115b419d5f4371cda6ceef2c6e3b7a111c1767903a2238cf1bf102ffdaf12ea",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "d462eadff8f85b1106a679ae80a7b90bc1aea7a31901f425d365bfe98242a08b",
+          "byteLength": 11833
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "a0c1e4fe2b7db35ba769f00545fd26d206dc48071ab39cb4f173bb00527bb809",
+          "byteLength": 99065
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "0b1c684d58e7993d3aefaf37a786a3a8abb72c20e5dde7920fac5292f06627ba",
+          "byteLength": 28238
+        }
+      ]
+    },
+    {
+      "runId": "2026-10-01T20-03-12.637Z_rps-1_d9545367",
+      "requests": 100,
+      "measurement": 90,
+      "warmup": 10,
+      "resourceSamples": 108,
+      "bundleSha256": "acd04107fc523783e1424870f60b8c64a5d53fb7af1ac9b5cfd29df039c054a0",
+      "artifacts": [
+        {
+          "relativePath": "run.json",
+          "kind": "manifest",
+          "sha256": "28f0f835bd57b1f0cc81847fbb94ac71edc1529b53a12f315b4d3068267fc0e1",
+          "byteLength": 11833
+        },
+        {
+          "relativePath": "requests.jsonl",
+          "kind": "requests",
+          "sha256": "ca5be251e6709fe7358906f380d67518cbd4f8f67e12786fe16fb42eaa3a3b65",
+          "byteLength": 99156
+        },
+        {
+          "relativePath": "resources.jsonl",
+          "kind": "resources",
+          "sha256": "51c90a019852abd765eb4aa0fac6deeee7176d05faef8d5eb491765558f6f5d0",
+          "byteLength": 28521
+        }
+      ]
+    }
+  ]
+}
