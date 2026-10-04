@@ -1,0 +1,38 @@
+{
+  "name": "gpu-profiling-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync-data": "node scripts/sync-data.mjs",
+    "predev": "npm run sync-data",
+    "dev": "vite --host 127.0.0.1",
+    "predev:live": "npm run sync-data",
+    "dev:live": "node --import tsx scripts/dev-live.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tools.json",
+    "test": "node --import tsx --test scripts/*.test.ts",
+    "build": "npm run sync-data && npm run typecheck && vite build --mode showcase",
+    "preview": "vite preview --host 127.0.0.1",
+    "build:share": "npm run build && node --import tsx scripts/prepare-share.mjs",
+    "build:live": "npm run sync-data && npm run typecheck && vite build --mode live --outDir dist-live && node --import tsx scripts/prepare-share.mjs --live",
+    "build:vercel": "npm run build:share && node scripts/prepare-vercel.mjs"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  }
+}

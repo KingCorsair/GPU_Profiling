@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["node"] },
+  "include": ["gateway/**/*.ts", "scripts/dev-live.ts", "src/live-contract.ts"]
+}

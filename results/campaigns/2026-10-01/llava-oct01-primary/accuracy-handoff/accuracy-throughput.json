@@ -1,0 +1,223 @@
+{
+  "schema": "accuracy-throughput-join",
+  "schemaVersion": 1,
+  "status": "pending",
+  "scope": "research",
+  "campaignId": "llava-oct01-primary",
+  "points": [],
+  "evaluations": [],
+  "requiredExecutionIdentities": [
+    {
+      "identity": {
+        "modelId": "liuhaotian/llava-v1.5-7b",
+        "checkpointRevision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+        "checkpointFiles": [
+          {
+            "file": ".gitattributes",
+            "bytes": 1519,
+            "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+          },
+          {
+            "file": "README.md",
+            "bytes": 1397,
+            "sha256": "a3101de0395b4517cee96f040d4feae45a99bde2fcfb2af54060bf54f3353b47"
+          },
+          {
+            "file": "config.json",
+            "bytes": 1161,
+            "sha256": "f112de882e31171a105f0d3f69d9e6e8700a40149f0944f4b507d3a41789e492"
+          },
+          {
+            "file": "generation_config.json",
+            "bytes": 124,
+            "sha256": "e453057ea6a89d902d7326b3addbe312a7a6c8faabf777a521c9f2d563f79b8d"
+          },
+          {
+            "file": "mm_projector.bin",
+            "bytes": 41961085,
+            "sha256": "be33a3b477e091832a3c8a9fabf5769c43b4cb2c161fc8c464b7bb214f16143a"
+          },
+          {
+            "file": "pytorch_model-00001-of-00002.bin",
+            "bytes": 9976634558,
+            "sha256": "492fdfa63cf314097d99da81a3586d54a97adc1471a0ae0535f5caa269b86314"
+          },
+          {
+            "file": "pytorch_model-00002-of-00002.bin",
+            "bytes": 3542276251,
+            "sha256": "c0eb94eb3fa578a4c63567f2eca6b0acf6a44a891c257aca0df88ffa891de72e"
+          },
+          {
+            "file": "pytorch_model.bin.index.json",
+            "bytes": 27068,
+            "sha256": "487578d3f7ec21c057596d0f9dc71084acc349eb8f13bd8b5af86c26460f2d31"
+          },
+          {
+            "file": "special_tokens_map.json",
+            "bytes": 438,
+            "sha256": "719833ff26ac897a3ec8ed946028a135de2a351470af59b4008744ab1f0ee9b7"
+          },
+          {
+            "file": "tokenizer.model",
+            "bytes": 499723,
+            "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+          },
+          {
+            "file": "tokenizer_config.json",
+            "bytes": 749,
+            "sha256": "cf01145c6de57f061991ff871e85d0402c38481f968daea8874c431cd0c7740f"
+          }
+        ],
+        "serverGitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+        "runtime": {
+          "torch": "2.2.2",
+          "transformers": "4.37.2"
+        },
+        "configuration": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "implementation": "vispruner-vendored-blocking-v1",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "do_sample": false,
+          "use_cache": true,
+          "eos_policy": "natural",
+          "prompt_template": "llava_v1",
+          "batch_size": 1,
+          "dtype": "torch.float16",
+          "instrumentation": "handler-service-wall-v1",
+          "queue_observation": "unavailable-blocking-handler"
+        }
+      },
+      "runIds": [
+        "2026-10-01T20-05-32.074Z_rps-3_d0559558",
+        "2026-10-01T20-11-23.570Z_rps-3_2abc7c6d",
+        "2026-10-01T20-13-30.777Z_rps-3_fd32738c",
+        "2026-10-01T20-19-21.391Z_rps-3_d85e80d2",
+        "2026-10-01T20-21-26.825Z_rps-3_f8d37663",
+        "2026-10-01T20-25-32.358Z_rps-1_d93ce8df",
+        "2026-10-01T20-39-54.151Z_rps-1_1b1c6521",
+        "2026-10-01T20-44-40.859Z_rps-1_edd29e1e",
+        "2026-10-01T20-59-04.551Z_rps-1_43f62605",
+        "2026-10-01T21-03-50.476Z_rps-1_6ad0480f"
+      ],
+      "variants": [
+        "baseline-A"
+      ]
+    },
+    {
+      "identity": {
+        "modelId": "liuhaotian/llava-v1.5-7b",
+        "checkpointRevision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+        "checkpointFiles": [
+          {
+            "file": ".gitattributes",
+            "bytes": 1519,
+            "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+          },
+          {
+            "file": "README.md",
+            "bytes": 1397,
+            "sha256": "a3101de0395b4517cee96f040d4feae45a99bde2fcfb2af54060bf54f3353b47"
+          },
+          {
+            "file": "config.json",
+            "bytes": 1161,
+            "sha256": "f112de882e31171a105f0d3f69d9e6e8700a40149f0944f4b507d3a41789e492"
+          },
+          {
+            "file": "generation_config.json",
+            "bytes": 124,
+            "sha256": "e453057ea6a89d902d7326b3addbe312a7a6c8faabf777a521c9f2d563f79b8d"
+          },
+          {
+            "file": "mm_projector.bin",
+            "bytes": 41961085,
+            "sha256": "be33a3b477e091832a3c8a9fabf5769c43b4cb2c161fc8c464b7bb214f16143a"
+          },
+          {
+            "file": "pytorch_model-00001-of-00002.bin",
+            "bytes": 9976634558,
+            "sha256": "492fdfa63cf314097d99da81a3586d54a97adc1471a0ae0535f5caa269b86314"
+          },
+          {
+            "file": "pytorch_model-00002-of-00002.bin",
+            "bytes": 3542276251,
+            "sha256": "c0eb94eb3fa578a4c63567f2eca6b0acf6a44a891c257aca0df88ffa891de72e"
+          },
+          {
+            "file": "pytorch_model.bin.index.json",
+            "bytes": 27068,
+            "sha256": "487578d3f7ec21c057596d0f9dc71084acc349eb8f13bd8b5af86c26460f2d31"
+          },
+          {
+            "file": "special_tokens_map.json",
+            "bytes": 438,
+            "sha256": "719833ff26ac897a3ec8ed946028a135de2a351470af59b4008744ab1f0ee9b7"
+          },
+          {
+            "file": "tokenizer.model",
+            "bytes": 499723,
+            "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+          },
+          {
+            "file": "tokenizer_config.json",
+            "bytes": 749,
+            "sha256": "cf01145c6de57f061991ff871e85d0402c38481f968daea8874c431cd0c7740f"
+          }
+        ],
+        "serverGitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+        "runtime": {
+          "torch": "2.2.2",
+          "transformers": "4.37.2"
+        },
+        "configuration": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "implementation": "vispruner-vendored-blocking-v1",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "do_sample": false,
+          "use_cache": true,
+          "eos_policy": "natural",
+          "prompt_template": "llava_v1",
+          "batch_size": 1,
+          "dtype": "torch.float16",
+          "instrumentation": "handler-service-wall-v1",
+          "queue_observation": "unavailable-blocking-handler"
+        }
+      },
+      "runIds": [
+        "2026-10-01T20-07-38.731Z_rps-3_1acc2d63",
+        "2026-10-01T20-09-30.765Z_rps-3_e2673e4d",
+        "2026-10-01T20-15-37.003Z_rps-3_118d79ce",
+        "2026-10-01T20-17-29.137Z_rps-3_669b1fa3",
+        "2026-10-01T20-23-37.296Z_rps-3_d16b49bd",
+        "2026-10-01T20-30-21.000Z_rps-1_05faed24",
+        "2026-10-01T20-35-08.008Z_rps-1_6ca38fc7",
+        "2026-10-01T20-49-27.948Z_rps-1_ebb1bf5e",
+        "2026-10-01T20-54-16.714Z_rps-1_89177da0",
+        "2026-10-01T21-09-19.369Z_rps-1_686fc506"
+      ],
+      "variants": [
+        "pruned-128"
+      ]
+    }
+  ],
+  "limitations": [
+    "Requires a canonical report generated by the raw-artifact verifier; this join does not rerun timing/statistical verification.",
+    "Accuracy is supplied by its owner; validation references are retained, not independently rescored or adjudicated.",
+    "Each point is one serving trial. Reusing one aggregate accuracy estimate across speed trials is not independent accuracy replication.",
+    "Within-window throughput at an offered load is not maximum sustainable capacity. These points establish no optimization significance.",
+    "Evaluation split and serving workload are separate populations. Category scores are retained without pooling overlapping categories."
+  ],
+  "reason": "Matching owner-validated aggregate accuracy has not been supplied.",
+  "generatedAtUtc": "2026-10-01T21:18:13.229218+00:00",
+  "inputs": {
+    "report": {
+      "filename": "report.json",
+      "sha256": "8a81907268ab8853b4f6a6b2445f0b5ab78e235b0ad14c676bae25ae1db8f4f6"
+    },
+    "accuracy": null
+  }
+}

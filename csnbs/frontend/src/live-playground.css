@@ -1,0 +1,47 @@
+.live-playground .play-intro { padding-bottom: 32px; }
+.live-playground .intro-copy { max-width: 700px; }
+.live-connection { display: flex; align-items: center; justify-content: space-between; gap: 24px; border: 1px solid var(--line); border-radius: 8px; padding: 20px 24px; background: var(--surface); }
+.live-connection-copy { min-width: 0; }
+.live-status-heading { display: flex; align-items: center; gap: 9px; }
+.live-status-heading h2 { font-size: 15px; font-weight: 500; letter-spacing: 0; }
+.live-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.live-status-dot[data-ready="true"] { background: #347565; }
+.live-status-caption { padding-left: 10px; margin-left: 3px; border-left: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.live-connection-copy > p { font-size: 12px; line-height: 1.7; color: var(--muted); max-width: 650px; margin-top: 9px; }
+.live-local-note { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+.live-verification { max-width: 340px; margin-top: 18px; }
+.live-verification > p { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 7px 0; }
+.live-fallback { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 18px; margin-top: 16px; font-size: 12px; line-height: 1.7; }
+.live-fallback a { display: inline-flex; align-items: center; gap: 6px; color: var(--blue); }
+.live-fallback > span { color: var(--muted); }
+.live-playground .play-workspace { margin-top: 28px; }
+.live-field-note { font-size: 11px; color: var(--muted); }
+.live-token-fieldset { margin: 28px 0 0; padding: 0; border: 0; }
+.live-token-fieldset legend { padding: 0; font-size: 13px; font-weight: 500; }
+.live-token-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; margin-top: 12px; }
+.live-token-options button { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; position: relative; min-height: 87px; text-align: left; border: 1px solid var(--line); border-radius: 6px; padding: 13px 12px; color: var(--text); background: var(--paper); }
+.live-token-options button strong { font-size: 20px; line-height: 1; font-weight: 400; font-variant-numeric: tabular-nums; }
+.live-token-options button span { color: var(--muted); font-size: 10px; }
+.live-token-options button small { font-size: 9px; color: var(--blue); }
+.live-token-options button[aria-pressed="true"] { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); background: color-mix(in srgb, var(--blue) 5%, var(--paper)); }
+.live-token-options button:hover:not(:disabled) { border-color: var(--muted); }
+.live-token-fieldset:disabled button { cursor: not-allowed; }
+.live-token-fieldset > p { color: var(--muted); font-size: 11px; line-height: 1.6; margin-top: 10px; }
+.live-fixed-settings { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--muted); padding-top: 17px; margin-top: 17px; border-top: 1px solid var(--line); }
+.live-fixed-settings > span { display: flex; flex-direction: column; gap: 5px; }
+.live-fixed-settings b { font-weight: 400; font-size: 12px; color: var(--text); }
+.live-comparison { margin-top: 36px; }
+.live-answer-title { color: var(--text); font-size: 16px; letter-spacing: -.2px; }
+.live-answer-tag { margin-top: 20px; font-size: 10px; }
+.live-answer .play-answer-text { margin-top: 12px; }
+.live-answer-empty { background: var(--surface); }
+.live-answer-placeholder { padding: 25px 0 17px; }
+.live-answer-placeholder p { font-size: 21px; font-weight: 400; letter-spacing: -.4px; }
+.live-answer-placeholder span { display: block; color: var(--muted); font-size: 12px; line-height: 1.8; margin-top: 9px; max-width: 340px; }
+@media (max-width: 650px) {
+  .live-connection { align-items: flex-start; flex-direction: column; gap: 15px; padding: 18px; }
+  .live-playground .play-panel-heading { flex-direction: row; align-items: center; }
+  .live-token-options { gap: 6px; }
+  .live-token-options button { padding: 13px 10px; }
+  .live-answer .play-answer-heading { flex-wrap: wrap; gap: 8px; }
+}

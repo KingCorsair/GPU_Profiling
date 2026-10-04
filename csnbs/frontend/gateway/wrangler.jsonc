@@ -1,0 +1,25 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "gpu-profiling-live-demo",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-04",
+  "workers_dev": false,
+  "assets": {
+    "directory": "../dist-live-share",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/live/*"],
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "LIVE_LIMITER", "class_name": "LiveAdmission" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LiveAdmission"] }],
+  "vars": {
+    "LIVE_ENABLED": "false",
+    "LOCAL_DEVELOPMENT": "false",
+    "ALLOWED_ORIGINS": "https://demo.example.com",
+    "MODEL_UPSTREAM_URL": "https://replace-with-authenticated-endpoint.modal.run",
+    "TURNSTILE_SITE_KEY": ""
+  },
+  "observability": { "enabled": false }
+}

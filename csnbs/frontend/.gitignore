@@ -1,0 +1,12 @@
+node_modules/
+dist/
+public/data/*
+public/plots/*
+*.local
+dist-share/
+.vercel/
+dist-live/
+dist-live-share/
+.dev.vars
+.dev.vars.*
+.wrangler/

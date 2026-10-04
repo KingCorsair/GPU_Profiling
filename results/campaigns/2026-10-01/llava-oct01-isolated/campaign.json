@@ -1,0 +1,361 @@
+{
+  "schema": "loadgen-campaign",
+  "schemaVersion": 2,
+  "campaignId": "llava-oct01-isolated",
+  "spec": {
+    "campaignId": "llava-oct01-isolated",
+    "purpose": "ab",
+    "endpoint": "http://127.0.0.1:8765/infer",
+    "datasetPath": "/workspace/rithvik-measure-20261001/vis_pruner_copy/vispruner_eval_dataset/dev.json",
+    "rates": [
+      1
+    ],
+    "repetitions": 5,
+    "measuredRequests": 90,
+    "warmupRequests": 10,
+    "seed": 465,
+    "timeoutMs": 120000,
+    "startupTimeoutMs": 300000,
+    "settleMs": 1000,
+    "gpuExclusive": true,
+    "variants": [
+      {
+        "id": "baseline-A",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural"
+        }
+      },
+      {
+        "id": "pruned-128",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "128",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural"
+        }
+      }
+    ],
+    "runKind": "isolated"
+  },
+  "specHash": "0b7f05e8849f0f03ad5e915ef6cab0a049485ebf5cfb5b760cc01908f96d27ec",
+  "createdAtUtc": "2026-10-01T21:15:28.016Z",
+  "schedule": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p4-v1",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p4-v0",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p5-v0",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p5-v1",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 1
+    }
+  ],
+  "trials": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p1-v0-ca225736/runs/2026-10-01T21-16-11.745Z_rps-1_65e0259f",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v0-ca225736",
+          "directory": "r1-p1-v0-ca225736",
+          "startedAtUtc": "2026-10-01T21:15:28.140Z",
+          "finishedAtUtc": "2026-10-01T21:16:55.307Z",
+          "status": "complete",
+          "runDirectory": "r1-p1-v0-ca225736/runs/2026-10-01T21-16-11.745Z_rps-1_65e0259f",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p1-v1-b26f98e5/runs/2026-10-01T21-17-06.090Z_rps-1_aaa57c84",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v1-b26f98e5",
+          "directory": "r1-p1-v1-b26f98e5",
+          "startedAtUtc": "2026-10-01T21:16:55.370Z",
+          "finishedAtUtc": "2026-10-01T21:17:44.699Z",
+          "status": "complete",
+          "runDirectory": "r1-p1-v1-b26f98e5/runs/2026-10-01T21-17-06.090Z_rps-1_aaa57c84",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p2-v1-43c10d72/runs/2026-10-01T21-17-55.142Z_rps-1_07a4a876",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v1-43c10d72",
+          "directory": "r1-p2-v1-43c10d72",
+          "startedAtUtc": "2026-10-01T21:17:44.825Z",
+          "finishedAtUtc": "2026-10-01T21:18:32.993Z",
+          "status": "complete",
+          "runDirectory": "r1-p2-v1-43c10d72/runs/2026-10-01T21-17-55.142Z_rps-1_07a4a876",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p2-v0-a7bdcc9f/runs/2026-10-01T21-18-43.579Z_rps-1_97f63972",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v0-a7bdcc9f",
+          "directory": "r1-p2-v0-a7bdcc9f",
+          "startedAtUtc": "2026-10-01T21:18:33.092Z",
+          "finishedAtUtc": "2026-10-01T21:19:27.347Z",
+          "status": "complete",
+          "runDirectory": "r1-p2-v0-a7bdcc9f/runs/2026-10-01T21-18-43.579Z_rps-1_97f63972",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v0",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p3-v0-37ff6866/runs/2026-10-01T21-19-38.495Z_rps-1_2df07e3b",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v0-37ff6866",
+          "directory": "r1-p3-v0-37ff6866",
+          "startedAtUtc": "2026-10-01T21:19:27.451Z",
+          "finishedAtUtc": "2026-10-01T21:20:21.661Z",
+          "status": "complete",
+          "runDirectory": "r1-p3-v0-37ff6866/runs/2026-10-01T21-19-38.495Z_rps-1_2df07e3b",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p3-v1",
+      "blockId": "r1-p3",
+      "repetition": 2,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p3-v1-0ddeb045/runs/2026-10-01T21-20-32.473Z_rps-1_c57c520d",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p3-v1-0ddeb045",
+          "directory": "r1-p3-v1-0ddeb045",
+          "startedAtUtc": "2026-10-01T21:20:21.729Z",
+          "finishedAtUtc": "2026-10-01T21:21:10.706Z",
+          "status": "complete",
+          "runDirectory": "r1-p3-v1-0ddeb045/runs/2026-10-01T21-20-32.473Z_rps-1_c57c520d",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p4-v1",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p4-v1-7c65fe7a/runs/2026-10-01T21-21-20.925Z_rps-1_f20a4891",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p4-v1-7c65fe7a",
+          "directory": "r1-p4-v1-7c65fe7a",
+          "startedAtUtc": "2026-10-01T21:21:10.765Z",
+          "finishedAtUtc": "2026-10-01T21:21:59.431Z",
+          "status": "complete",
+          "runDirectory": "r1-p4-v1-7c65fe7a/runs/2026-10-01T21-21-20.925Z_rps-1_f20a4891",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p4-v0",
+      "blockId": "r1-p4",
+      "repetition": 3,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p4-v0-fbf7f59c/runs/2026-10-01T21-22-09.773Z_rps-1_2358dcf8",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p4-v0-fbf7f59c",
+          "directory": "r1-p4-v0-fbf7f59c",
+          "startedAtUtc": "2026-10-01T21:21:59.493Z",
+          "finishedAtUtc": "2026-10-01T21:22:52.406Z",
+          "status": "complete",
+          "runDirectory": "r1-p4-v0-fbf7f59c/runs/2026-10-01T21-22-09.773Z_rps-1_2358dcf8",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p5-v0",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "r1-p5-v0-3afe0fb9/runs/2026-10-01T21-23-02.492Z_rps-1_cde847ef",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p5-v0-3afe0fb9",
+          "directory": "r1-p5-v0-3afe0fb9",
+          "startedAtUtc": "2026-10-01T21:22:52.468Z",
+          "finishedAtUtc": "2026-10-01T21:23:46.373Z",
+          "status": "complete",
+          "runDirectory": "r1-p5-v0-3afe0fb9/runs/2026-10-01T21-23-02.492Z_rps-1_cde847ef",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p5-v1",
+      "blockId": "r1-p5",
+      "repetition": 4,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "r1-p5-v1-f1a814e5/runs/2026-10-01T21-23-57.098Z_rps-1_3d08daa6",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p5-v1-f1a814e5",
+          "directory": "r1-p5-v1-f1a814e5",
+          "startedAtUtc": "2026-10-01T21:23:46.433Z",
+          "finishedAtUtc": "2026-10-01T21:24:36.192Z",
+          "status": "complete",
+          "runDirectory": "r1-p5-v1-f1a814e5/runs/2026-10-01T21-23-57.098Z_rps-1_3d08daa6",
+          "error": null
+        }
+      ]
+    }
+  ]
+}
