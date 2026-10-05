@@ -58,5 +58,9 @@ CMD ["/bin/bash", "-c", "\
         echo '    IdentitiesOnly yes' >> /root/.ssh/config; \
         chmod 600 /root/.ssh/config; \
     fi; \
+    if [ ! -d /workspace/GPU_Profiling/.git ]; then \
+        echo 'Cloning GPU_Profiling...'; \
+        git clone https://github.com/KingCorsair/GPU_Profiling.git /workspace/GPU_Profiling; \
+    fi; \
     service ssh start; \
     sleep infinity"]
