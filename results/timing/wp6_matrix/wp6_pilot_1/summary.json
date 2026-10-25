@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "run_id": "wp6_pilot_1",
+    "git_commit": "655eac09a775c568fcf4674e246dd0925fd94016",
+    "git_dirty": false,
+    "gpu": "NVIDIA A40",
+    "args": {
+      "run_id": "wp6_pilot_1",
+      "states": "S0,S1,S2",
+      "configs": "128",
+      "policies": "natural",
+      "levels_s0": "2",
+      "levels_s2": "4",
+      "min_samples": 40,
+      "min_duration": 30,
+      "batch_size": 8,
+      "max_wait_ms": 10,
+      "torch_threads": 4,
+      "seed": 20261026
+    },
+    "block_order": [
+      "000_S1_vtn128_natural_rps2.0",
+      "001_S2_vtn128_natural_rps4.0",
+      "002_S0_vtn128_natural_rps2.0"
+    ],
+    "blocks": [
+      {
+        "name": "000_S1_vtn128_natural_rps2.0",
+        "state": "S1",
+        "visual_token_num": 128,
+        "policy": "natural",
+        "rps": 2.0,
+        "duration_s": 30,
+        "loadgen_run_json": "results/loadgen/2026-10-25/05-16-41Z_rps-2_02d57216/run.json",
+        "gpu_csv": "000_S1_vtn128_natural_rps2.0_gpu.csv",
+        "server_configuration": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_batch_size": 1,
+          "max_wait_ms": 10.0,
+          "max_new_tokens": 64,
+          "min_new_tokens": null,
+          "prep_threads": 4,
+          "torch_threads": 4,
+          "max_queue": 256,
+          "server_state": "S1",
+          "queue_depth": 0,
+          "batches_run": 60
+        }
+      },
+      {
+        "name": "001_S2_vtn128_natural_rps4.0",
+        "state": "S2",
+        "visual_token_num": 128,
+        "policy": "natural",
+        "rps": 4.0,
+        "duration_s": 30,
+        "loadgen_run_json": "results/loadgen/2026-10-25/05-17-19Z_rps-4_35ed035f/run.json",
+        "gpu_csv": "001_S2_vtn128_natural_rps4.0_gpu.csv",
+        "server_configuration": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_batch_size": 8,
+          "max_wait_ms": 10.0,
+          "max_new_tokens": 64,
+          "min_new_tokens": null,
+          "prep_threads": 4,
+          "torch_threads": 4,
+          "max_queue": 256,
+          "server_state": "S2",
+          "queue_depth": 0,
+          "batches_run": 56
+        }
+      },
+      {
+        "name": "002_S0_vtn128_natural_rps2.0",
+        "state": "S0",
+        "visual_token_num": 128,
+        "policy": "natural",
+        "rps": 2.0,
+        "duration_s": 30,
+        "loadgen_run_json": "results/loadgen/2026-10-25/05-17-59Z_rps-2_7c868f9b/run.json",
+        "gpu_csv": "002_S0_vtn128_natural_rps2.0_gpu.csv",
+        "server_configuration": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "server_state": "S0",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_batch_size": 1,
+          "max_new_tokens": 64,
+          "min_new_tokens": null,
+          "torch_threads": 4
+        }
+      }
+    ],
+    "server_load_times_s": [
+      8.0,
+      8.0,
+      8.0
+    ]
+  },
+  "rows": [
+    {
+      "state": "S0",
+      "visual_token_num": 128,
+      "policy": "natural",
+      "rps_offered": 2.0,
+      "rps_achieved_arrival": 2.0001135551817177,
+      "throughput_rps": 2,
+      "n": 50,
+      "failed": 0,
+      "p50_ms": 499.4155010000013,
+      "p95_ms": 2823.5891476999996,
+      "p99_ms": null,
+      "gpu_util_mean_pct": 64.62068965517241,
+      "batch_size": 1,
+      "block": "002_S0_vtn128_natural_rps2.0"
+    },
+    {
+      "state": "S1",
+      "visual_token_num": 128,
+      "policy": "natural",
+      "rps_offered": 2.0,
+      "rps_achieved_arrival": 2.0000123890563355,
+      "throughput_rps": 2,
+      "n": 50,
+      "failed": 0,
+      "p50_ms": 537.8916014999995,
+      "p95_ms": 3083.4225840500003,
+      "p99_ms": null,
+      "gpu_util_mean_pct": 70.41379310344827,
+      "batch_size": 1,
+      "block": "000_S1_vtn128_natural_rps2.0"
+    },
+    {
+      "state": "S2",
+      "visual_token_num": 128,
+      "policy": "natural",
+      "rps_offered": 4.0,
+      "rps_achieved_arrival": 4.00017340964584,
+      "throughput_rps": 3.9440242399210605,
+      "n": 110,
+      "failed": 0,
+      "p50_ms": 907.6042820000002,
+      "p95_ms": 2897.8573635000007,
+      "p99_ms": null,
+      "gpu_util_mean_pct": 81.72413793103448,
+      "batch_size": 8,
+      "block": "001_S2_vtn128_natural_rps4.0"
+    }
+  ],
+  "capacity": [
+    {
+      "policy": "natural",
+      "visual_token_num": 128,
+      "state": "S0",
+      "throughput_rps": 2,
+      "at_offered": 2.0,
+      "gpu_util_mean_pct": 64.62068965517241
+    },
+    {
+      "policy": "natural",
+      "visual_token_num": 128,
+      "state": "S1",
+      "throughput_rps": 2,
+      "at_offered": 2.0,
+      "gpu_util_mean_pct": 70.41379310344827
+    },
+    {
+      "policy": "natural",
+      "visual_token_num": 128,
+      "state": "S2",
+      "throughput_rps": 3.9440242399210605,
+      "at_offered": 4.0,
+      "gpu_util_mean_pct": 81.72413793103448
+    }
+  ]
+}

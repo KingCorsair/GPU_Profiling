@@ -1,0 +1,14 @@
+WP6 load matrix -- wp6_pilot_1
+commit 655eac09a775c568fcf4674e246dd0925fd94016 (dirty=False)  GPU NVIDIA A40  torch_threads=4  S2 batch=8 wait=10ms
+latency in ms after 10 warm-up requests; p99 only where n >= 1000
+
+policy    vtn state offered arrival   tput     n fail      p50      p95      p99  GPU%
+natural   128 S0        2.0   2.000  2.000    50    0      499     2824           64.6
+natural   128 S1        2.0   2.000  2.000    50    0      538     3083           70.4
+natural   128 S2        4.0   4.000  3.944   110    0      908     2898           81.7
+
+Capacity (highest achieved throughput at any offered level):
+policy    vtn state     rps at offered  GPU%
+natural   128 S0      2.000        2.0  64.6
+natural   128 S1      2.000        2.0  70.4
+natural   128 S2      3.944        4.0  81.7

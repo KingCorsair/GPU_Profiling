@@ -30,8 +30,11 @@ def pct(xs, q):
 
 
 def block_row(root, b):
-    run = json.loads((REPO_ROOT / b["loadgen_run_json"]).read_text())
-    reqs = sorted(run["requests"], key=lambda r: r["sequence"])[WARMUP:]
+    run_path = REPO_ROOT / b["loadgen_run_json"]
+    run = json.loads(run_path.read_text())
+    records = [json.loads(l) for l in
+               (run_path.parent / run["requests"]["file"]).read_text().splitlines() if l.strip()]
+    reqs = sorted(records, key=lambda r: r["sequence"])[WARMUP:]
     ok = [r for r in reqs if r["status"] == 200 and r["error"] is None]
     lat = [r["latencyMs"] for r in ok]
     util = []

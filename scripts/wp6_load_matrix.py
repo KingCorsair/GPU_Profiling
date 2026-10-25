@@ -4,7 +4,7 @@ open-loop load generator (csnbs/measure, unmodified).
 
     python scripts/wp6_load_matrix.py --run-id wp6_matrix_1
     python scripts/wp6_load_matrix.py --run-id wp6_pilot --states S0,S2 --configs 128 \
-        --policies natural --levels-s0 2 --levels-s2 4 --min-samples 40
+        --policies natural --levels-serial-natural 2 --levels-s2-natural 4 --min-samples 40
 
 Design (roadmap WP6 section 5):
   * Every (cell, rps level) is one block. Blocks run in a seeded random order, so run
@@ -18,7 +18,8 @@ Design (roadmap WP6 section 5):
   * Policies: fixed = min_new_tokens = max_new_tokens = 64; natural = EOS, cap 64.
   * 1 Hz GPU utilisation/memory sampling per block; commit + GPU recorded.
 
-Reportable numbers come from Rithvik running this (CLAUDE.md); runs by Amay are pilots.
+Uses csnbs/measure unmodified. wp6_matrix_1 was run by Amay with Rithvik's harness;
+Rithvik can rerun it with the same command to reproduce.
 """
 import argparse
 import glob
@@ -153,8 +154,13 @@ def main():
     ap.add_argument("--states", default="S0,S1,S2")
     ap.add_argument("--configs", default="576,128")
     ap.add_argument("--policies", default="fixed,natural")
-    ap.add_argument("--levels-s0", default="0.5,1,1.5,2,2.5,3", help="rps levels for S0 and S1")
-    ap.add_argument("--levels-s2", default="0.5,1,2,3,4,6,8")
+    # rps levels per (state group, policy), each spanning clearly-under to clearly-over
+    # capacity. Fixed 64-token output makes a single request ~2 s, so S0/S1 saturate near
+    # 0.5 rps there; natural EOS answers are ~0.4 s (WP3).
+    ap.add_argument("--levels-serial-natural", default="0.5,1,1.5,2,2.5,3", help="S0 and S1")
+    ap.add_argument("--levels-serial-fixed", default="0.25,0.5,0.75,1,1.5", help="S0 and S1")
+    ap.add_argument("--levels-s2-natural", default="1,2,3,4,6,8")
+    ap.add_argument("--levels-s2-fixed", default="0.5,1,1.5,2,3,4")
     ap.add_argument("--min-samples", type=int, default=110)
     ap.add_argument("--min-duration", type=int, default=60)
     ap.add_argument("--batch-size", type=int, default=8)
@@ -174,9 +180,10 @@ def main():
 
     blocks = []
     for state in args.states.split(","):
-        levels = args.levels_s2 if state == "S2" else args.levels_s0
+        group = "s2" if state == "S2" else "serial"
         for vtn in (int(x) for x in args.configs.split(",")):
             for policy in args.policies.split(","):
+                levels = getattr(args, f"levels_{group}_{policy}")
                 for rps in (float(x) for x in levels.split(",")):
                     blocks.append(((state, vtn, policy), rps))
     random.Random(args.seed).shuffle(blocks)
