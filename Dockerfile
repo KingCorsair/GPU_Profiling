@@ -36,6 +36,13 @@ RUN mkdir -p /var/run/sshd /root/.ssh && \
     sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
+# Pin GitHub's host key so git-over-ssh doesn't stop at a host-key prompt. Baked into
+# the image, so every container (and every pod restart) starts with it. Pinned rather
+# than ssh-keyscan'd at boot so a spoofed answer can't be trusted silently.
+# Fingerprint: SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU (GitHub's published value).
+RUN echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' \
+    >> /root/.ssh/known_hosts && chmod 600 /root/.ssh/known_hosts
+
 WORKDIR /workspace
 
 # Write the injected key, stage the persistent git deploy key (if present on the

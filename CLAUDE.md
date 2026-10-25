@@ -410,3 +410,12 @@ it isn't yours yet.
   reverts to `666`. SSH refuses to load a private key left there directly. Keep the key's
   bytes on `/workspace` for persistence, but stage a copy into `/root` (chmod'd correctly)
   at container boot — see the `CMD` in the Dockerfile for the pattern.
+- Torch defaults to one intra-op thread per host core (48), but the container is CFS-capped
+  at ~7.65 CPUs. Each request's burst exhausts the quota and freezes the process ~55–70 ms.
+  It's invisible in GPU timings and shows up as bimodal prep latency. Pin
+  `torch.set_num_threads(4)` in anything that runs the model, and check
+  `nr_throttled` before and after a run: `/sys/fs/cgroup/cpu/cpu.stat` on cgroup v1 pods
+  (the RunPod default so far), `/sys/fs/cgroup/cpu.stat` on cgroup v2.
+- The base image's `~/.ssh/known_hosts` has no GitHub entry, so the first `git push` over
+  SSH stops at a host-key prompt. The Dockerfile now pins GitHub's key. On a pod built
+  from an older image, add it by hand (and check the fingerprint against GitHub's docs).
