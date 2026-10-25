@@ -2,21 +2,81 @@
 
 ## Current State
 
-* **WP2 — FP16 Vision Tower is closed (2026-10-02).** All four roadmap §9 criteria hold. The FP16 change (`caf19fe`) stays.
-* **Current work package: WP3 — Server Diagnostic.** Not started as a tracked WP. A first attempt was begun and stopped on 2026-10-02; its scripts and partial data are parked outside the repo at `/workspace/wp3_parked/` (see `HANDOFF.md`).
-* Open from WP2, not blocking: the Layer-3 per-category request to Sribhav.
+* **WP3, WP4 and WP5 are closed (2026-10-25).** See their sections below.
+* **Current work package: WP6 — Final Load Benchmark.** Pilot `wp6_pilot_1` done (`17e6ab0`); noise-floor repeat blocks added (`ac6a827`). Full matrix `wp6_matrix_1` started 2026-10-25 05:19 UTC: 74 blocks in seeded random order via `scripts/wp6_load_matrix.py`, output in `results/timing/wp6_matrix/wp6_matrix_1/`.
+* Open, not blocking: the Layer-3 per-category request (WP2) and the WP5 one-answer EOS difference, both with Sribhav (`kingcorsair/SRIBHAV_ACCURACY_REQUESTS.md`).
 * Blockers: none.
-* Last updated: 2026-10-02
+* Last updated: 2026-10-25
 
 ## Month-One Progress
 
 * [x] WP1 — Controlled Benchmark (2026-09-07; component timing and noise floor 2026-09-11)
 * [x] WP2 — FP16 Vision Tower (2026-10-02; Layer-3 confirmation from Sribhav still to come)
-* [ ] WP3 — Server Diagnostic
-* [ ] WP4 — Request Queue
-* [ ] WP5 — Static Batching MVP
-* [ ] WP6 — Final Load Benchmark
+* [x] WP3 — Server Diagnostic (2026-10-25, `wp3_diag_2`)
+* [x] WP4 — Request Queue (2026-10-25)
+* [x] WP5 — Static Batching MVP (2026-10-25, `wp5_val_2`; one EOS rounding difference accepted)
+* [ ] WP6 — Final Load Benchmark (matrix `wp6_matrix_1` running)
 * [ ] WP7 — Final Writeup
+
+## WP3 — Server Diagnostic (closed 2026-10-25)
+
+**Method.** `csnbs/server.py` served **unmodified**, instrumented from outside by `scripts/wp3_diag_server.py`: ASGI stage timestamps, shims around b64 decode / tokenizer / `process_images` / `generate`, and a 5 ms event-loop heartbeat. `scripts/wp3_run_diag.py` drove it with `csnbs/measure` at 2.0 rps, 60 s per session, {576, 128} × {torch default threads, 4 threads} × 2 repeats in random order. Run `wp3_diag_2` at `cad5444`, clean tree, A40. Files: `results/timing/wp3_diag/wp3_diag_2/summary.{txt,json}`.
+
+| Pooled over repeats | vtn=576, default | vtn=576, 4 thr | vtn=128, default | vtn=128, 4 thr |
+|---|---|---|---|---|
+| Overlappable CPU (`t_preprocess_done − t_handler_entry`) | 23.7 ms | 25.2 ms | 26.3 ms | 28.3 ms |
+| of which `process_images` | 19.3 ms | 20.5 ms | 21.5 ms | 23.1 ms |
+| `generate()` | 408.8 ms | 386.2 ms | 378.5 ms | 335.2 ms |
+| Service time (handler span) | 433.7 ms | 412.4 ms | 406.3 ms | 364.6 ms |
+| **Overlappable CPU / service** | **5.5%** | **6.1%** | **6.5%** | **7.8%** |
+| CFS `nr_throttled`, 2 sessions | 195 | 0 | 170 | 0 |
+| GPU utilisation (nvidia-smi) | 78% | 74% | 70% | 72% |
+
+**Findings (MEASURED).**
+
+* **Go for WP4, with a small expected gain.** Overlappable CPU work is 5.5–7.8% of service time, just above the 5% gate. The most a queue can recover from overlap is about that much capacity.
+* **The thread pin matters more than the queue.** With torch's default threads the server is CFS-throttled about once per request (83–102 events per 120 requests). Pinning to 4 threads removes it entirely and cuts `generate()` by 23 ms at 576 and 43 ms at 128. WP4 onward and every WP6 server state pin 4 threads.
+* **The event loop is blocked for the whole request.** Heartbeat blocked time ≈ handler time in every session. 93–95% of requests are not even *received* (ASGI call start) until the previous response is sent.
+* **Analysis correction made during WP3.** A queue-based "service interval" cannot be measured from server-side timestamps, because arrivals are invisible while the loop is blocked. Service time is the handler span; `wp3_analyze.py` was changed accordingly before the numbers above were taken.
+
+## WP4 — Request Queue (closed 2026-10-25)
+
+* **Engine:** `vis_pruner_copy/llava/serve/batch_engine.py`. One inference worker thread owns every CUDA call; bounded `queue.Queue` (full → HTTP 503); `submit()` returns a `Future`.
+* **Server (S1/S2):** `vis_pruner_copy/llava/serve/batch_server.py`. Same HTTP contract as `csnbs/server.py`, so `csnbs/measure` works against it unchanged. b64 / PIL / `process_images` / tokenization run in a 4-thread pool; the event loop never blocks. `/health` reports the configuration, which `csnbs/measure` records in `run.json`. Rithvik's `csnbs/server.py` was not modified.
+* **Shared-state fix:** `llava_llama.py` timing lists are now thread-local instead of on the shared model instance.
+* **Output identity (S1 vs S0):** 90/90 identical at both 576 and 128 (`wp5_val_1` and `wp5_val_2`, `engine.generate_batch` at B=1 vs `csnbs/server.py`'s exact code path).
+* S1's load numbers are in WP6.
+
+## WP5 — Static Batching MVP (closed 2026-10-25)
+
+**Fixes needed for B>1 (all MEASURED by the checks below):**
+
+1. **B>1 crash.** `prepare_inputs_labels_for_multimodal` masked the whole `(B, N, C)` batch at once, flattening every image's kept tokens into one row: the first sequence got all of them and the second indexed past the end. Now split per image (`llava_arch.py`).
+2. **Left padding.** `builder.py` sets `tokenizer_padding_side = "left"` at load; a no-op at B=1.
+3. **Batch-dependent token selection.** `wp5_val_1` at vtn=128: every image kept a different token set when batched, and only 79–80/90 answers matched B=1. `scripts/wp5_selection_diag.py` (`wp5_seldiag_1`) showed this is batch-shape numerics, **not** cross-request mixing: 8 copies of one image in a batch agree with each other (24/24), and differ from B=1 by the same 74% kept-token overlap as random partners. Running only the tower per image did not fix it (0/24), which points at `argsort` tie-breaking in the selection code as well as tower rounding. **Fix:** `encode_images` runs per image; the LLM stays batched.
+
+**Validation, `wp5_val_2`** (`scripts/wp5_batch_validation.py`, `6a471cb`, 90 dev images, greedy, max 64 tokens; files `results/wp5_validation/wp5_val_2.{json,txt}`). The run recorded `dirty=True` only because `generate()` appended rows to the tracked `results/timing/llava_llama_timing.json`; serving and validation now write that file to `/tmp`.
+
+| | vtn=576 | vtn=128 |
+|---|---|---|
+| B=1 via engine vs S0 | 90/90 | 90/90 |
+| B=2 / 4 / 8 vs single request | 90 / 90 / 89 | 90 / 90 / 90 |
+| Kept-token set changed | 0 | 0 |
+| Contamination (anchor with short-prompt and long-output partners, both orders) | 10/10 | 10/10 |
+
+* **1 of 540 batched answers differs:** `textvqa_34610` at 576, B=8, same kept tokens. The first sentence is identical; the single-request answer emits EOS after it, the batched one continues. This is LLM-side FP16 rounding of the EOS decision. Roadmap criterion 1 ("identical, no exceptions") is therefore **missed by one answer**. Accepted because it is a rounding difference and not contamination, and sent to Sribhav for a scoring check (`kingcorsair/SRIBHAV_ACCURACY_REQUESTS.md`).
+
+**Batched `generate()` throughput, no server** (fixed 64-token output, CUDA events, 10 reps after 5 warm-up, interleaved B; throwaway scaling curve, MEASURED but not a serving number):
+
+| B | vtn=576 | vtn=128 | 128 / 576 |
+|---|---|---|---|
+| 1 | 0.48 req/s | 0.52 req/s | 1.07× |
+| 4 | 1.39 (2.9×) | 1.77 (3.4×) | 1.28× |
+| 8 | 2.05 (4.3×) | 3.01 (5.8×) | 1.47× |
+| 16 | 2.69 (5.6×) | 4.52 (8.7×) | 1.68× |
+
+* **Pruning's advantage grows with batch size** (1.07× → 1.68×). At B=1 decode is memory-bound and pruning-independent; batching amortises the weight reads, so prefill and the attention/KV traffic over visual tokens become a larger share. DERIVED interpretation, consistent with the roadmap's "decode dominates at B=1" story; WP6 tests it under load.
+* Per-image selection costs about 5% of batch time at 128, B=16 (3368 → 3538 ms, `wp5_val_1` vs `wp5_val_2`).
 
 ## WP2 — FP16 Vision Tower
 
@@ -157,7 +217,7 @@ None of these are serving numbers. Reportable serving results come from WP6 and 
 
 Left open:
 
-* **Layer 3.** Per-category accuracy on the locked eval set, FP32 (`e295fd0`) vs FP16 (`caf19fe`), from Sribhav. Ask him to look at OCR and counting at 128 in particular. The request has not been sent yet. If OCR regresses there, the roadmap says revert.
+* **Layer 3.** Per-category accuracy on Sribhav's **dev split**, FP32 (`e295fd0`) vs FP16 (`caf19fe`), with OCR and counting at 128 in particular. *Corrected 2026-10-25:* this said "locked eval set", but a keep/revert decision taken from test results contaminates the test set (rule 11). Request written up in `kingcorsair/SRIBHAV_ACCURACY_REQUESTS.md`. If OCR regresses, revert.
 * **End-to-end figure.** Not reported from WP2. About −2% is indicative only; the reportable number comes from the WP6 load benchmark.
 * **Feature-cosine bar.** Missed in 6 of 90 images, as described above. Accepted on the strength of Layer 2.
 
@@ -208,11 +268,8 @@ Left open:
 
 ## Open carry-overs
 
-* **WP3.** Nothing in `csnbs/` or `scripts/start_model_server.sh` sets a torch thread count, so the server likely hits the ~55–70 ms throttling stall on every request.
-  * Now that the FP16 tower is CPU-bound, CPU contention in the server matters even more.
-  * Check `nr_throttled` before and after the rps 2.0 run.
-  * The fix is in Rithvik's server, so agree it with him.
+* **Thread pin in Rithvik's server.** WP3 confirmed the stall (`nr_throttled` 170–195 at default threads, 0 at 4). `batch_server.py` pins 4 threads, but `csnbs/server.py` and `scripts/start_model_server.sh` still set none. Anything served through S0 is still throttled. The fix is in Rithvik's server, so agree it with him.
 * **`/workspace` quota.** A 7 GB download failed with a write error on 2026-10-02 when `du -sh /workspace` reached about 59 GB, so the volume appears to be capped near 60 GB, not the ~100 GB `CLAUDE.md` states. About 53 GB is in use. Check the pod's configured volume size.
 * **Stashed timing rows.** `git stash list` holds 10 rows that an interrupted profile run appended to `results/timing/llava_llama_timing.json` on 2026-10-01. They are log lines with no use; `git stash drop` removes them.
-* **Git host key.** This pod's `~/.ssh/known_hosts` lacked GitHub's host key; it was added by hand on 2026-09-21. Add it to the Dockerfile's boot `CMD` so it survives pod restarts. Not done.
-* **`CLAUDE.md`.** Add two entries to "Gotchas already hit": the CPU-throttling stall and the missing `known_hosts` entry. Not done.
+* **Git host key.** The Dockerfile now pins GitHub's ed25519 host key into `/root/.ssh/known_hosts` (fingerprint `SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU`, checked against GitHub's published value, 2026-10-25). It takes effect once CI rebuilds the image and the pod is redeployed on it.
+* **`CLAUDE.md` gotchas.** The CPU-throttling stall and `known_hosts` entries were added 2026-10-25.

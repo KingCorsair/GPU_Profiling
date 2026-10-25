@@ -1446,7 +1446,7 @@ execution order is WP1 → WP7, above.
 | Triton gather/fixup kernel | 2b | Withdrawn to Optional in an earlier revision. The region is 0.079 ms/call, 0.2% of prep GPU busy. The 63.2% figure that once justified it was a double-counting artifact | New evidence only |
 | Paged KV allocator | — | MEASURED: GPU memory flat at 15.3 GB of 46 GB (33%) at every load level, both configs. No memory pressure exists to solve | Only if WP5's batching at larger B creates real KV-cache memory pressure. Measure during WP6 |
 | Packed / varlen batching | — | **The premise does not hold for this pruner.** `visual_token_num` is a global scalar, so every image in a batch keeps an identical token count. Padding waste comes only from text and output-length variance | Re-derive the premise first. If WP6's natural-EOS run shows large padding waste from *output* length, that is a different and real argument — for continuous batching, not packed layout |
-| vLLM port | — | Out of scope until the toy versions exist to compare against, per the original plan's own reasoning | After a batching implementation exists to compare |
+| **OPTIONAL — vLLM port** | — | Out of scope until a batching implementation existed to compare against. **That condition is met (WP5, 2026-10-25).** Full plan: "OPTIONAL — vLLM Port" below | Month two, optional. 8–13 days |
 
 ### One diagnostic worth doing before committing to the KV-cache chain
 
@@ -1462,6 +1462,145 @@ If decode is already near the roofline, CUDA Graphs recovers launch overhead but
 the memory wall, and the 8–16% estimate is optimistic. If it is far from the roofline, the
 chain is worth the three weeks. **Deciding that with half a day of measurement instead of
 three weeks of implementation is the highest-leverage thing available after month one.**
+
+### OPTIONAL — vLLM Port (VisPruner inside a production server)
+
+**Status: OPTIONAL, month two at the earliest. Not required for month-one completion.**
+Added 2026-10-25, after WP5 closed. The deferral condition in the table above ("after a
+batching implementation exists to compare") is now met.
+
+#### 1. Problem
+
+WP5/WP6 measure pruning on a prototype server: static batching, standard HuggingFace
+kernels, no paged KV cache. The central finding (pruning gives ~7% more throughput one
+request at a time, ~68% batched; offline in `wp5_val_2`, live in WP6) may change size on a
+production server, which uses continuous batching, paged KV memory and optimized kernels.
+
+#### 2. Why this matters
+
+It turns "shown on a prototype" into "shown on the server people actually deploy". It also
+directly tests R5 (pruning raises the concurrency ceiling), because vLLM's memory manager
+admits more requests when each one's KV cache is smaller.
+
+#### 3. Evidence carried in from month one
+
+- **MEASURED (`wp5_val_1`, `wp5_seldiag_1`, `wp5_val_2`)** — VisPruner as released needs two
+  fixes to run batched: split kept tokens per image (otherwise it crashes at B>1), and select
+  tokens per image (otherwise batch-shape rounding plus `argsort` ties change the kept set
+  and ~11% of answers at vtn=128). Both must be carried into the vLLM version.
+- **MEASURED** — `visual_token_num` is a global scalar, so every image keeps the same count
+  (128). vLLM's placeholder count per image can therefore be a constant, not per-request.
+- **HYPOTHETICAL** — the batched pruning advantage holds or grows on vLLM. **State no
+  target.** Faster kernels change which costs dominate; long outputs shrink it (R2).
+
+#### 4. What we are trying to achieve
+
+LLaVA-1.5-7B served by vLLM with VisPruner selecting `visual_token_num` tokens per image,
+answers matching the current server, benchmarked in the same WP6 matrix.
+
+#### 5. What Amay will actually do
+
+**Step 0 — Environment, separately.** vLLM likely needs newer torch/transformers than this
+project pins (2.2.2 / 4.37.2). Check the exact versions the chosen vLLM release requires. Build
+a **separate** Docker image or environment (CLAUDE.md: environment changes go through a
+Dockerfile), so the existing code keeps working. Record the vLLM version and commit.
+
+**Step 1 — Baseline: plain LLaVA on vLLM, vtn=576, no pruning.** Start vLLM's server with
+`llava-hf/llava-1.5-7b-hf` (vLLM's supported LLaVA format; check it matches the
+`liuhaotian/llava-v1.5-7b` weights used so far, or convert). Run the 90 dev images and
+compare answers with the current server. Expect high but not perfect agreement: different
+kernels round differently. Quantify it; this is the noise floor for step 4.
+
+**Step 2 — Read vLLM's LLaVA code before changing anything.** Find:
+- where the vision tower runs and image features are produced (vLLM's LLaVA model file);
+- where the prompt's single `<image>` token is expanded into 576 placeholder tokens (the
+  multimodal input processor), because vLLM plans KV memory and positions from that count;
+- how image features get merged into the text embeddings at those placeholders.
+
+**Step 3 — Add VisPruner.**
+- Vision tower returns CLS attention as well as features (as `clip_encoder.py` does here).
+- Port `encode_images`' selection: important tokens by CLS attention, diverse tokens by the
+  duplicate-removal loop, **per image** (month-one fix 2), output **in raster order**
+  (rule 16).
+- Change the placeholder expansion from 576 to `visual_token_num` per image. This is the
+  hard part: memory planning, positions and the feature merge must all agree on the count.
+- Make `visual_token_num` and `important_ratio` configurable at server start.
+
+**Step 4 — Correctness.** Reuse `scripts/wp5_batch_validation.py`'s approach against vLLM:
+- vtn=576 vs the step-1 baseline: must be identical (pruning off must change nothing);
+- vtn=128 vs the current server at vtn=128: agreement within the step-1 noise floor;
+- kept-token set per image identical with and without batching;
+- the contamination test.
+
+**Step 5 — Benchmark.** Add vLLM as a fourth server state (S3) to
+`scripts/wp6_load_matrix.py` (an adapter to vLLM's OpenAI-style API, or a thin wrapper
+exposing the existing `/infer` contract). Run {S2, S3} × {576, 128} × {fixed, natural}, plus
+a longer-output policy for R2. Record peak KV usage and max concurrent requests per config
+for R5.
+
+#### 6. Code/files involved
+
+| File | Why it matters |
+|---|---|
+| vLLM's LLaVA model file (`vllm/model_executor/models/llava.py` in recent releases; confirm for the pinned version) | Vision tower call and feature merge, where selection goes |
+| vLLM's multimodal input processor for LLaVA | Where 576 placeholders are created; must become `visual_token_num` |
+| `vis_pruner_copy/llava/model/llava_arch.py` `encode_images` | The reference selection logic, with both month-one fixes |
+| `vis_pruner_copy/llava/model/multimodal_encoder/clip_encoder.py` | How CLS attention is extracted |
+| `scripts/wp5_batch_validation.py` | Correctness method to reuse |
+| `scripts/wp6_load_matrix.py`, `scripts/wp6_analyze.py` | Benchmark driver to extend with S3 |
+| A new Dockerfile for the vLLM environment | Step 0 |
+
+#### 7. Concepts Amay needs to understand
+
+- **Continuous batching** — requests join and leave the batch every decode step, unlike WP5's
+  static batching, where a batch runs until its longest answer finishes.
+- **Paged KV cache** — KV memory in fixed-size blocks with a block table, so memory isn't
+  reserved for the worst case. Why fewer visual tokens means more concurrent requests.
+- **Why vLLM must know the token count before the model runs** — it plans memory and
+  positions from the prompt length. Pruning changes that length.
+
+#### 8. Success criteria
+
+1. vtn=576 through the ported code is identical to unmodified vLLM.
+2. Kept-token selection is batch-invariant.
+3. vtn=128 answers agree with the current server within vLLM's own baseline noise.
+4. The S2-vs-S3 matrix is populated, with commit, GPU and vLLM version recorded.
+5. The pruning advantage on vLLM is reported, whether larger, smaller or absent.
+
+#### 9. Failure / stop criteria
+
+- **If step 0 cannot produce a working environment within ~2 days**, stop and record why.
+  The month-one result stands on its own.
+- **If placeholder-count changes ripple through too much of vLLM** (scheduler, memory
+  planner, multiple model files), consider pruning at the feature level while keeping 576
+  placeholders. **That is masking, not removal** (rule 15): it can test accuracy but not
+  speed. Say so explicitly; never report its speed as a pruning result.
+- **If vLLM shows no pruning advantage**, report that. It is a legitimate, important result.
+
+#### 10. Deliverables
+
+- vLLM environment (Dockerfile) and the VisPruner patch, with version and commit recorded
+- Correctness report (steps 1 and 4)
+- S2 vs S3 load matrix, plus a longer-output run (R2) and KV/concurrency numbers (R5)
+- A short note: what the prototype got right and wrong compared with vLLM
+
+#### 11. What Amay should be able to explain afterward
+
+- Why VisPruner couldn't just be switched on in vLLM.
+- Why vLLM needs the visual token count before the model runs.
+- What continuous batching and paged KV change compared with WP5's server.
+- Whether the batched pruning advantage held on vLLM, and why or why not.
+
+#### 12. Time estimate
+
+| | Days |
+|---|---|
+| Step 0 environment | 1–2 |
+| Step 1 baseline + step 2 code reading | 1–2 |
+| Step 3 VisPruner integration | 3–5 |
+| Step 4 correctness | 1–2 |
+| Step 5 benchmark + analysis | 2 |
+| **Total** | **8–13 days** |
 
 ### Note on cross-references inside preserved blocks
 
