@@ -1,0 +1,85 @@
+{
+  "schema": "loadgen-run",
+  "schemaVersion": 1,
+  "runId": "06-11-39Z_rps-1_db00dc5c",
+  "runKind": "open-loop",
+  "recordedAtUtc": "2026-10-25T06:13:39.049Z",
+  "timing": {
+    "clock": "performance.now",
+    "performanceTimeOriginUnixMs": 1792908699261.454,
+    "plannedStartMs": 372.925348,
+    "plannedEndMs": 120372.925348,
+    "finishedMs": 119785.357798,
+    "plannedStartAtUtc": "2026-10-25T06:11:39.634Z",
+    "plannedEndAtUtc": "2026-10-25T06:13:39.634Z",
+    "finishedAtUtc": "2026-10-25T06:13:39.046Z"
+  },
+  "config": {
+    "endpoint": "http://127.0.0.1:8000/infer",
+    "requestsPerSecond": 1,
+    "durationSeconds": 120,
+    "timeoutMs": 600000,
+    "datasetPath": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json"
+  },
+  "workload": {
+    "id": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "recordCount": 90,
+    "totalImageByteLength": 5530510
+  },
+  "source": {
+    "gitCommit": "ac6a827ce1779d55c3fcd197dc71329eea873217",
+    "gitDirty": true
+  },
+  "hardware": {
+    "gpuModels": [
+      "NVIDIA A40"
+    ],
+    "source": "local-nvidia-smi"
+  },
+  "server": {
+    "healthUrl": "http://127.0.0.1:8000/health",
+    "service": "csnbs-llava-server",
+    "pid": 33535,
+    "modelId": "liuhaotian/llava-v1.5-7b",
+    "checkpointRevision": null,
+    "configuration": {
+      "model_id": "liuhaotian/llava-v1.5-7b",
+      "server_state": "S0",
+      "visual_token_num": 128,
+      "important_ratio": 0.5,
+      "max_batch_size": 1,
+      "max_new_tokens": 64,
+      "min_new_tokens": null,
+      "torch_threads": 4
+    },
+    "error": null
+  },
+  "summary": {
+    "totalRequests": 110,
+    "successfulRequests": 110,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 1.0000112018869487,
+    "completionRateRps": 1,
+    "successfulThroughputRps": 1,
+    "successfulRequestLatencyMs": {
+      "p50": 431.21049100000164,
+      "p95": 812.2808190000069,
+      "p99": 1479.0894179999887
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.14868300000671297,
+      "p95": 1.0668299999997544,
+      "p99": 1.4079839999903925
+    },
+    "plannedToCompleteMs": {
+      "p50": 431.12159899999097,
+      "p95": 812.3380610000022,
+      "p99": 1478.8680059999897
+    }
+  },
+  "requests": {
+    "file": "requests.jsonl",
+    "schemaVersion": 2,
+    "count": 120
+  }
+}

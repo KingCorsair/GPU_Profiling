@@ -2,9 +2,12 @@
 
 ## Current State
 
-* **WP3, WP4 and WP5 are closed (2026-10-25).** See their sections below.
-* **Current work package: WP6 — Final Load Benchmark.** Pilot `wp6_pilot_1` done (`17e6ab0`); noise-floor repeat blocks added (`ac6a827`). Full matrix `wp6_matrix_1` started 2026-10-25 05:19 UTC: 74 blocks in seeded random order via `scripts/wp6_load_matrix.py`, output in `results/timing/wp6_matrix/wp6_matrix_1/`.
-* Open, not blocking: the Layer-3 per-category request (WP2) and the WP5 one-answer EOS difference, both with Sribhav (`kingcorsair/SRIBHAV_ACCURACY_REQUESTS.md`).
+* **Month one is complete (2026-10-25).** WP1–WP7 closed. Results and conclusions: `AMAY_MONTH_ONE_RESULTS.md`.
+* **Headline (MEASURED, `wp6_matrix_2`):** pruning 576 → 128 raises max throughput +6% (fixed 64-token answers) / +14% (natural) when requests are served one at a time, and +46% / +57% on the batched server (B ≤ 8). Batching alone: 1.7–6×. The queue alone (S1): no measurable gain.
+* Open, not blocking:
+  * Rithvik's sign-off or rerun of WP6, to make it reportable (`kingcorsair/RITHVIK_LOADGEN_REQUESTS.md`);
+  * Sribhav: WP2 Layer-3 per-category check, and the one WP5 EOS difference (`kingcorsair/SRIBHAV_ACCURACY_REQUESTS.md`).
+* Next (month two, optional): vLLM port (plan in `AMAY_ENGINEERING_ROADMAP.md`), realistic traffic, B=16.
 * Blockers: none.
 * Last updated: 2026-10-25
 
@@ -15,8 +18,33 @@
 * [x] WP3 — Server Diagnostic (2026-10-25, `wp3_diag_2`)
 * [x] WP4 — Request Queue (2026-10-25)
 * [x] WP5 — Static Batching MVP (2026-10-25, `wp5_val_2`; one EOS rounding difference accepted)
-* [ ] WP6 — Final Load Benchmark (matrix `wp6_matrix_1` running)
-* [ ] WP7 — Final Writeup
+* [x] WP6 — Final Load Benchmark (2026-10-25, `wp6_matrix_2`; pending Rithvik's sign-off)
+* [x] WP7 — Final Writeup (2026-10-25, `AMAY_MONTH_ONE_RESULTS.md`)
+
+## WP6 — Final Load Benchmark (closed 2026-10-25)
+
+**Run `wp6_matrix_2`** (`scripts/wp6_load_matrix.py`, commit `ac6a827`, A40): {S0, S1, S2} × {576, 128} × {fixed 64, natural EOS}, 5–6 rps levels each, plus 6 noise-floor repeats; 74 blocks in seeded random order, server restarted per cell (8 s load), torch pinned to 4 threads in every state, ≥110 post-warm-up samples per block, 0 failures. Load from `csnbs/measure`, unmodified. Files: `results/timing/wp6_matrix/wp6_matrix_2/` (`summary.{txt,json}`, `wp6_demo_plots.png`, `wp6_capacity.png`).
+
+* An earlier attempt, `wp6_matrix_1`, died after 2 blocks when the Claude Code session ended, and was deleted. `wp6_matrix_2` ran detached (`setsid nohup`).
+* `git_dirty=true` is recorded only because `CLAUDE.md`/`Dockerfile` edits were uncommitted at launch; the code was exactly `ac6a827`.
+
+| Max throughput (req/s) | 576 | 128 | Pruning's gain |
+|---|---|---|---|
+| S0 fixed / natural | 0.473 / 2.560 | 0.500 / 2.907* | +6% / +14%* |
+| S1 fixed / natural | 0.477 / 2.571 | 0.501 / 2.898* | +5% / +13%* |
+| S2 fixed / natural | 1.950 / 4.355 | 2.848 / 6.816 | **+46% / +57%** |
+
+\* Lower bound: the top tested level (3 rps) did not fully saturate.
+
+* **Noise floor:** p50 spread 1.0% (S0, 1 rps) and 4.5% (S2, 3 rps) over 4 repeats.
+* **S1 ≈ S0** in capacity (within noise), with ~+3% low-load p50. The WP3 overlap bound (5–8%) did not turn into throughput.
+* **Utilisation premise:** S0 at 3 rps natural measures 94.7% (576) vs 86.7% (128), an **8-point gap, not the PROVISIONAL 21.3 points.** Reported per roadmap WP6 §10.
+* **Offline vs live agree:** batched scan 1.47× at B=8 (`wp5_val_2`) vs live +46% (fixed, B ≤ 8).
+* p99 omitted everywhere (no cell reaches 1,000 samples).
+
+## WP7 — Final Writeup (closed 2026-10-25)
+
+`AMAY_MONTH_ONE_RESULTS.md`: every figure labelled MEASURED / DERIVED / PROVISIONAL / HYPOTHETICAL, the four claims kept separate, what didn't work, limits, reproduce commands, and the month-two list. Not done: a clean-checkout rerun of every script (all ran from the committed tree in-session).
 
 ## WP3 — Server Diagnostic (closed 2026-10-25)
 

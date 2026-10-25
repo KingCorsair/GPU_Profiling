@@ -10,12 +10,13 @@ WP until you can explain the current one out loud without looking.
 - The old server (Rithvik's `csnbs/server.py`) handles **one request at a time** and
   **freezes** while the GPU works.
 - WP3 measured *why* the GPU sits idle. WP4 built a server that doesn't freeze.
-  WP5 made it run **several requests together** (batching). WP6 measures all three servers
+  WP5 made it run **several requests together** (batching). WP6 measured all three servers
   under load.
 - Batching is where the speed comes from: the GPU reads the model weights once per step,
   no matter how many requests share that step.
-- Pruning (128 tokens) helps much more once you batch: about 1.07× faster alone, about
-  1.7× faster in a batch of 16.
+- Pruning (128 tokens) helps much more once you batch. Under live load (WP6), it gave
+  +6% to +14% more throughput one request at a time, and +46% to +57% on the batched
+  server.
 
 ---
 
@@ -103,15 +104,31 @@ the same as reading them for 1.
 
 ---
 
-## WP6: the big load test (running)
+## WP6: the big load test (done)
 
-**What it does.** It tests 3 servers (old, queue, batched) × 2 token counts (576, 128)
-× 2 answer types (natural length, fixed 64 tokens), at many request rates. The order is
-random, so time-of-day effects can't fake a result. Every rate gets at least 100 samples
-for p95. Some settings are repeated to measure the noise floor.
+**What it did.** It tested 3 servers (old, queue, batched) × 2 token counts (576, 128)
+× 2 answer types (natural length, fixed 64 tokens), at many request rates, in random
+order, with ≥110 samples per point. Some settings were repeated to measure the noise
+floor (1–4.5%).
 
-**Read:** just the top comment of `scripts/wp6_load_matrix.py`. The results will be in
-`results/timing/wp6_matrix/wp6_matrix_2/summary.txt` when it finishes.
+**What it found: max requests per second, 576 → 128:**
+
+| | Fixed 64-token answers | Natural answers |
+|---|---|---|
+| Old server (S0) | 0.47 → 0.50 (**+6%**) | 2.56 → 2.91 (**+14%**) |
+| Queue only (S1) | about the same as S0 | about the same as S0 |
+| Batched (S2) | 1.95 → 2.85 (**+46%**) | 4.36 → 6.82 (**+57%**) |
+
+- Pruning barely helps one request at a time; batched, it helps a lot. That's the story.
+- The queue alone gave **no** measurable gain, even though WP3 said up to 5–8% was possible.
+- Batching's gain is much bigger with fixed long answers (4–6×) than natural short ones
+  (1.7–2.3×). Static batching makes short answers wait for long ones in the same batch.
+
+**Read:**
+- `results/timing/wp6_matrix/wp6_matrix_2/wp6_demo_plots.png`: the two demo plots.
+- `results/timing/wp6_matrix/wp6_matrix_2/summary.txt`: every number.
+- `AMAY_MONTH_ONE_RESULTS.md`: the full writeup. Read sections 1, 3, 4 and 5.
+- The top comment of `scripts/wp6_load_matrix.py`: how the test was designed.
 
 ---
 
@@ -132,8 +149,10 @@ These are helper scripts with no new ideas: `wp3_run_diag.py`, `wp3_analyze.py`,
 6. Why did batching change which tokens were kept, and how did we prove it wasn't leaking?
 7. Why does batching help 128 tokens (8.7×) more than 576 (5.6×)?
 8. What was the one differing answer out of 540, and why is it OK?
+9. Why did the queue alone (S1) give no gain, and why was it still needed?
+10. Why does pruning help more with natural (short) answers than fixed 64-token ones on the old server?
 
-## Try it yourself (after WP6 finishes; one job on the GPU at a time)
+## Try it yourself (one job on the GPU at a time)
 
 Run the server and send it requests:
 ```bash
