@@ -31,7 +31,10 @@ from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
 
-import torch
+# generate() appends a timing row per call; keep serving runs out of the tracked file.
+os.environ.setdefault("LLAVA_TIMING_FILE", "/tmp/batch_server_llava_timing.jsonl")
+
+import torch  # noqa: E402
 from fastapi import FastAPI, HTTPException
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field

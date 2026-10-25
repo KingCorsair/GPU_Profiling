@@ -1,0 +1,32 @@
+WP4/WP5 batch validation -- wp5_val_2
+commit 6a471cbae3be8890dfee3806f2d8a16147245b83 (dirty=True)  GPU NVIDIA A40  90 dev images  greedy, max_new_tokens=64  padding_side=left
+
+vtn=576
+  S1 identity (B=1 via engine)   identical 90/90  token-set changed 0  shapes_ok=True
+  B=2                            identical 90/90  token-set changed 0  shapes_ok=True
+  B=4                            identical 90/90  token-set changed 0  shapes_ok=True
+  B=8                            identical 89/90  token-set changed 0  shapes_ok=True
+      textvqa_34610 [ocr] token_set_changed=False
+        ref: 'The center of all of this is a man who is writing on a large whiteboard.'
+        bat: 'The center of all of this is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, which adds a pop of color to the scene.'
+  contamination: 10/10 anchors identical to reference with every partner/order
+  batched generate(), fixed 64-token output, 10 reps after 5 warm-up (CUDA events):
+    B= 1: batch p50   2074.3 ms  [2068.5-2083.0]   0.482 req/s  (1.00x B=1)
+    B= 2: batch p50   2333.9 ms  [2299.4-2348.3]   0.857 req/s  (1.78x B=1)
+    B= 4: batch p50   2879.1 ms  [2875.2-2890.2]   1.389 req/s  (2.88x B=1)
+    B= 8: batch p50   3908.3 ms  [3903.5-3917.5]   2.047 req/s  (4.25x B=1)
+    B=16: batch p50   5956.6 ms  [5938.6-5971.9]   2.686 req/s  (5.57x B=1)
+
+vtn=128
+  S1 identity (B=1 via engine)   identical 90/90  token-set changed 0  shapes_ok=True
+  B=2                            identical 90/90  token-set changed 0  shapes_ok=True
+  B=4                            identical 90/90  token-set changed 0  shapes_ok=True
+  B=8                            identical 90/90  token-set changed 0  shapes_ok=True
+  contamination: 10/10 anchors identical to reference with every partner/order
+  batched generate(), fixed 64-token output, 10 reps after 5 warm-up (CUDA events):
+    B= 1: batch p50   1931.1 ms  [1925.8-1944.3]   0.518 req/s  (1.00x B=1)
+    B= 2: batch p50   2039.4 ms  [2009.6-2044.2]   0.981 req/s  (1.89x B=1)
+    B= 4: batch p50   2255.4 ms  [2247.2-2275.3]   1.774 req/s  (3.42x B=1)
+    B= 8: batch p50   2654.7 ms  [2647.4-2676.8]   3.014 req/s  (5.82x B=1)
+    B=16: batch p50   3537.6 ms  [3524.5-3599.6]   4.523 req/s  (8.73x B=1)
+

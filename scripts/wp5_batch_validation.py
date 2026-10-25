@@ -30,7 +30,11 @@ import sys
 import time
 from pathlib import Path
 
-import torch
+import os
+
+os.environ.setdefault("LLAVA_TIMING_FILE", "/tmp/wp5_validation_llava_timing.jsonl")
+
+import torch  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "vis_pruner_copy"))
