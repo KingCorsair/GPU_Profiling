@@ -269,7 +269,10 @@ class LlavaMetaForCausalLM(ABC):
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
         else:
             image_features, index_masks = self.encode_images(images)
-            image_features = image_features[index_masks].unsqueeze(0)
+            # One (T, C) tensor per image. Masking the whole (B, N, C) batch at once
+            # flattens every image's kept tokens into a single row, which hands all of
+            # them to the first sequence when B > 1. Boolean indexing keeps raster order.
+            image_features = [x[m] for x, m in zip(image_features, index_masks)]
 
         # TODO: image start / end is not implemented here to support pretraining.
         if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):

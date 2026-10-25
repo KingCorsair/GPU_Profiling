@@ -28,6 +28,7 @@ from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
 import time
 import json
 import os
+import threading
 
 # Where per-question timing lines get written. Overridable via the
 # LLAVA_TIMING_FILE env var (e.g. by scripts/time_sqa_sweep.py, so each
@@ -72,11 +73,31 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         # drain the pipeline every step and inflate exactly the fast kernels
         # we're trying to measure. Events get read out with a single sync
         # after generate() returns.
-        self._timing_forward_events = None
-        self._timing_prepare_inputs_calls = None
+        #
+        # Both lists live in thread-local storage (see the properties below),
+        # not on the shared instance: a serving process may call generate()
+        # from more than one thread, and a plain attribute would let one
+        # call's reset wipe another call's in-flight records.
+        self.__dict__["_timing_tls"] = threading.local()
 
         # Initialize weights and apply final processing
         self.post_init()
+
+    @property
+    def _timing_forward_events(self):
+        return getattr(self.__dict__["_timing_tls"], "forward_events", None)
+
+    @_timing_forward_events.setter
+    def _timing_forward_events(self, value):
+        self.__dict__["_timing_tls"].forward_events = value
+
+    @property
+    def _timing_prepare_inputs_calls(self):
+        return getattr(self.__dict__["_timing_tls"], "prepare_inputs_calls", None)
+
+    @_timing_prepare_inputs_calls.setter
+    def _timing_prepare_inputs_calls(self, value):
+        self.__dict__["_timing_tls"].prepare_inputs_calls = value
 
     def get_model(self):
         return self.model

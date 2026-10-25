@@ -156,6 +156,11 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             vision_tower.to(device=device_map, dtype=torch.float16)
         image_processor = vision_tower.image_processor
 
+    # Batched generation needs left padding: prepare_inputs_labels_for_multimodal re-pads
+    # on this setting, and right padding would append new tokens after the pad. At B=1
+    # nothing is padded, so single-request outputs are unaffected.
+    model.config.tokenizer_padding_side = "left"
+
     if hasattr(model.config, "max_sequence_length"):
         context_len = model.config.max_sequence_length
     elif hasattr(model.config, "max_position_embeddings"):

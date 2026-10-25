@@ -1,0 +1,26 @@
+{
+  "visual_token_num": 576,
+  "torch_threads": 4,
+  "rps": 2.0,
+  "duration_s": 60,
+  "loadgen_run_json": "results/loadgen/2026-10-25/04-42-59Z_rps-2_58afaf9d/run.json",
+  "server_counts": {
+    "requests": 120,
+    "heartbeat_samples": 1776
+  },
+  "cgroup_before": {
+    "nr_periods": 9837,
+    "nr_throttled": 611,
+    "throttled_time": 1000644760271,
+    "nr_bursts": 0,
+    "burst_time": 0
+  },
+  "cgroup_after": {
+    "nr_periods": 10461,
+    "nr_throttled": 611,
+    "throttled_time": 1000644760271,
+    "nr_bursts": 0,
+    "burst_time": 0
+  },
+  "nr_throttled_delta": 0
+}

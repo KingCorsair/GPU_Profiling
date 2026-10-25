@@ -10,7 +10,12 @@ dropped (rule 3).
 Definitions (all from server-side perf_counter timestamps):
   overlappable CPU  = t_preprocess_done - t_handler_entry   (roadmap WP3 step 4)
   serial non-GPU    = everything in a request's handler span except generate()
-  service interval  = gap between consecutive handler entries while the queue is non-empty
+  service time      = handler span (t_handler_entry -> t_response). The S0 server is
+                      strictly serial, so this is the per-request service time.
+  received-after-previous-response: share of requests whose ASGI call only started after
+                      the previous request's response was sent. While the loop is blocked,
+                      arrivals are not even received, so a queue-based service interval
+                      cannot be measured from server-side timestamps.
 """
 import json
 import statistics
@@ -60,15 +65,10 @@ def analyze_session(d):
     handler_span = [r["t_response"] - r["t_handler_entry"] for r in reqs]
     serial_non_gpu = [h - g for h, g in zip(handler_span, stage["generate"])]
 
-    # Service interval: consecutive handler entries, counted only when request N+1 had
-    # already arrived before request N finished (server never idle between them).
     by_entry = sorted(reqs, key=lambda r: r["t_handler_entry"])
-    service, handoff = [], []
-    for a, b in zip(by_entry, by_entry[1:]):
-        if b["t_received"] < a["t_response"]:
-            service.append(b["t_handler_entry"] - a["t_handler_entry"])
-            # If the server only reads N+1's body after N's response, this is ~0 and >=0.
-            handoff.append(b["t_body_done"] - a["t_response"])
+    handoff = [b["t_received"] - a["t_response"] for a, b in zip(by_entry, by_entry[1:])]
+    service = handler_span
+    window_s = by_entry[-1]["t_response"] - by_entry[0]["t_handler_entry"]
 
     # Heartbeat: total blocked time vs total handler time, and per-request gap match.
     gaps = hb["gaps"]
@@ -109,18 +109,16 @@ def analyze_session(d):
         "overlappable_cpu_p50_ms": ms(pct(overlappable, 0.5)),
         "serial_non_gpu_mean_ms": ms(statistics.mean(serial_non_gpu)),
         "handler_span_mean_ms": ms(statistics.mean(handler_span)),
-        "service_interval_n": len(service),
         "service_interval_mean_ms": ms(mean_service),
         "service_interval_p50_ms": ms(pct(service, 0.5)),
+        "server_busy_fraction": round(sum(handler_span) / window_s, 3),
         "overlappable_pct_of_service": round(100 * statistics.mean(overlappable) / mean_service, 2)
         if mean_service else None,
         "serial_non_gpu_pct_of_service": round(100 * statistics.mean(serial_non_gpu) / mean_service, 2)
         if mean_service else None,
-        "handoff_body_after_prev_response_ms": {
-            "min": ms(min(handoff)) if handoff else None,
-            "p50": ms(pct(handoff, 0.5)),
-            "max": ms(max(handoff)) if handoff else None,
-            "n_negative": sum(h < 0 for h in handoff),
+        "received_after_prev_response": {
+            "share": round(sum(h >= 0 for h in handoff) / len(handoff), 3),
+            "n": len(handoff),
         },
         "heartbeat": {
             "samples": hb["samples"],
@@ -157,7 +155,7 @@ def main():
         "",
         "Per session:",
         f"{'session':32} {'n':>4} {'thrtl':>5} {'overlap':>8} {'nonGPU':>7} {'generate':>9} "
-        f"{'service':>8} {'ovl%':>6} {'nonGPU%':>7} {'GPU%':>5} {'tput':>6} {'p50':>7} {'p95':>7}",
+        f"{'service':>8} {'ovl%':>6} {'nonGPU%':>7} {'busy':>5} {'GPU%':>5} {'tput':>6} {'p50':>7} {'p95':>7}",
     ]
     for s in sessions:
         lg = s["loadgen"] or {}
@@ -166,7 +164,7 @@ def main():
             f"{s['overlappable_cpu_mean_ms']:>8} {s['serial_non_gpu_mean_ms']:>7} "
             f"{s['stage_mean_ms']['generate']:>9} {s['service_interval_mean_ms']:>8} "
             f"{s['overlappable_pct_of_service']:>6} {s['serial_non_gpu_pct_of_service']:>7} "
-            f"{s['gpu_util_mean_pct']:>5} {lg.get('throughput_rps', 0):>6.3f} "
+            f"{s['server_busy_fraction']:>5} {s['gpu_util_mean_pct']:>5} {lg.get('throughput_rps', 0):>6.3f} "
             f"{lg.get('p50_ms', 0):>7.0f} {lg.get('p95_ms', 0):>7.0f}")
 
     lines += ["", "Stage decomposition, mean ms, pooled over repeats:"]
@@ -187,17 +185,18 @@ def main():
             "overlappable_pct_of_service": pooled(ss, "overlappable_pct_of_service"),
             "serial_non_gpu_pct_of_service": pooled(ss, "serial_non_gpu_pct_of_service"),
             "gpu_util_mean_pct": pooled(ss, "gpu_util_mean_pct"),
+            "server_busy_fraction": pooled(ss, "server_busy_fraction"),
             "nr_throttled_delta_total": sum(s["nr_throttled_delta"] or 0 for s in ss),
         }
 
     lines += ["", "Event loop / handoff checks:"]
     for s in sessions:
-        hb, ho = s["heartbeat"], s["handoff_body_after_prev_response_ms"]
+        hb, ho = s["heartbeat"], s["received_after_prev_response"]
         lines.append(
             f"{s['session']:32} max_gap={hb['max_gap_ms']}ms blocked={hb['blocked_s_in_window']}s "
             f"handler={hb['handler_s_in_window']}s gap/handler p50={hb['gap_over_handler_span_p50']} "
             f"({hb['requests_with_gap_covering_generate']}/{s['n_requests']})  "
-            f"body-after-prev-response p50={ho['p50']}ms min={ho['min']}ms neg={ho['n_negative']}")
+            f"received after previous response: {ho['share']:.1%} of {ho['n']}")
 
     text = "\n".join(lines)
     print(text)

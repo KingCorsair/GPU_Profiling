@@ -1,0 +1,26 @@
+{
+  "run_id": "wp3_diag_2",
+  "git_commit": "cad54442d072b4021649a17fb761460a1787536d",
+  "git_dirty": false,
+  "gpu": "NVIDIA A40",
+  "cpu_quota": "765000",
+  "args": {
+    "run_id": "wp3_diag_2",
+    "rps": 2.0,
+    "duration": 60,
+    "repeats": 2,
+    "configs": "576,128",
+    "threads": "0,4",
+    "seed": 20261025
+  },
+  "session_order": [
+    "00_vtn128_thrdefault_rep0",
+    "01_vtn576_thrdefault_rep1",
+    "02_vtn576_thrdefault_rep0",
+    "03_vtn128_thr4_rep1",
+    "04_vtn576_thr4_rep1",
+    "05_vtn576_thr4_rep0",
+    "06_vtn128_thr4_rep0",
+    "07_vtn128_thrdefault_rep1"
+  ]
+}

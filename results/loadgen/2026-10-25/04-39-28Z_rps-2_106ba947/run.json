@@ -1,0 +1,76 @@
+{
+  "schema": "loadgen-run",
+  "schemaVersion": 1,
+  "runId": "04-39-28Z_rps-2_106ba947",
+  "runKind": "open-loop",
+  "recordedAtUtc": "2026-10-25T04:40:30.260Z",
+  "timing": {
+    "clock": "performance.now",
+    "performanceTimeOriginUnixMs": 1792903167749.72,
+    "plannedStartMs": 371.469169,
+    "plannedEndMs": 60371.469169,
+    "finishedMs": 62508.445419,
+    "plannedStartAtUtc": "2026-10-25T04:39:28.121Z",
+    "plannedEndAtUtc": "2026-10-25T04:40:28.121Z",
+    "finishedAtUtc": "2026-10-25T04:40:30.258Z"
+  },
+  "config": {
+    "endpoint": "http://127.0.0.1:8000/infer",
+    "requestsPerSecond": 2,
+    "durationSeconds": 60,
+    "timeoutMs": 300000,
+    "datasetPath": "/workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json"
+  },
+  "workload": {
+    "id": "sha256:3933e73c4e08aa1ca665b5184055ab7b46ca19d3ce1dc0362b3dd00220444bc5",
+    "recordCount": 90,
+    "totalImageByteLength": 5530510
+  },
+  "source": {
+    "gitCommit": "cad54442d072b4021649a17fb761460a1787536d",
+    "gitDirty": true
+  },
+  "hardware": {
+    "gpuModels": [
+      "NVIDIA A40"
+    ],
+    "source": "local-nvidia-smi"
+  },
+  "server": {
+    "healthUrl": "http://127.0.0.1:8000/health",
+    "service": "csnbs-llava-server",
+    "pid": 7238,
+    "modelId": null,
+    "checkpointRevision": null,
+    "configuration": null,
+    "error": null
+  },
+  "summary": {
+    "totalRequests": 110,
+    "successfulRequests": 110,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 2.000000977908735,
+    "completionRateRps": 1.925201233603396,
+    "successfulThroughputRps": 1.925201233603396,
+    "successfulRequestLatencyMs": {
+      "p50": 1045.2298650000012,
+      "p95": 5648.162063,
+      "p99": 7998.4310789999945
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.15778000000136672,
+      "p95": 0.47449799999958486,
+      "p99": 27.925709999995888
+    },
+    "plannedToCompleteMs": {
+      "p50": 1045.339011,
+      "p95": 5648.205715,
+      "p99": 7998.805106999993
+    }
+  },
+  "requests": {
+    "file": "requests.jsonl",
+    "schemaVersion": 2,
+    "count": 120
+  }
+}

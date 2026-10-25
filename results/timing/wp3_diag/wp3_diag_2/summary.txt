@@ -1,0 +1,31 @@
+WP3 server diagnostic -- wp3_diag_2
+commit cad54442d072b4021649a17fb761460a1787536d (dirty=False)  GPU NVIDIA A40  rps=2.0  60s/session  warm-up dropped=10
+session order: 00_vtn128_thrdefault_rep0, 01_vtn576_thrdefault_rep1, 02_vtn576_thrdefault_rep0, 03_vtn128_thr4_rep1, 04_vtn576_thr4_rep1, 05_vtn576_thr4_rep0, 06_vtn128_thr4_rep0, 07_vtn128_thrdefault_rep1
+
+Per session:
+session                             n thrtl  overlap  nonGPU  generate  service   ovl% nonGPU%  busy  GPU%   tput     p50     p95
+00_vtn128_thrdefault_rep0         110    87    26.08   27.15    380.19   407.35    6.4    6.67 0.838  72.0  1.965     702    4510
+01_vtn576_thrdefault_rep1         110   102     23.8   24.88    412.48   437.36   5.44    5.69  0.88  77.9  1.920    1045    5793
+02_vtn576_thrdefault_rep0         110    93    23.63    24.9    405.18   430.08    5.5    5.79 0.878  78.8  1.925    1045    5648
+03_vtn128_thr4_rep1               110     0    27.66   28.76    335.11   363.87    7.6     7.9 0.759  70.9  1.999     535    2671
+04_vtn576_thr4_rep1               110     0    25.09   26.13    385.55   411.68   6.09    6.35 0.848  75.4  1.946     696    4397
+05_vtn576_thr4_rep0               110     0    25.36   26.39     386.8   413.18   6.14    6.39 0.834  71.8  1.944     701    4310
+06_vtn128_thr4_rep0               110     0    28.88   29.95    335.28   365.23   7.91     8.2 0.761  73.2  2.000     528    2678
+07_vtn128_thrdefault_rep1         110    83    26.48   28.55    376.77   405.32   6.53    7.04 0.834  68.6  1.971     620    4294
+
+Stage decomposition, mean ms, pooled over repeats:
+config             pydantic_p b64_decode pil_decode   tokenize    ids_h2d process_im  image_h2d   generate decode_res   service
+vtn128 thr=4             0.37       0.32       3.46        1.2       0.17      23.12       0.39     335.19        0.7    364.55
+vtn128 thr=default       0.35       0.29       3.22        1.1       0.15      21.53       0.89     378.48       0.69    406.34
+vtn576 thr=4             0.33       0.28        3.2       1.06       0.15      20.54       0.35     386.18       0.68    412.43
+vtn576 thr=default       0.33       0.27       2.99       1.02       0.14       19.3       0.48     408.83       0.69    433.72
+
+Event loop / handoff checks:
+00_vtn128_thrdefault_rep0        max_gap=3308.95ms blocked=42.47s handler=44.81s gap/handler p50=2.173 (105/110)  received after previous response: 93.6% of 109
+01_vtn576_thrdefault_rep1        max_gap=4825.99ms blocked=48.67s handler=48.11s gap/handler p50=3.32 (110/110)  received after previous response: 92.7% of 109
+02_vtn576_thrdefault_rep0        max_gap=4345.85ms blocked=45.41s handler=47.31s gap/handler p50=2.378 (107/110)  received after previous response: 93.6% of 109
+03_vtn128_thr4_rep1              max_gap=3123.38ms blocked=37.95s handler=40.03s gap/handler p50=1.495 (105/110)  received after previous response: 95.4% of 109
+04_vtn576_thr4_rep1              max_gap=4320.82ms blocked=43.43s handler=45.28s gap/handler p50=2.27 (107/110)  received after previous response: 94.5% of 109
+05_vtn576_thr4_rep0              max_gap=4221.72ms blocked=45.67s handler=45.45s gap/handler p50=2.377 (109/110)  received after previous response: 92.7% of 109
+06_vtn128_thr4_rep0              max_gap=2948.8ms blocked=38.02s handler=40.18s gap/handler p50=1.011 (105/110)  received after previous response: 95.4% of 109
+07_vtn128_thrdefault_rep1        max_gap=2894.0ms blocked=42.26s handler=44.58s gap/handler p50=2.052 (105/110)  received after previous response: 94.5% of 109

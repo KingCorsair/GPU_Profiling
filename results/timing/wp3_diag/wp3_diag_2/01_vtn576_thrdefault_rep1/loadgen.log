@@ -1,0 +1,31 @@
+
+> measure@1.0.0 dev
+> tsx src/loadgen.ts --endpoint http://127.0.0.1:8000/infer --rps 2.0 --duration 60 --timeout 300000 --dataset /workspace/GPU_Profiling/vis_pruner_copy/vispruner_eval_dataset/dev.json
+
+{
+  "runId": "04-38-14Z_rps-2_7e600a9b",
+  "outputDirectory": "/workspace/GPU_Profiling/results/loadgen/2026-10-25/04-38-14Z_rps-2_7e600a9b",
+  "summary": {
+    "totalRequests": 110,
+    "successfulRequests": 110,
+    "failedRequests": 0,
+    "achievedArrivalRateRps": 1.9999859690892596,
+    "completionRateRps": 1.91964791895837,
+    "successfulThroughputRps": 1.91964791895837,
+    "successfulRequestLatencyMs": {
+      "p50": 1045.0185270000002,
+      "p95": 5792.734102,
+      "p99": 6830.622582000002
+    },
+    "dispatchLatenessMs": {
+      "p50": -0.33574400000361493,
+      "p95": 1.0288319999999658,
+      "p99": 10.966623000000254
+    },
+    "plannedToCompleteMs": {
+      "p50": 1044.697205999997,
+      "p95": 5791.773832000001,
+      "p99": 6830.250011000002
+    }
+  }
+}
