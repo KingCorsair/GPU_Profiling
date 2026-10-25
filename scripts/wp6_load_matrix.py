@@ -161,6 +161,9 @@ def main():
     ap.add_argument("--levels-serial-fixed", default="0.25,0.5,0.75,1,1.5", help="S0 and S1")
     ap.add_argument("--levels-s2-natural", default="1,2,3,4,6,8")
     ap.add_argument("--levels-s2-fixed", default="0.5,1,1.5,2,3,4")
+    ap.add_argument("--noise-floor", default="S0:128:natural:1;S2:128:natural:3",
+                    help="state:vtn:policy:rps blocks repeated --noise-reps extra times (rule 8)")
+    ap.add_argument("--noise-reps", type=int, default=3)
     ap.add_argument("--min-samples", type=int, default=110)
     ap.add_argument("--min-duration", type=int, default=60)
     ap.add_argument("--batch-size", type=int, default=8)
@@ -186,6 +189,9 @@ def main():
                 levels = getattr(args, f"levels_{group}_{policy}")
                 for rps in (float(x) for x in levels.split(",")):
                     blocks.append(((state, vtn, policy), rps))
+    for spec in filter(None, args.noise_floor.split(";")):
+        state, vtn, policy, rps = spec.split(":")
+        blocks += [((state, int(vtn), policy), float(rps))] * args.noise_reps
     random.Random(args.seed).shuffle(blocks)
 
     out_root.mkdir(parents=True)

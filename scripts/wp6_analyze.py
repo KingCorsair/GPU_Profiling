@@ -80,6 +80,20 @@ def main():
             f"{r['failed']:>4} {fmt(r['p50_ms']):>8} {fmt(r['p95_ms']):>8} {fmt(r['p99_ms']):>8} "
             f"{fmt(r['gpu_util_mean_pct'], 1):>5}")
 
+    repeats = defaultdict(list)
+    for r in rows:
+        repeats[(r["policy"], r["visual_token_num"], r["state"], r["rps_offered"])].append(r)
+    noise = {k: v for k, v in repeats.items() if len(v) > 1}
+    if noise:
+        lines += ["", "Noise floor (same cell and level, repeated in random positions):"]
+        for (policy, vtn, state, rps), rs in sorted(noise.items()):
+            p50s, p95s = [r["p50_ms"] for r in rs], [r["p95_ms"] for r in rs]
+            lines.append(
+                f"{policy:8} {vtn:>4} {state:5} {rps:>7}  x{len(rs)}  "
+                f"p50 {min(p50s):.0f}-{max(p50s):.0f} ms (spread {100 * (max(p50s) - min(p50s)) / min(p50s):.1f}%)  "
+                f"p95 {min(p95s):.0f}-{max(p95s):.0f} ms (spread {100 * (max(p95s) - min(p95s)) / min(p95s):.1f}%)  "
+                f"tput {min(r['throughput_rps'] for r in rs):.3f}-{max(r['throughput_rps'] for r in rs):.3f}")
+
     capacity = defaultdict(dict)
     for r in rows:
         key = (r["policy"], r["visual_token_num"], r["state"])
