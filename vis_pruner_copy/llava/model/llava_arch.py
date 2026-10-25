@@ -139,6 +139,14 @@ class LlavaMetaForCausalLM(ABC):
 
     # [VisPruner] Generate index masks using visual cues
     def encode_images(self, images):
+        # Encode and select one image at a time. Batched, the tower's fp16 rounding and
+        # argsort's tie-breaking depend on B, so the same image keeps a different token set
+        # alone than in a batch (results/wp5_validation/wp5_seldiag_1). Per image, a request's
+        # selection never depends on what it was batched with. The LLM stays batched.
+        if images.shape[0] > 1:
+            features, masks = zip(*(self.encode_images(x.unsqueeze(0)) for x in images))
+            return torch.cat(features), torch.cat(masks)
+
         image_features, image_attentions = self.get_model().get_vision_tower()(images, output_attentions=True) # (B, N, C), (B, H, N)
         
         B, N, C = image_features.shape

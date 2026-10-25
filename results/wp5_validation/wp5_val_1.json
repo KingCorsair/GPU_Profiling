@@ -1,0 +1,932 @@
+{
+  "meta": {
+    "run_id": "wp5_val_1",
+    "git_commit": "c8a301abdd97b34975e9e79a94420dc3ea94a758",
+    "git_dirty": false,
+    "gpu": "NVIDIA A40",
+    "n_items": 90,
+    "padding_side": "left",
+    "seed": 20261025,
+    "elapsed_s": 799.2
+  },
+  "configs": {
+    "576": {
+      "batch": {
+        "1": {
+          "identical": 90,
+          "n": 90,
+          "token_set_changed": 0,
+          "shapes_ok": true,
+          "diffs": []
+        },
+        "2": {
+          "identical": 89,
+          "n": 90,
+          "token_set_changed": 0,
+          "shapes_ok": true,
+          "diffs": [
+            {
+              "id": "textvqa_34610",
+              "category": "ocr",
+              "batch_index": 37,
+              "position": 0,
+              "token_set_changed": false,
+              "reference": "The center of all of this is a man who is writing on a large whiteboard.",
+              "batched": "The center of all of this is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, which adds a pop of color to the scene."
+            }
+          ]
+        },
+        "4": {
+          "identical": 90,
+          "n": 90,
+          "token_set_changed": 0,
+          "shapes_ok": true,
+          "diffs": []
+        },
+        "8": {
+          "identical": 88,
+          "n": 90,
+          "token_set_changed": 0,
+          "shapes_ok": true,
+          "diffs": [
+            {
+              "id": "textvqa_34610",
+              "category": "ocr",
+              "batch_index": 0,
+              "position": 3,
+              "token_set_changed": false,
+              "reference": "The center of all of this is a man who is writing on a large whiteboard.",
+              "batched": "The center of all of this is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, which adds a pop of color to the scene."
+            },
+            {
+              "id": "textvqa_34614",
+              "category": "ocr",
+              "batch_index": 3,
+              "position": 7,
+              "token_set_changed": false,
+              "reference": "The light sign on the farthest right window reads \"all lit.\"",
+              "batched": "The light sign on the farthest right window reads \"HULC LIGHT.\""
+            }
+          ]
+        }
+      },
+      "contamination": {
+        "short_partner": "textvqa_34608",
+        "long_output_partner": "textvqa_34620",
+        "anchors_all_equal": 10,
+        "n_anchors": 10,
+        "cases": [
+          {
+            "id": "mme_existence/000000007108.jpg",
+            "reference": "Yes",
+            "short_prompt_after": "Yes",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000015746.jpg",
+            "reference": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_after": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a fire hydrant in this image.",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes, there is a fire hydrant in this image.",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_position/000000211825.jpg",
+            "reference": "Yes",
+            "short_prompt_after": "Yes",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_count/000000290081.jpg",
+            "reference": "Yes",
+            "short_prompt_after": "Yes",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "gqa_n235859_1",
+            "reference": "The woman is wearing the dress.",
+            "short_prompt_after": "The woman is wearing the dress.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "The woman is wearing the dress.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "The woman is wearing the dress.",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "The woman is wearing the dress.",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_color/000000492992.jpg",
+            "reference": "Yes, there is a white bird in the image.",
+            "short_prompt_after": "Yes, there is a white bird in the image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a white bird in the image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a white bird in the image.",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes, there is a white bird in the image.",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000541952.jpg",
+            "reference": "Yes, there is a clock in this image.",
+            "short_prompt_after": "Yes, there is a clock in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a clock in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a clock in this image.",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes, there is a clock in this image.",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "textvqa_34637",
+            "reference": "The picture says \"your other ride is a bicycle.\"",
+            "short_prompt_after": "The picture says \"your other ride is a bicycle.\"",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "The picture says \"your other ride is a bicycle.\"",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "The picture says \"your other ride is a bicycle.\"",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "The picture says \"your other ride is a bicycle.\"",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000572956.jpg",
+            "reference": "Yes, there is a motorcycle in this image.",
+            "short_prompt_after": "Yes, there is a motorcycle in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a motorcycle in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a motorcycle in this image.",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "Yes, there is a motorcycle in this image.",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000009590.jpg",
+            "reference": "No",
+            "short_prompt_after": "No",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "No",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "No",
+            "long_output_after_partner_ok": true,
+            "long_output_before": "No",
+            "long_output_before_partner_ok": true,
+            "all_equal_reference": true
+          }
+        ]
+      },
+      "reference_answers": {
+        "textvqa_34628": "The name of the runner on the left is Willis.",
+        "textvqa_34620": "In the image, there are four items available for $5 each. These items are colorful cakes or frosting, which are displayed in a store. The four items are placed in a row, and each one is priced at $5.",
+        "textvqa_34614": "The light sign on the farthest right window reads \"all lit.\"",
+        "textvqa_34638": "The lowest number yard line that I can see in the image is the 30-yard line.",
+        "textvqa_34633": "Yes, these are bottles of Pepsi.",
+        "textvqa_34610": "The center of all of this is a man who is writing on a large whiteboard.",
+        "textvqa_34608": "The time on the watch is 10:10.",
+        "textvqa_34618": "The bottle with a red label is a bottle of Jack Daniel's whiskey.",
+        "textvqa_34616": "Yes, this is a Denny's restaurant sign.",
+        "textvqa_34622": "One of the brands being advertised in the image is Yamaha.",
+        "textvqa_34613": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+        "textvqa_34637": "The picture says \"your other ride is a bicycle.\"",
+        "textvqa_34643": "Yes, the ruler in the image was made in 2002.",
+        "textvqa_34632": "The author of the book is Jorge Luis Borges.",
+        "textvqa_34623": "This image was taken on January 14, 2012.",
+        "mme_count/000000427034.jpg": "Yes",
+        "mme_count/000000434479.jpg": "No, there is only one piece of pizza in the image.",
+        "mme_count/000000438304.jpg": "Yes, there are two tennis rackets in the picture.",
+        "mme_count/000000565045.jpg": "Yes, there are two bath towels in the picture.",
+        "mme_count/000000357816.jpg": "Yes, there are four people in the image.",
+        "mme_count/000000006040.jpg": "Yes",
+        "mme_count/000000195918.jpg": "Yes, there are two display devices in the image.",
+        "mme_count/000000372819.jpg": "Yes, there are four dogs in the image.",
+        "mme_count/000000289059.jpg": "Yes, there are two people in the image.",
+        "mme_count/000000044279.jpg": "Yes, there are two people in the image.",
+        "mme_count/000000410612.jpg": "Yes",
+        "mme_count/000000335954.jpg": "Yes, there are two bowls in this image.",
+        "mme_count/000000290081.jpg": "Yes",
+        "mme_count/000000430286.jpg": "Yes, there are three remotes in this image.",
+        "mme_count/000000556000.jpg": "Yes, there are four people in the image.",
+        "mme_position/000000211825.jpg": "Yes",
+        "mme_position/000000395801.jpg": "Yes",
+        "mme_position/000000204871.jpg": "Yes",
+        "mme_position/000000007281.jpg": "Yes",
+        "mme_position/000000472046.jpg": "Yes",
+        "mme_position/000000048504.jpg": "Yes",
+        "mme_position/000000395701.jpg": "Yes",
+        "mme_position/000000062808.jpg": "Yes",
+        "gqa_n414992_6": "The airplane is flying above a beach with people on it.",
+        "gqa_n578564_13": "A painting is hanging above the chalkboard.",
+        "mme_position/000000056127.jpg": "Yes",
+        "mme_position/000000014038.jpg": "Yes",
+        "mme_position/000000477955.jpg": "Yes",
+        "mme_position/000000458410.jpg": "Yes",
+        "mme_position/000000426241.jpg": "Yes",
+        "gqa_n309148_109": "Yes, there is a red fire truck in the image.",
+        "gqa_n207708_55": "Yes, there is a pear beneath the silver and black appliance.",
+        "mme_existence/000000494427.jpg": "Yes",
+        "mme_existence/000000009590.jpg": "No",
+        "mme_existence/000000537812.jpg": "Yes",
+        "mme_existence/000000015746.jpg": "Yes, there is a fire hydrant in this image.",
+        "mme_existence/000000037751.jpg": "Yes, there is a backpack in the image.",
+        "mme_existence/000000050145.jpg": "Yes",
+        "mme_existence/000000007816.jpg": "Yes",
+        "mme_existence/000000572956.jpg": "Yes, there is a motorcycle in this image.",
+        "gqa_n473688_116": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in front of a mirror.",
+        "mme_existence/000000007108.jpg": "Yes",
+        "mme_existence/000000061418.jpg": "Yes",
+        "mme_existence/000000541952.jpg": "Yes, there is a clock in this image.",
+        "mme_existence/000000424521.jpg": "Yes",
+        "mme_scene/Places365_val_00000144.jpg": "No",
+        "mme_scene/Places365_val_00000193.jpg": "No",
+        "mme_scene/Places365_val_00000089.jpg": "No",
+        "mme_scene/Places365_val_00000165.jpg": "Yes",
+        "mme_scene/Places365_val_00000162.jpg": "Yes",
+        "mme_scene/Places365_val_00000164.jpg": "Yes",
+        "mme_scene/Places365_val_00000011.jpg": "Yes",
+        "mme_scene/Places365_val_00000009.jpg": "Yes",
+        "mme_scene/Places365_val_00000072.jpg": "Yes",
+        "mme_scene/Places365_val_00000127.jpg": "Yes",
+        "mme_scene/Places365_val_00000106.jpg": "Yes",
+        "mme_scene/Places365_val_00000052.jpg": "Yes",
+        "mme_scene/Places365_val_00000163.jpg": "Yes",
+        "mme_scene/Places365_val_00000022.jpg": "Yes",
+        "mme_scene/Places365_val_00000108.jpg": "No.",
+        "mme_color/000000492992.jpg": "Yes, there is a white bird in the image.",
+        "mme_color/000000006723.jpg": "Yes, there is a red brick building in the image.",
+        "mme_color/000000377723.jpg": "Yes, there is a blue bus in the image.",
+        "mme_color/000000370208.jpg": "Yes, there is a red bicycle with white handlebars in the image.",
+        "mme_color/000000012120.jpg": "Yes, there is a blue court in the image.",
+        "mme_color/000000053994.jpg": "Yes",
+        "mme_color/000000492362.jpg": "Yes, there is a skateboard with red wheels in the image.",
+        "mme_color/000000047112.jpg": "Yes, there is a white plate in the image.",
+        "mme_color/000000512929.jpg": "Yes, there are green beans in the image.",
+        "mme_color/000000047121.jpg": "Yes, there is a black cat in the image.",
+        "mme_color/000000014831.jpg": "Yes, there is a brown and white animal in the image.",
+        "mme_color/000000057597.jpg": "Yes, there are red shoes in the image.",
+        "mme_color/000000563758.jpg": "Yes, there is a red scarf in the image.",
+        "gqa_n235859_1": "The woman is wearing the dress.",
+        "mme_color/000000008277.jpg": "Yes, there is a white plate in the image."
+      },
+      "latency_scan": {
+        "1": {
+          "n": 10,
+          "batch_ms_p50": 2092.7,
+          "batch_ms_min": 2083.4,
+          "batch_ms_max": 2094.8,
+          "requests_per_s_at_p50": 0.478
+        },
+        "2": {
+          "n": 10,
+          "batch_ms_p50": 2351.0,
+          "batch_ms_min": 2319.4,
+          "batch_ms_max": 2355.8,
+          "requests_per_s_at_p50": 0.851
+        },
+        "4": {
+          "n": 10,
+          "batch_ms_p50": 2889.4,
+          "batch_ms_min": 2877.4,
+          "batch_ms_max": 2899.4,
+          "requests_per_s_at_p50": 1.384
+        },
+        "8": {
+          "n": 10,
+          "batch_ms_p50": 3919.0,
+          "batch_ms_min": 3913.4,
+          "batch_ms_max": 3930.8,
+          "requests_per_s_at_p50": 2.041
+        },
+        "16": {
+          "n": 10,
+          "batch_ms_p50": 5954.9,
+          "batch_ms_min": 5941.9,
+          "batch_ms_max": 5961.5,
+          "requests_per_s_at_p50": 2.687
+        }
+      }
+    },
+    "128": {
+      "batch": {
+        "1": {
+          "identical": 90,
+          "n": 90,
+          "token_set_changed": 0,
+          "shapes_ok": true,
+          "diffs": []
+        },
+        "2": {
+          "identical": 79,
+          "n": 90,
+          "token_set_changed": 90,
+          "shapes_ok": true,
+          "diffs": [
+            {
+              "id": "textvqa_34620",
+              "category": "ocr",
+              "batch_index": 11,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.",
+              "batched": "At the store, you can get two items for $5."
+            },
+            {
+              "id": "gqa_n414992_6",
+              "category": "spatial_reasoning",
+              "batch_index": 16,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "The airplane is flying above a beach with people on it.",
+              "batched": "The airplane is flying above a beach where a group of people is standing."
+            },
+            {
+              "id": "mme_existence/000000061418.jpg",
+              "category": "object_presence",
+              "batch_index": 18,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "Yes, there is a chair in the image.",
+              "batched": "No"
+            },
+            {
+              "id": "textvqa_34622",
+              "category": "ocr",
+              "batch_index": 19,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "One of the brands being advertised is Yamaha.",
+              "batched": "One of the brands being advertised in the image is Yamaha."
+            },
+            {
+              "id": "textvqa_34632",
+              "category": "ocr",
+              "batch_index": 25,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "The author of the book is Jorge Luis Borges.",
+              "batched": "Jorge Luis Borges"
+            },
+            {
+              "id": "mme_count/000000289059.jpg",
+              "category": "counting",
+              "batch_index": 29,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "Yes, there are two people in the image.",
+              "batched": "Yes"
+            },
+            {
+              "id": "gqa_n473688_116",
+              "category": "object_presence",
+              "batch_index": 36,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.",
+              "batched": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in a bathroom."
+            },
+            {
+              "id": "textvqa_34613",
+              "category": "ocr",
+              "batch_index": 36,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+              "batched": "The candy bar down on the bottom is a Snickers bar."
+            },
+            {
+              "id": "textvqa_34610",
+              "category": "ocr",
+              "batch_index": 37,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone",
+              "batched": "The center of attention in this image is a man who is wearing a red hat and is standing in front of a whiteboard. He is surrounded by various sticky notes and appears to be looking at a diagram or map on the board. The man seems to be the focal point of the scene, possibly discuss"
+            },
+            {
+              "id": "mme_color/000000053994.jpg",
+              "category": "fine_attributes",
+              "batch_index": 39,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "No",
+              "batched": "Yes"
+            },
+            {
+              "id": "mme_count/000000357816.jpg",
+              "category": "counting",
+              "batch_index": 44,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "No, there are only three people in the image.",
+              "batched": "No, there are only three people in this image."
+            }
+          ]
+        },
+        "4": {
+          "identical": 79,
+          "n": 90,
+          "token_set_changed": 90,
+          "shapes_ok": true,
+          "diffs": [
+            {
+              "id": "textvqa_34620",
+              "category": "ocr",
+              "batch_index": 1,
+              "position": 2,
+              "token_set_changed": true,
+              "reference": "At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.",
+              "batched": "At the store, you can get two items for $5."
+            },
+            {
+              "id": "mme_existence/000000061418.jpg",
+              "category": "object_presence",
+              "batch_index": 3,
+              "position": 2,
+              "token_set_changed": true,
+              "reference": "Yes, there is a chair in the image.",
+              "batched": "No"
+            },
+            {
+              "id": "textvqa_34610",
+              "category": "ocr",
+              "batch_index": 5,
+              "position": 2,
+              "token_set_changed": true,
+              "reference": "The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone",
+              "batched": "The center of attention in this image is a man who is wearing a red hat and is standing in front of a whiteboard. He is surrounded by various sticky notes and appears to be looking at a diagram or map on the board. The man seems to be the focal point of the scene, possibly discuss"
+            },
+            {
+              "id": "textvqa_34622",
+              "category": "ocr",
+              "batch_index": 6,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "One of the brands being advertised is Yamaha.",
+              "batched": "One of the brands being advertised in the image is Yamaha."
+            },
+            {
+              "id": "gqa_n414992_6",
+              "category": "spatial_reasoning",
+              "batch_index": 10,
+              "position": 2,
+              "token_set_changed": true,
+              "reference": "The airplane is flying above a beach with people on it.",
+              "batched": "The airplane is flying above a beach where a group of people is standing."
+            },
+            {
+              "id": "gqa_n473688_116",
+              "category": "object_presence",
+              "batch_index": 13,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.",
+              "batched": "No, there are no mats in this picture. The image only shows a woman brushing her teeth in a bathroom."
+            },
+            {
+              "id": "mme_count/000000357816.jpg",
+              "category": "counting",
+              "batch_index": 13,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "No, there are only three people in the image.",
+              "batched": "Yes, there are four people in the image."
+            },
+            {
+              "id": "textvqa_34613",
+              "category": "ocr",
+              "batch_index": 16,
+              "position": 3,
+              "token_set_changed": true,
+              "reference": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+              "batched": "The candy bar down on the bottom is a Snickers bar."
+            },
+            {
+              "id": "textvqa_34632",
+              "category": "ocr",
+              "batch_index": 17,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "The author of the book is Jorge Luis Borges.",
+              "batched": "Jorge Luis Borges"
+            },
+            {
+              "id": "mme_color/000000053994.jpg",
+              "category": "fine_attributes",
+              "batch_index": 18,
+              "position": 3,
+              "token_set_changed": true,
+              "reference": "No",
+              "batched": "Yes"
+            },
+            {
+              "id": "mme_count/000000289059.jpg",
+              "category": "counting",
+              "batch_index": 20,
+              "position": 2,
+              "token_set_changed": true,
+              "reference": "Yes, there are two people in the image.",
+              "batched": "Yes"
+            }
+          ]
+        },
+        "8": {
+          "identical": 80,
+          "n": 90,
+          "token_set_changed": 90,
+          "shapes_ok": true,
+          "diffs": [
+            {
+              "id": "textvqa_34610",
+              "category": "ocr",
+              "batch_index": 0,
+              "position": 3,
+              "token_set_changed": true,
+              "reference": "The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone",
+              "batched": "The center of attention in this image is a man who is wearing a red hat and is holding a pen. He is surrounded by a group of people, and there is a diagram or map on the wall in front of him. The man appears to be the focal point of the scene, possibly discussing or"
+            },
+            {
+              "id": "textvqa_34622",
+              "category": "ocr",
+              "batch_index": 0,
+              "position": 5,
+              "token_set_changed": true,
+              "reference": "One of the brands being advertised is Yamaha.",
+              "batched": "One of the brands being advertised in the image is Yamaha."
+            },
+            {
+              "id": "gqa_n414992_6",
+              "category": "spatial_reasoning",
+              "batch_index": 1,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "The airplane is flying above a beach with people on it.",
+              "batched": "The airplane is flying above a beach where a group of people is standing."
+            },
+            {
+              "id": "mme_count/000000289059.jpg",
+              "category": "counting",
+              "batch_index": 2,
+              "position": 1,
+              "token_set_changed": true,
+              "reference": "Yes, there are two people in the image.",
+              "batched": "Yes"
+            },
+            {
+              "id": "mme_color/000000053994.jpg",
+              "category": "fine_attributes",
+              "batch_index": 2,
+              "position": 6,
+              "token_set_changed": true,
+              "reference": "No",
+              "batched": "Yes"
+            },
+            {
+              "id": "mme_position/000000211825.jpg",
+              "category": "spatial_reasoning",
+              "batch_index": 2,
+              "position": 7,
+              "token_set_changed": true,
+              "reference": "Yes",
+              "batched": "No"
+            },
+            {
+              "id": "textvqa_34620",
+              "category": "ocr",
+              "batch_index": 4,
+              "position": 0,
+              "token_set_changed": true,
+              "reference": "At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.",
+              "batched": "At the store, you can get a pack of 3 Tuff Stuff Camouflage Cake Mix and a pack of 3 Tuff Stuff Pink Camouflage Cake Mix for $5."
+            },
+            {
+              "id": "mme_existence/000000061418.jpg",
+              "category": "object_presence",
+              "batch_index": 4,
+              "position": 6,
+              "token_set_changed": true,
+              "reference": "Yes, there is a chair in the image.",
+              "batched": "No"
+            },
+            {
+              "id": "textvqa_34613",
+              "category": "ocr",
+              "batch_index": 9,
+              "position": 6,
+              "token_set_changed": true,
+              "reference": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+              "batched": "The candy bar down on the bottom is a Hershey's bar."
+            },
+            {
+              "id": "mme_count/000000357816.jpg",
+              "category": "counting",
+              "batch_index": 10,
+              "position": 5,
+              "token_set_changed": true,
+              "reference": "No, there are only three people in the image.",
+              "batched": "No, there are only three people in this image."
+            }
+          ]
+        }
+      },
+      "contamination": {
+        "short_partner": "textvqa_34608",
+        "long_output_partner": "textvqa_34610",
+        "anchors_all_equal": 10,
+        "n_anchors": 10,
+        "cases": [
+          {
+            "id": "mme_existence/000000007108.jpg",
+            "reference": "Yes",
+            "short_prompt_after": "Yes",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000015746.jpg",
+            "reference": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_after": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a fire hydrant in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a fire hydrant in this image.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes, there is a fire hydrant in this image.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_position/000000211825.jpg",
+            "reference": "Yes",
+            "short_prompt_after": "Yes",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_count/000000290081.jpg",
+            "reference": "No",
+            "short_prompt_after": "No",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "No",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "No",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "No",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "gqa_n235859_1",
+            "reference": "The woman is wearing the dress.",
+            "short_prompt_after": "The woman is wearing the dress.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "The woman is wearing the dress.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "The woman is wearing the dress.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "The woman is wearing the dress.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_color/000000492992.jpg",
+            "reference": "Yes, there is a white bird in the image.",
+            "short_prompt_after": "Yes, there is a white bird in the image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a white bird in the image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a white bird in the image.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes, there is a white bird in the image.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000541952.jpg",
+            "reference": "Yes, there is a clock in this image.",
+            "short_prompt_after": "Yes, there is a clock in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a clock in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a clock in this image.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes, there is a clock in this image.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "textvqa_34637",
+            "reference": "The picture says \"your other ride\" on it.",
+            "short_prompt_after": "The picture says \"your other ride\" on it.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "The picture says \"your other ride\" on it.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "The picture says \"your other ride\" on it.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "The picture says \"your other ride\" on it.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000572956.jpg",
+            "reference": "Yes, there is a motorcycle in this image.",
+            "short_prompt_after": "Yes, there is a motorcycle in this image.",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "Yes, there is a motorcycle in this image.",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "Yes, there is a motorcycle in this image.",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "Yes, there is a motorcycle in this image.",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          },
+          {
+            "id": "mme_existence/000000009590.jpg",
+            "reference": "No",
+            "short_prompt_after": "No",
+            "short_prompt_after_partner_ok": true,
+            "short_prompt_before": "No",
+            "short_prompt_before_partner_ok": true,
+            "long_output_after": "No",
+            "long_output_after_partner_ok": false,
+            "long_output_before": "No",
+            "long_output_before_partner_ok": false,
+            "all_equal_reference": true
+          }
+        ]
+      },
+      "reference_answers": {
+        "textvqa_34628": "The name of the runner on the left is Willis.",
+        "textvqa_34620": "At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.",
+        "textvqa_34614": "The light sign on the farthest right window reads \"all night.\"",
+        "textvqa_34638": "The lowest number yard line that I can see in the image is the 30-yard line.",
+        "textvqa_34633": "Yes, the image shows a row of bottles of Pepsi.",
+        "textvqa_34610": "The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone",
+        "textvqa_34608": "The time on the watch is 10:10.",
+        "textvqa_34618": "The bottle with a red label is Jack Daniel's whiskey.",
+        "textvqa_34616": "Yes, this is a Denny's restaurant sign.",
+        "textvqa_34622": "One of the brands being advertised is Yamaha.",
+        "textvqa_34613": "A Hershey's chocolate bar is down on the bottom of the pile of snow.",
+        "textvqa_34637": "The picture says \"your other ride\" on it.",
+        "textvqa_34643": "Yes, the ruler was made in 2002.",
+        "textvqa_34632": "The author of the book is Jorge Luis Borges.",
+        "textvqa_34623": "This image was taken on January 14, 2012.",
+        "mme_count/000000427034.jpg": "Yes",
+        "mme_count/000000434479.jpg": "No, there is only one piece of pizza in the image.",
+        "mme_count/000000438304.jpg": "Yes, there are two tennis rackets in the picture.",
+        "mme_count/000000565045.jpg": "Yes, there are two bath towels in the picture.",
+        "mme_count/000000357816.jpg": "No, there are only three people in the image.",
+        "mme_count/000000006040.jpg": "Yes, there is a train in the picture.",
+        "mme_count/000000195918.jpg": "Yes, there are two display devices in the image.",
+        "mme_count/000000372819.jpg": "Yes, there are four dogs in the image.",
+        "mme_count/000000289059.jpg": "Yes, there are two people in the image.",
+        "mme_count/000000044279.jpg": "Yes, there are two people in the image.",
+        "mme_count/000000410612.jpg": "Yes",
+        "mme_count/000000335954.jpg": "Yes, there are two bowls in the image.",
+        "mme_count/000000290081.jpg": "No",
+        "mme_count/000000430286.jpg": "Yes, there are three remotes in this image.",
+        "mme_count/000000556000.jpg": "Yes, there are four people in the image.",
+        "mme_position/000000211825.jpg": "Yes",
+        "mme_position/000000395801.jpg": "Yes",
+        "mme_position/000000204871.jpg": "Yes",
+        "mme_position/000000007281.jpg": "Yes",
+        "mme_position/000000472046.jpg": "Yes",
+        "mme_position/000000048504.jpg": "Yes",
+        "mme_position/000000395701.jpg": "Yes",
+        "mme_position/000000062808.jpg": "Yes",
+        "gqa_n414992_6": "The airplane is flying above a beach with people on it.",
+        "gqa_n578564_13": "A painting is hanging above the chalkboard.",
+        "mme_position/000000056127.jpg": "Yes",
+        "mme_position/000000014038.jpg": "Yes",
+        "mme_position/000000477955.jpg": "Yes",
+        "mme_position/000000458410.jpg": "Yes",
+        "mme_position/000000426241.jpg": "Yes",
+        "gqa_n309148_109": "Yes, there is a red fire truck in the image.",
+        "gqa_n207708_55": "Yes, there is a pear beneath the silver and black appliance.",
+        "mme_existence/000000494427.jpg": "Yes",
+        "mme_existence/000000009590.jpg": "No",
+        "mme_existence/000000537812.jpg": "Yes",
+        "mme_existence/000000015746.jpg": "Yes, there is a fire hydrant in this image.",
+        "mme_existence/000000037751.jpg": "Yes, there is a backpack in the image.",
+        "mme_existence/000000050145.jpg": "Yes, there is a bicycle in the image.",
+        "mme_existence/000000007816.jpg": "Yes, there is a motorcycle in this image.",
+        "mme_existence/000000572956.jpg": "Yes, there is a motorcycle in this image.",
+        "gqa_n473688_116": "No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.",
+        "mme_existence/000000007108.jpg": "Yes",
+        "mme_existence/000000061418.jpg": "Yes, there is a chair in the image.",
+        "mme_existence/000000541952.jpg": "Yes, there is a clock in this image.",
+        "mme_existence/000000424521.jpg": "Yes",
+        "mme_scene/Places365_val_00000144.jpg": "No",
+        "mme_scene/Places365_val_00000193.jpg": "No",
+        "mme_scene/Places365_val_00000089.jpg": "No",
+        "mme_scene/Places365_val_00000165.jpg": "Yes",
+        "mme_scene/Places365_val_00000162.jpg": "Yes",
+        "mme_scene/Places365_val_00000164.jpg": "Yes",
+        "mme_scene/Places365_val_00000011.jpg": "Yes",
+        "mme_scene/Places365_val_00000009.jpg": "Yes",
+        "mme_scene/Places365_val_00000072.jpg": "Yes",
+        "mme_scene/Places365_val_00000127.jpg": "Yes",
+        "mme_scene/Places365_val_00000106.jpg": "Yes",
+        "mme_scene/Places365_val_00000052.jpg": "Yes",
+        "mme_scene/Places365_val_00000163.jpg": "Yes",
+        "mme_scene/Places365_val_00000022.jpg": "Yes",
+        "mme_scene/Places365_val_00000108.jpg": "No.",
+        "mme_color/000000492992.jpg": "Yes, there is a white bird in the image.",
+        "mme_color/000000006723.jpg": "Yes, there is a red brick building in the image.",
+        "mme_color/000000377723.jpg": "Yes, there is a blue bus in the image.",
+        "mme_color/000000370208.jpg": "Yes, there is a red bicycle with white handlebars in the image.",
+        "mme_color/000000012120.jpg": "Yes, there is a blue court in the image.",
+        "mme_color/000000053994.jpg": "No",
+        "mme_color/000000492362.jpg": "Yes, there is a skateboard with red wheels in the image.",
+        "mme_color/000000047112.jpg": "Yes, there is a white plate in the image.",
+        "mme_color/000000512929.jpg": "Yes, there are green beans in the image.",
+        "mme_color/000000047121.jpg": "Yes, there is a black cat in the image.",
+        "mme_color/000000014831.jpg": "Yes, there is a brown and white animal in the image.",
+        "mme_color/000000057597.jpg": "Yes, there are red shoes in the image.",
+        "mme_color/000000563758.jpg": "Yes, there is a red scarf in the image.",
+        "gqa_n235859_1": "The woman is wearing the dress.",
+        "mme_color/000000008277.jpg": "Yes, there is a white plate in the image."
+      },
+      "latency_scan": {
+        "1": {
+          "n": 10,
+          "batch_ms_p50": 1942.5,
+          "batch_ms_min": 1940.1,
+          "batch_ms_max": 1945.2,
+          "requests_per_s_at_p50": 0.515
+        },
+        "2": {
+          "n": 10,
+          "batch_ms_p50": 2038.5,
+          "batch_ms_min": 2017.4,
+          "batch_ms_max": 2052.4,
+          "requests_per_s_at_p50": 0.981
+        },
+        "4": {
+          "n": 10,
+          "batch_ms_p50": 2227.7,
+          "batch_ms_min": 2221.8,
+          "batch_ms_max": 2235.9,
+          "requests_per_s_at_p50": 1.796
+        },
+        "8": {
+          "n": 10,
+          "batch_ms_p50": 2585.5,
+          "batch_ms_min": 2578.0,
+          "batch_ms_max": 2589.9,
+          "requests_per_s_at_p50": 3.094
+        },
+        "16": {
+          "n": 10,
+          "batch_ms_p50": 3367.7,
+          "batch_ms_min": 3354.6,
+          "batch_ms_max": 3377.1,
+          "requests_per_s_at_p50": 4.751
+        }
+      }
+    }
+  }
+}

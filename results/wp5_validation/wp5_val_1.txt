@@ -1,0 +1,134 @@
+WP4/WP5 batch validation -- wp5_val_1
+commit c8a301abdd97b34975e9e79a94420dc3ea94a758 (dirty=False)  GPU NVIDIA A40  90 dev images  greedy, max_new_tokens=64  padding_side=left
+
+vtn=576
+  S1 identity (B=1 via engine)   identical 90/90  token-set changed 0  shapes_ok=True
+  B=2                            identical 89/90  token-set changed 0  shapes_ok=True
+      textvqa_34610 [ocr] token_set_changed=False
+        ref: 'The center of all of this is a man who is writing on a large whiteboard.'
+        bat: 'The center of all of this is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, which adds a pop of color to the scene.'
+  B=4                            identical 90/90  token-set changed 0  shapes_ok=True
+  B=8                            identical 88/90  token-set changed 0  shapes_ok=True
+      textvqa_34610 [ocr] token_set_changed=False
+        ref: 'The center of all of this is a man who is writing on a large whiteboard.'
+        bat: 'The center of all of this is a man who is writing on a large whiteboard. He is surrounded by various sticky notes and drawings, which are likely related to the content he is discussing or working on. The man is wearing a red hat, which adds a pop of color to the scene.'
+      textvqa_34614 [ocr] token_set_changed=False
+        ref: 'The light sign on the farthest right window reads "all lit."'
+        bat: 'The light sign on the farthest right window reads "HULC LIGHT."'
+  contamination: 10/10 anchors identical to reference with every partner/order
+  batched generate(), fixed 64-token output, 10 reps after 5 warm-up (CUDA events):
+    B= 1: batch p50   2092.7 ms  [2083.4-2094.8]   0.478 req/s  (1.00x B=1)
+    B= 2: batch p50   2351.0 ms  [2319.4-2355.8]   0.851 req/s  (1.78x B=1)
+    B= 4: batch p50   2889.4 ms  [2877.4-2899.4]   1.384 req/s  (2.90x B=1)
+    B= 8: batch p50   3919.0 ms  [3913.4-3930.8]   2.041 req/s  (4.27x B=1)
+    B=16: batch p50   5954.9 ms  [5941.9-5961.5]   2.687 req/s  (5.62x B=1)
+
+vtn=128
+  S1 identity (B=1 via engine)   identical 90/90  token-set changed 0  shapes_ok=True
+  B=2                            identical 79/90  token-set changed 90  shapes_ok=True
+      textvqa_34620 [ocr] token_set_changed=True
+        ref: 'At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.'
+        bat: 'At the store, you can get two items for $5.'
+      gqa_n414992_6 [spatial_reasoning] token_set_changed=True
+        ref: 'The airplane is flying above a beach with people on it.'
+        bat: 'The airplane is flying above a beach where a group of people is standing.'
+      mme_existence/000000061418.jpg [object_presence] token_set_changed=True
+        ref: 'Yes, there is a chair in the image.'
+        bat: 'No'
+      textvqa_34622 [ocr] token_set_changed=True
+        ref: 'One of the brands being advertised is Yamaha.'
+        bat: 'One of the brands being advertised in the image is Yamaha.'
+      textvqa_34632 [ocr] token_set_changed=True
+        ref: 'The author of the book is Jorge Luis Borges.'
+        bat: 'Jorge Luis Borges'
+      mme_count/000000289059.jpg [counting] token_set_changed=True
+        ref: 'Yes, there are two people in the image.'
+        bat: 'Yes'
+      gqa_n473688_116 [object_presence] token_set_changed=True
+        ref: 'No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.'
+        bat: 'No, there are no mats in this picture. The image only shows a woman brushing her teeth in a bathroom.'
+      textvqa_34613 [ocr] token_set_changed=True
+        ref: "A Hershey's chocolate bar is down on the bottom of the pile of snow."
+        bat: 'The candy bar down on the bottom is a Snickers bar.'
+      textvqa_34610 [ocr] token_set_changed=True
+        ref: 'The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone'
+        bat: 'The center of attention in this image is a man who is wearing a red hat and is standing in front of a whiteboard. He is surrounded by various sticky notes and appears to be looking at a diagram or map on the board. The man seems to be the focal point of the scene, possibly discuss'
+      mme_color/000000053994.jpg [fine_attributes] token_set_changed=True
+        ref: 'No'
+        bat: 'Yes'
+      mme_count/000000357816.jpg [counting] token_set_changed=True
+        ref: 'No, there are only three people in the image.'
+        bat: 'No, there are only three people in this image.'
+  B=4                            identical 79/90  token-set changed 90  shapes_ok=True
+      textvqa_34620 [ocr] token_set_changed=True
+        ref: 'At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.'
+        bat: 'At the store, you can get two items for $5.'
+      mme_existence/000000061418.jpg [object_presence] token_set_changed=True
+        ref: 'Yes, there is a chair in the image.'
+        bat: 'No'
+      textvqa_34610 [ocr] token_set_changed=True
+        ref: 'The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone'
+        bat: 'The center of attention in this image is a man who is wearing a red hat and is standing in front of a whiteboard. He is surrounded by various sticky notes and appears to be looking at a diagram or map on the board. The man seems to be the focal point of the scene, possibly discuss'
+      textvqa_34622 [ocr] token_set_changed=True
+        ref: 'One of the brands being advertised is Yamaha.'
+        bat: 'One of the brands being advertised in the image is Yamaha.'
+      gqa_n414992_6 [spatial_reasoning] token_set_changed=True
+        ref: 'The airplane is flying above a beach with people on it.'
+        bat: 'The airplane is flying above a beach where a group of people is standing.'
+      gqa_n473688_116 [object_presence] token_set_changed=True
+        ref: 'No, there are no mats in this picture. The image only shows a woman brushing her teeth with a toothbrush.'
+        bat: 'No, there are no mats in this picture. The image only shows a woman brushing her teeth in a bathroom.'
+      mme_count/000000357816.jpg [counting] token_set_changed=True
+        ref: 'No, there are only three people in the image.'
+        bat: 'Yes, there are four people in the image.'
+      textvqa_34613 [ocr] token_set_changed=True
+        ref: "A Hershey's chocolate bar is down on the bottom of the pile of snow."
+        bat: 'The candy bar down on the bottom is a Snickers bar.'
+      textvqa_34632 [ocr] token_set_changed=True
+        ref: 'The author of the book is Jorge Luis Borges.'
+        bat: 'Jorge Luis Borges'
+      mme_color/000000053994.jpg [fine_attributes] token_set_changed=True
+        ref: 'No'
+        bat: 'Yes'
+      mme_count/000000289059.jpg [counting] token_set_changed=True
+        ref: 'Yes, there are two people in the image.'
+        bat: 'Yes'
+  B=8                            identical 80/90  token-set changed 90  shapes_ok=True
+      textvqa_34610 [ocr] token_set_changed=True
+        ref: 'The center of attention in this image is a man who is wearing a red hat and is surrounded by a group of people. He is standing in the middle of a large diagram or map, which is being drawn on a whiteboard. The man appears to be the focal point of the gathering, as everyone'
+        bat: 'The center of attention in this image is a man who is wearing a red hat and is holding a pen. He is surrounded by a group of people, and there is a diagram or map on the wall in front of him. The man appears to be the focal point of the scene, possibly discussing or'
+      textvqa_34622 [ocr] token_set_changed=True
+        ref: 'One of the brands being advertised is Yamaha.'
+        bat: 'One of the brands being advertised in the image is Yamaha.'
+      gqa_n414992_6 [spatial_reasoning] token_set_changed=True
+        ref: 'The airplane is flying above a beach with people on it.'
+        bat: 'The airplane is flying above a beach where a group of people is standing.'
+      mme_count/000000289059.jpg [counting] token_set_changed=True
+        ref: 'Yes, there are two people in the image.'
+        bat: 'Yes'
+      mme_color/000000053994.jpg [fine_attributes] token_set_changed=True
+        ref: 'No'
+        bat: 'Yes'
+      mme_position/000000211825.jpg [spatial_reasoning] token_set_changed=True
+        ref: 'Yes'
+        bat: 'No'
+      textvqa_34620 [ocr] token_set_changed=True
+        ref: 'At the store, you can get a package of 6 Tie Dye Camouflage Candy Cakes for $5.'
+        bat: 'At the store, you can get a pack of 3 Tuff Stuff Camouflage Cake Mix and a pack of 3 Tuff Stuff Pink Camouflage Cake Mix for $5.'
+      mme_existence/000000061418.jpg [object_presence] token_set_changed=True
+        ref: 'Yes, there is a chair in the image.'
+        bat: 'No'
+      textvqa_34613 [ocr] token_set_changed=True
+        ref: "A Hershey's chocolate bar is down on the bottom of the pile of snow."
+        bat: "The candy bar down on the bottom is a Hershey's bar."
+      mme_count/000000357816.jpg [counting] token_set_changed=True
+        ref: 'No, there are only three people in the image.'
+        bat: 'No, there are only three people in this image.'
+  contamination: 10/10 anchors identical to reference with every partner/order
+  batched generate(), fixed 64-token output, 10 reps after 5 warm-up (CUDA events):
+    B= 1: batch p50   1942.5 ms  [1940.1-1945.2]   0.515 req/s  (1.00x B=1)
+    B= 2: batch p50   2038.5 ms  [2017.4-2052.4]   0.981 req/s  (1.90x B=1)
+    B= 4: batch p50   2227.7 ms  [2221.8-2235.9]   1.796 req/s  (3.49x B=1)
+    B= 8: batch p50   2585.5 ms  [2578.0-2589.9]   3.094 req/s  (6.01x B=1)
+    B=16: batch p50   3367.7 ms  [3354.6-3377.1]   4.751 req/s  (9.23x B=1)
+

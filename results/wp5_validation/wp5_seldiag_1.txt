@@ -1,0 +1,14 @@
+run_id: wp5_seldiag_1
+git_commit: c8a301abdd97b34975e9e79a94420dc3ea94a758
+gpu: NVIDIA A40
+n: 24
+batch_size: 8
+feature_cos_min_over_images: 0.7601317763328552
+feature_cos_mean: 0.9997230718533198
+feature_max_abs_diff_max: 5.671875
+attn_max_abs_diff_max: 0.00732421875
+kept_overlap_batched_mean: 0.7418619791666666
+kept_identical_batched: 0
+dup_copies_agree: 24
+dup_overlap_with_b1_mean: 0.7418619791666666
+per_image_tower_exact: 0
