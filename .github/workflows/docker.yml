@@ -9,7 +9,13 @@ on:
       - '.dockerignore'
       - 'requirements.txt'
       - '.github/workflows/docker.yml'
-  workflow_dispatch:        # lets you trigger it manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      runtime:
+        description: Optional model runtime to build
+        type: choice
+        options: [llava, gemma]
+        default: llava
 
 jobs:
   build:
@@ -41,20 +47,24 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ${{ inputs.runtime == 'gemma' && 'csnbs/Dockerfile.gemma' || 'Dockerfile' }}
           push: true
           tags: |
-            kingcorsair/gpu_profiling_project:latest
-            kingcorsair/gpu_profiling_project:${{ github.sha }}
+            kingcorsair/gpu_profiling_project:${{ inputs.runtime == 'gemma' && 'gemma' || 'latest' }}
+            kingcorsair/gpu_profiling_project:${{ inputs.runtime == 'gemma' && 'gemma-' || '' }}${{ github.sha }}
           # Cache layers between runs so rebuilds are fast when only
           # requirements.txt changes.
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ inputs.runtime || 'llava' }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.runtime || 'llava' }}
 
       - name: Done
+        env:
+          IMAGE_TAG: ${{ inputs.runtime == 'gemma' && 'gemma' || 'latest' }}
+          COMMIT_TAG: ${{ inputs.runtime == 'gemma' && 'gemma-' || '' }}${{ github.sha }}
         run: |
           echo "Image pushed:"
-          echo "  kingcorsair/gpu_profiling_project:latest"
-          echo "  kingcorsair/gpu_profiling_project:${{ github.sha }}"
+          echo "  kingcorsair/gpu_profiling_project:$IMAGE_TAG"
+          echo "  kingcorsair/gpu_profiling_project:$COMMIT_TAG"
           echo ""
           echo "Deploy on RunPod with the custom image:"
-          echo "  kingcorsair/gpu_profiling_project:latest"
+          echo "  kingcorsair/gpu_profiling_project:$COMMIT_TAG"
