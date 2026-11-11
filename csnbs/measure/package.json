@@ -1,14 +1,18 @@
 {
   "name": "measure",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Open-loop load generator for GPU serving benchmarks",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --import tsx --test src/*.test.ts",
     "dev": "tsx src/loadgen.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "start": "node dist/loadgen.js"
+    "start": "node dist/loadgen.js",
+    "campaign": "node --import tsx src/campaign.ts",
+    "report": "node --import tsx src/report.ts",
+    "ingest": "node --import tsx src/ingest.ts",
+    "db:test": "node --import tsx --test src/ingest.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +20,7 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^24.13.3",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.23.11",
     "typescript": "^7.0.2"
   },
@@ -24,6 +29,9 @@
   },
   "private": true,
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=20.19 <26"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

@@ -32,6 +32,8 @@ export type ArchivedRun = {
   maxOutputTokens: number | null;
   batchSize: number | null;
   offeredRps: number | null;
+  arrival?: 'uniform' | 'poisson' | null;
+  arrivalSeed?: number | null;
   durationSeconds: number | null;
   workloadId: string | null;
   measuredOrderHash: string | null;
@@ -62,7 +64,7 @@ export type CapacityBracket = {
   points: { offeredRps: number; trialCount: number; expectedTrialCount: number | null; classification: string; reasons: string[] }[];
   reasons: string[];
 };
-export type CampaignReport = { campaignId: string; purpose: string; runKind: 'open-loop' | 'isolated' | null; sourcePath: string; sha256: string; downloadPath: string | null; runCount: number; capacityBrackets: CapacityBracket[]; limitations: string[] };
+export type CampaignReport = { campaignId: string; purpose: string; runKind: 'open-loop' | 'isolated' | null; arrival?: 'uniform' | 'poisson' | null; sourcePath: string; sha256: string; downloadPath: string | null; runCount: number; capacityBrackets: CapacityBracket[]; limitations: string[] };
 export type RunArchive = { publicPreview?: true; schemaVersion: 1; generatedAtUtc: string; runs: ArchivedRun[]; campaignReports: CampaignReport[]; issues: { sourcePath: string; message: string }[] };
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
 const nullableNumber = (value: unknown) => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 0;
@@ -85,6 +87,9 @@ export function parseArchive(input: unknown): RunArchive {
     if (!['exploratory', 'integration', 'eligible', 'review'].includes(String(run.evidence))) return invalid();
     if (!['status', 'recordedAtUtc', 'campaign', 'modelId', 'workloadId', 'gitCommit', 'measuredOrderHash', 'checkpointRevision'].every((field) => run[field] === null || typeof run[field] === 'string')) return invalid();
     if (!['visualTokenNum', 'importantRatio', 'maxOutputTokens', 'batchSize', 'offeredRps', 'durationSeconds', 'warmupRequests'].every((field) => nullableNumber(run[field]))) return invalid();
+    if (![undefined, null, 'uniform', 'poisson'].includes(run.arrival as string | null | undefined)) return invalid();
+    if (run.arrival === 'poisson' && (!Number.isSafeInteger(run.arrivalSeed) || Number(run.arrivalSeed) < 0 || Number(run.arrivalSeed) > 0xffffffff)) return invalid();
+    if (run.arrival !== 'poisson' && run.arrivalSeed != null) return invalid();
     for (const field of ['measuredRequests', 'successfulRequests', 'failedRequests']) if (!Number.isInteger(run.summary[field]) || Number(run.summary[field]) < 0) return invalid();
     if (Number(run.summary.successfulRequests) + Number(run.summary.failedRequests) !== run.summary.measuredRequests || !nullableNumber(run.summary.successfulThroughputRps)) return invalid();
     if (!['withinWindowThroughputRps', 'includingDrainThroughputRps', 'outstandingAtWindowEnd', 'drainMs'].every((field) => nullableNumber(run.summary && (run.summary as Record<string, unknown>)[field]))) return invalid();
@@ -114,6 +119,7 @@ export function parseArchive(input: unknown): RunArchive {
     }
   }
   for (const report of input.campaignReports) {
+    if (object(report) && ![undefined, null, 'uniform', 'poisson'].includes(report.arrival as string | null | undefined)) return invalid();
     if (!object(report) || !['open-loop', 'isolated', null].includes(report.runKind as string | null)) return invalid();
     if (!object(report) || !['campaignId', 'purpose'].every((field) => typeof report[field] === 'string') || typeof report.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(report.sha256) || (typeof report.sourcePath !== 'string' || !(preview && report.downloadPath === null || report.downloadPath === `/data/archive/${report.sha256}.json`)) || !Number.isSafeInteger(report.runCount) || Number(report.runCount) < 0 || !Array.isArray(report.capacityBrackets) || !strings(report.limitations)) return invalid();
     for (const bracket of report.capacityBrackets) {
@@ -135,6 +141,11 @@ export function comparisonWarnings(a: ArchivedRun, b: ArchivedRun): string[] {
     ['batchSize', 'Batch size'],
   ] as const;
   if (a.runKind !== b.runKind) warnings.push('Load-generation modes differ.');
+  if (a.runKind !== 'isolated' || b.runKind !== 'isolated') {
+    if (a.arrival == null || b.arrival == null) warnings.push('Arrival distribution is unknown in at least one run.');
+    else if (a.arrival !== b.arrival) warnings.push('Arrival distributions differ.');
+    else if (a.arrival === 'poisson' && a.arrivalSeed !== b.arrivalSeed) warnings.push('Poisson arrival seeds differ; the arrival schedules are not matched.');
+  }
   if (a.schemaVersion !== b.schemaVersion) warnings.push('Harness schema versions differ; measurement boundaries and throughput definitions may differ.');
   for (const [key, label] of fields) {
     if (key === 'offeredRps' && a.runKind === 'isolated' && b.runKind === 'isolated') continue;

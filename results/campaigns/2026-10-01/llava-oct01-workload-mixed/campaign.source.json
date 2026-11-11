@@ -1,0 +1,197 @@
+{
+  "schema": "loadgen-campaign",
+  "schemaVersion": 2,
+  "campaignId": "llava-oct01-workload-mixed",
+  "spec": {
+    "campaignId": "llava-oct01-workload-mixed",
+    "purpose": "ab",
+    "endpoint": "http://127.0.0.1:8765/infer",
+    "datasetPath": "/workspace/rithvik-measure-observations-20261001/csnbs/measure/workloads/oct01/mixed.json",
+    "rates": [
+      1
+    ],
+    "repetitions": 2,
+    "measuredRequests": 90,
+    "warmupRequests": 10,
+    "seed": 465,
+    "timeoutMs": 120000,
+    "startupTimeoutMs": 300000,
+    "settleMs": 1000,
+    "gpuExclusive": true,
+    "variants": [
+      {
+        "id": "baseline-A",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "576",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+          "EXTENDED_HTTP_OBSERVATIONS": "1"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 576,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural",
+          "instrumentation": "handler-stage-token-observations-v2"
+        }
+      },
+      {
+        "id": "pruned-128",
+        "command": [
+          "bash",
+          "scripts/start_model_server.sh"
+        ],
+        "env": {
+          "MODEL_SERVER_HOST": "127.0.0.1",
+          "MODEL_SERVER_PORT": "8765",
+          "MODEL_PATH": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+          "VISUAL_TOKEN_NUM": "128",
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "TOKENIZERS_PARALLELISM": "false",
+          "LLAVA_TIMING_FILE": "/workspace/rithvik-results/model-diagnostic-timing.jsonl",
+          "EXTENDED_HTTP_OBSERVATIONS": "1"
+        },
+        "expected": {
+          "model_id": "liuhaotian/llava-v1.5-7b",
+          "visual_token_num": 128,
+          "important_ratio": 0.5,
+          "max_new_tokens": 64,
+          "batch_size": 1,
+          "eos_policy": "natural",
+          "instrumentation": "handler-stage-token-observations-v2"
+        }
+      }
+    ],
+    "runKind": "open-loop"
+  },
+  "specHash": "99d303c5c07ce12fb8999c177be8eb64840e3ca5fefc11469265faeb258bee3d",
+  "createdAtUtc": "2026-10-01T21:44:29.119Z",
+  "schedule": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0
+    }
+  ],
+  "trials": [
+    {
+      "trialId": "r1-p1-v0",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v0-1e42c711/runs/2026-10-01T21-44-40.037Z_rps-1_423d00f6",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v0-1e42c711",
+          "directory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v0-1e42c711",
+          "startedAtUtc": "2026-10-01T21:44:29.250Z",
+          "finishedAtUtc": "2026-10-01T21:46:15.681Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v0-1e42c711/runs/2026-10-01T21-44-40.037Z_rps-1_423d00f6",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p1-v1",
+      "blockId": "r1-p1",
+      "repetition": 0,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v1-950858e6/runs/2026-10-01T21-46-26.542Z_rps-1_5636064e",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p1-v1-950858e6",
+          "directory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v1-950858e6",
+          "startedAtUtc": "2026-10-01T21:46:15.743Z",
+          "finishedAtUtc": "2026-10-01T21:48:01.457Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p1-v1-950858e6/runs/2026-10-01T21-46-26.542Z_rps-1_5636064e",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v1",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 1,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v1-40296e5a/runs/2026-10-01T21-48-12.323Z_rps-1_3ec476f9",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v1-40296e5a",
+          "directory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v1-40296e5a",
+          "startedAtUtc": "2026-10-01T21:48:01.531Z",
+          "finishedAtUtc": "2026-10-01T21:49:48.611Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v1-40296e5a/runs/2026-10-01T21-48-12.323Z_rps-1_3ec476f9",
+          "error": null
+        }
+      ]
+    },
+    {
+      "trialId": "r1-p2-v0",
+      "blockId": "r1-p2",
+      "repetition": 1,
+      "rate": 1,
+      "variantIndex": 0,
+      "status": "complete",
+      "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v0-fbae2630/runs/2026-10-01T21-49-59.032Z_rps-1_aa723538",
+      "error": null,
+      "attempts": [
+        {
+          "attemptId": "r1-p2-v0-fbae2630",
+          "directory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v0-fbae2630",
+          "startedAtUtc": "2026-10-01T21:49:48.726Z",
+          "finishedAtUtc": "2026-10-01T21:51:34.899Z",
+          "status": "complete",
+          "runDirectory": "/workspace/rithvik-results/llava-oct01-workload-mixed/r1-p2-v0-fbae2630/runs/2026-10-01T21-49-59.032Z_rps-1_aa723538",
+          "error": null
+        }
+      ]
+    }
+  ]
+}

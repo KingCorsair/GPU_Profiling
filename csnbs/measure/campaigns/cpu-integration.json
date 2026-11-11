@@ -1,0 +1,48 @@
+{
+  "campaignId": "cpu-integration",
+  "purpose": "integration",
+  "endpoint": "http://127.0.0.1:8765/infer",
+  "datasetPath": "../test/fixtures/workload.json",
+  "rates": [
+    20,
+    80
+  ],
+  "repetitions": 2,
+  "measuredRequests": 20,
+  "warmupRequests": 10,
+  "seed": 465,
+  "timeoutMs": 5000,
+  "startupTimeoutMs": 10000,
+  "variants": [
+    {
+      "id": "A",
+      "command": [
+        "node",
+        "csnbs/measure/test/fixtures/serial-server.mjs"
+      ],
+      "env": {
+        "VISUAL_TOKEN_NUM": "576"
+      },
+      "expected": {
+        "model_id": "serial-fake",
+        "visual_token_num": 576,
+        "delay_ms": 20
+      }
+    },
+    {
+      "id": "B",
+      "command": [
+        "node",
+        "csnbs/measure/test/fixtures/serial-server.mjs"
+      ],
+      "env": {
+        "VISUAL_TOKEN_NUM": "128"
+      },
+      "expected": {
+        "model_id": "serial-fake",
+        "visual_token_num": 128,
+        "delay_ms": 20
+      }
+    }
+  ]
+}

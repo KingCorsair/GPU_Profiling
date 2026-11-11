@@ -1,0 +1,105 @@
+{
+  "id": "open-loop-r250",
+  "mode": "open-loop",
+  "targetRps": 250,
+  "schema": "coordinated-omission-trial",
+  "schemaVersion": 1,
+  "status": "complete",
+  "stopReason": null,
+  "summary": {
+    "totalRequests": 10000,
+    "dispatchedRequests": 10000,
+    "successfulRequests": 10000,
+    "failedRequests": 0,
+    "timedOutRequests": 0,
+    "cancelledRequests": 0,
+    "achievedArrivalRateRps": 249.99984008411067,
+    "completionRateRps": 250,
+    "successfulThroughputRps": 250,
+    "successfulThroughputIncludingDrainRps": 250,
+    "measurementWindowSeconds": 40,
+    "completedWithinWindow": 10000,
+    "successfulWithinWindow": 10000,
+    "successfulThroughputWithinWindowRps": 250,
+    "outstandingAtWindowEnd": 0,
+    "drainMs": 0,
+    "successfulRequestLatencyMs": {
+      "sampleCount": 10000,
+      "p50": 3.108041999999841,
+      "p95": 3.849291999998968,
+      "p99": 43.68274999999994,
+      "p95Reason": null,
+      "p99Reason": null
+    },
+    "dispatchLatenessMs": {
+      "sampleCount": 10000,
+      "p50": 0.6598750000048312,
+      "p95": 1.3644170000043232,
+      "p99": 5.889875000000757,
+      "p95Reason": null,
+      "p99Reason": null
+    },
+    "plannedToCompleteMs": {
+      "sampleCount": 10000,
+      "p50": 3.7463750000024447,
+      "p95": 5.121459000001778,
+      "p99": 71.0092500000028,
+      "p95Reason": null,
+      "p99Reason": null
+    },
+    "serverServiceMs": {
+      "sampleCount": 10000,
+      "p50": 2.547082999997656,
+      "p95": 2.6151669999999285,
+      "p99": 2.8036670000001322,
+      "p95Reason": null,
+      "p99Reason": null
+    },
+    "serverQueueMs": {
+      "sampleCount": 10000,
+      "p50": 0.005707999996957369,
+      "p95": 0.015709000000015294,
+      "p99": 37.61212499999965,
+      "p95Reason": null,
+      "p99Reason": null
+    },
+    "unattributedClientMs": {
+      "sampleCount": 10000,
+      "p50": 0.591459000002942,
+      "p95": 1.2807499999998981,
+      "p99": 41.85187499999665,
+      "p95Reason": null,
+      "p99Reason": null
+    }
+  },
+  "service": {
+    "pid": 31204,
+    "service": "synthetic-serial-queue",
+    "requestedServiceDelayMs": 2,
+    "outstanding": 0,
+    "maximumOutstanding": 38,
+    "measuredReceived": 10000,
+    "warmupReceived": 10
+  },
+  "clock": "performance.now",
+  "timing": {
+    "measuredStartMs": 23995.405666,
+    "observationEndMs": 63995.405666,
+    "finishedMs": 63996.532458,
+    "observationWindowSeconds": 40,
+    "actualElapsedIncludingDrainSeconds": 40.001126792,
+    "referencePlannedEndMs": 63995.405666,
+    "referenceHorizonSeconds": 40
+  },
+  "referenceHorizon": {
+    "prescribedRequests": 10000,
+    "deliveredRequests": 10000,
+    "successfulCompletions": 10000
+  },
+  "requests": {
+    "file": "requests.jsonl",
+    "count": 10010,
+    "sha256": "sha256:1ec6ec1a4f74e050e52c2dd9f83fa58678d12222deeaa02df9b12a56ab1fb41b"
+  },
+  "note": "Prescribed open-loop window is fixed at N/RPS; final drain is reported separately."
+}

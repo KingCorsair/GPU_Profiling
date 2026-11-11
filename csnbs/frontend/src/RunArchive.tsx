@@ -21,7 +21,8 @@ export function RunDetails({ run }: { run: ArchivedRun }) {
       <div><dt>Recorded</dt><dd>{date(run.recordedAtUtc)}</dd></div>
       <div><dt>Run kind / status</dt><dd>{run.runKind} / {run.status ?? 'Legacy'}</dd></div>
       <div><dt>GPU</dt><dd>{run.gpuModels.join(', ') || 'Not recorded'}</dd></div>
-      <div><dt>Offered load</dt><dd>{run.runKind === 'isolated' ? 'Sequential (no arrival schedule)' : `${value(run.offeredRps, 3)} requests/s`}</dd></div>
+      <div><dt>{run.arrival === 'poisson' ? 'Nominal arrival rate' : 'Offered load'}</dt><dd>{run.runKind === 'isolated' ? 'Sequential (no arrival schedule)' : `${value(run.offeredRps, 3)} requests/s`}</dd></div>
+      {!isolated && <div><dt>Arrival distribution</dt><dd>{run.arrival ?? 'Not recorded'}</dd></div>}
       <div><dt>Configured visual-token budget</dt><dd>{value(run.visualTokenNum, 0)}{run.tokenSource === 'campaign' ? ' (campaign metadata)' : ''}</dd></div>
       <div><dt>Output cap / batch size</dt><dd>{value(run.maxOutputTokens, 0)} / {value(run.batchSize, 0)}</dd></div>
       <div><dt>Source revision</dt><dd><code>{run.gitCommit?.slice(0, 12) ?? 'Not recorded'}</code>{run.gitDirty === true ? ' · modified' : run.gitDirty === false ? ' · clean' : ''}</dd></div>
@@ -47,6 +48,7 @@ export function RunDetails({ run }: { run: ArchivedRun }) {
       <dt>Campaign</dt><dd>{run.campaign ?? 'Not assigned'}</dd>
       <dt>Workload identity</dt><dd><code>{run.workloadId ?? 'Not recorded'}</code></dd>
       <dt>Measured question order</dt><dd><code>{run.measuredOrderHash ?? 'Not recorded'}</code></dd>
+      {run.arrival === 'poisson' && <><dt>Arrival seed</dt><dd>{run.arrivalSeed}</dd><dt>Seeded arrival window</dt><dd>{value(run.durationSeconds, 3)} seconds</dd></>}
       <dt>Checkpoint revision</dt><dd><code>{run.checkpointRevision ?? 'Not recorded'}</code></dd>
       <dt>Run source</dt><dd><code>{run.sourcePath}</code></dd>
       <dt>Run SHA-256</dt><dd><code>{run.sha256}</code></dd>
@@ -62,8 +64,9 @@ function Comparison({ runs }: { runs: ArchivedRun[] }) {
     ['Evidence', evidence[left.evidence], evidence[right.evidence]],
     ['Model', left.modelId ?? 'Not recorded', right.modelId ?? 'Not recorded'],
     ['Request mode', left.runKind, right.runKind],
+    ['Arrival distribution', left.arrival ?? 'Not recorded', right.arrival ?? 'Not recorded'],
     ['Configured visual-token budget', value(left.visualTokenNum, 0), value(right.visualTokenNum, 0)],
-    ['Offered requests/s', left.runKind === 'isolated' ? 'Not applicable (sequential)' : value(left.offeredRps, 3), right.runKind === 'isolated' ? 'Not applicable (sequential)' : value(right.offeredRps, 3)],
+    ['Configured requests/s (nominal for Poisson)', left.runKind === 'isolated' ? 'Not applicable (sequential)' : value(left.offeredRps, 3), right.runKind === 'isolated' ? 'Not applicable (sequential)' : value(right.offeredRps, 3)],
     ['Successful samples', value(left.summary.successfulRequests, 0), value(right.summary.successfulRequests, 0)],
     ['Failed requests', value(left.summary.failedRequests, 0), value(right.summary.failedRequests, 0)],
     [left.schemaVersion === 2 && right.schemaVersion === 2 ? 'Completed incl. drain / s' : 'Saved completion rate / s', value(left.summary.successfulThroughputRps, 3), value(right.summary.successfulThroughputRps, 3)],
@@ -165,10 +168,10 @@ export default function RunArchive() {
       </div>}
       <p className="figure-note" id="archive-throughput-note">V2 completion rates include drain time. Rows marked “Legacy rate” preserve the original saved throughput; check the run notes before comparing timing boundaries.</p>
       <div ref={runTable} tabIndex={-1} className="archive-reveal" role="group" aria-label="Run list">
-        {filtered.length ? <div className="table-scroll archive-table" tabIndex={0} role="region" aria-label="Saved run archive" aria-describedby="archive-throughput-note"><table><caption className="sr-only">Saved run summaries. p99 estimates with fewer than 1,000 successful samples are unstable.</caption><thead><tr><th scope="col">Compare</th><th scope="col">Run / model</th><th scope="col">Evidence</th><th scope="col">Offered / s</th><th scope="col">Success / fail</th><th scope="col">p50 (ms)</th><th scope="col">p95 (ms)</th><th scope="col">p99 (ms)</th><th scope="col">Completed incl. drain / s</th></tr></thead><tbody>{filtered.map((run) => <tr key={run.sha256} data-selected={selected === run.runId}>
+        {filtered.length ? <div className="table-scroll archive-table" tabIndex={0} role="region" aria-label="Saved run archive" aria-describedby="archive-throughput-note"><table><caption className="sr-only">Saved run summaries. p99 estimates with fewer than 1,000 successful samples are unstable.</caption><thead><tr><th scope="col">Compare</th><th scope="col">Run / model</th><th scope="col">Evidence</th><th scope="col">Configured / s</th><th scope="col">Success / fail</th><th scope="col">p50 (ms)</th><th scope="col">p95 (ms)</th><th scope="col">p99 (ms)</th><th scope="col">Completed incl. drain / s</th></tr></thead><tbody>{filtered.map((run) => <tr key={run.sha256} data-selected={selected === run.runId}>
           <td><input type="checkbox" checked={comparison.includes(run.runId)} disabled={comparison.length === 2 && !comparison.includes(run.runId)} onChange={() => toggleCompare(run.runId)} aria-label={`Compare run ${run.runId}`} /></td>
           <th scope="row"><span className="archive-run-model">{run.modelId ?? 'Model not recorded'}</span><button className="run-select" aria-label={`${selected === run.runId ? 'Hide' : 'View'} details for run ${run.runId}`} aria-expanded={selected === run.runId} aria-controls={selected === run.runId ? 'selected-run-details' : undefined} onClick={() => updateLocation({ run: selected === run.runId ? null : run.runId }, false, selected === run.runId ? undefined : 'details')}>{selected === run.runId ? 'Hide details' : 'View details'} →</button><small>{run.recordedAtUtc?.slice(0, 10) ?? 'Unknown date'} · {run.visualTokenNum === null ? run.runKind : `${run.visualTokenNum} visual-token budget`}</small><small>{run.runId}</small></th>
-          <td><span className={`evidence-badge ${run.evidence}`}>{evidence[run.evidence]}</span></td><td>{run.runKind === 'isolated' ? 'Sequential' : value(run.offeredRps, 3)}</td><td>{run.summary.successfulRequests} / {run.summary.failedRequests}</td><td>{value(run.summary.latencyMs.p50)}</td><td>{value(run.summary.latencyMs.p95)}</td><td>{value(run.summary.latencyMs.p99)}{run.summary.successfulRequests < 1000 && <small>{run.schemaVersion === 1 ? 'Unstable tail' : 'Insufficient samples'}</small>}</td><td>{value(run.summary.successfulThroughputRps, 3)}{run.schemaVersion === 1 && <small>Legacy rate</small>}</td>
+          <td><span className={`evidence-badge ${run.evidence}`}>{evidence[run.evidence]}</span></td><td>{run.runKind === 'isolated' ? 'Sequential' : value(run.offeredRps, 3)}{run.arrival === 'poisson' && <small>Poisson · nominal rate</small>}</td><td>{run.summary.successfulRequests} / {run.summary.failedRequests}</td><td>{value(run.summary.latencyMs.p50)}</td><td>{value(run.summary.latencyMs.p95)}</td><td>{value(run.summary.latencyMs.p99)}{run.summary.successfulRequests < 1000 && <small>{run.schemaVersion === 1 ? 'Unstable tail' : 'Insufficient samples'}</small>}</td><td>{value(run.summary.successfulThroughputRps, 3)}{run.schemaVersion === 1 && <small>Legacy rate</small>}</td>
         </tr>)}</tbody></table></div> : <div className="archive-empty"><p>No saved runs match these filters.</p><button onClick={() => updateLocation({ query: '', evidence: 'all', campaign: 'all' }, true)}>Reset filters</button></div>}
       </div>
       <CampaignReports reports={data.campaignReports.filter((report) => campaignFilter === 'all' || campaignFilter === report.campaignId)} />

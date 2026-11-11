@@ -1,0 +1,4 @@
+# Keep reproducible raw evidence in git while letting reviews focus on its tools.
+results/campaigns/** linguist-generated=true -whitespace
+results/calibration/** linguist-generated=true -whitespace
+results/provenance/** linguist-generated=true

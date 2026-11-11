@@ -1,0 +1,85 @@
+{
+  "schema": "supplemental-vision-cache-provenance",
+  "schemaVersion": 1,
+  "modelId": "openai/clip-vit-large-patch14-336",
+  "inspectionStartedAtUtc": "2026-10-01T21:14:58.146796+00:00",
+  "inspectionHost": "a4fb61b40a7f",
+  "frozenSourceCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+  "primaryCampaignId": "llava-oct01-primary",
+  "loadedRevision": null,
+  "scope": "Read-only cache inspection after the primary campaign and before isolated measurements; not metadata captured by the original running health endpoint.",
+  "limitations": [
+    "Cached revision candidates and refs/main do not prove which revision an earlier process loaded.",
+    "Multiple cached snapshots remain ambiguous; no loaded revision is inferred from directory names.",
+    "Only this CLIP model cache is inspected. No authentication files or secret environment values are read."
+  ],
+  "cacheResolution": [
+    {
+      "variantId": "baseline-A",
+      "explicitVariantCacheSettings": {},
+      "resolvedLibraryConstants": {
+        "transformersCache": "/root/.cache/huggingface/hub",
+        "hubCache": "/root/.cache/huggingface/hub"
+      }
+    },
+    {
+      "variantId": "pruned-128",
+      "explicitVariantCacheSettings": {},
+      "resolvedLibraryConstants": {
+        "transformersCache": "/root/.cache/huggingface/hub",
+        "hubCache": "/root/.cache/huggingface/hub"
+      }
+    }
+  ],
+  "modelCaches": [
+    {
+      "cacheRoot": "/root/.cache/huggingface/hub",
+      "modelCachePath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336",
+      "exists": true,
+      "refsMain": "ce19dc912ca5cd21c8a653c79e251e808ccabcd1",
+      "cachedRevisions": [
+        "ce19dc912ca5cd21c8a653c79e251e808ccabcd1"
+      ],
+      "snapshots": [
+        {
+          "revisionCandidate": "ce19dc912ca5cd21c8a653c79e251e808ccabcd1",
+          "snapshotPath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/snapshots/ce19dc912ca5cd21c8a653c79e251e808ccabcd1",
+          "files": [
+            {
+              "snapshotRelativePath": "config.json",
+              "cachePath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/snapshots/ce19dc912ca5cd21c8a653c79e251e808ccabcd1/config.json",
+              "resolvedPath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/blobs/e9c5a5dc325b017eda0b6e802f79283a1f68bf27",
+              "kind": "configuration",
+              "bytes": 4757,
+              "sha256": "sha256:51b1c14aabcdf639c4a0370eeda1010b773bbe1df78319c7d0f5882c22ac0ac0",
+              "fileMtimeUtc": "2026-10-01T19:53:13.905724+00:00",
+              "stableWhileHashed": true
+            },
+            {
+              "snapshotRelativePath": "preprocessor_config.json",
+              "cachePath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/snapshots/ce19dc912ca5cd21c8a653c79e251e808ccabcd1/preprocessor_config.json",
+              "resolvedPath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/blobs/a4604d0a1564fa0c45a6ff087bada5066a6335ea",
+              "kind": "configuration",
+              "bytes": 316,
+              "sha256": "sha256:d253881f65322dc546df59cf925a408e5538b8ecb5a1b496cdd36af9992686d4",
+              "fileMtimeUtc": "2026-10-01T19:53:40.333606+00:00",
+              "stableWhileHashed": true
+            },
+            {
+              "snapshotRelativePath": "pytorch_model.bin",
+              "cachePath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/snapshots/ce19dc912ca5cd21c8a653c79e251e808ccabcd1/pytorch_model.bin",
+              "resolvedPath": "/root/.cache/huggingface/hub/models--openai--clip-vit-large-patch14-336/blobs/c6032c2e0caae3dc2d4fba35535fa6307dbb49df59c7e182b1bc4b3329b81801",
+              "kind": "weights",
+              "bytes": 1711974081,
+              "sha256": "sha256:c6032c2e0caae3dc2d4fba35535fa6307dbb49df59c7e182b1bc4b3329b81801",
+              "fileMtimeUtc": "2026-10-01T19:53:46.830577+00:00",
+              "stableWhileHashed": true
+            }
+          ]
+        }
+      ],
+      "refsMainAfterHashing": "ce19dc912ca5cd21c8a653c79e251e808ccabcd1"
+    }
+  ],
+  "inspectionFinishedAtUtc": "2026-10-01T21:15:03.808776+00:00"
+}

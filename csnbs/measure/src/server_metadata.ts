@@ -6,6 +6,11 @@ export type ServerMetadata = {
   checkpointRevision: string | null;
   configuration: Record<string, unknown> | null;
   error: string | null;
+  mode?: string | null;
+  modelLoaded?: boolean | null;
+  hardware?: Record<string, unknown> | null;
+  source?: Record<string, unknown> | null;
+  runtime?: Record<string, unknown> | null;
 };
 
 function objectOrNull(value: unknown): Record<string, unknown> | null {
@@ -29,10 +34,16 @@ export async function collectServerMetadata(endpoint: string): Promise<ServerMet
     result.service = typeof health.service === "string" ? health.service : null;
     result.pid = typeof health.pid === "number" ? health.pid : null;
     result.configuration = objectOrNull(health.configuration);
+    result.mode = typeof health.mode === "string" ? health.mode : null;
+    result.modelLoaded = typeof health.model_loaded === "boolean" ? health.model_loaded : null;
+    result.hardware = objectOrNull(health.hardware);
+    result.source = objectOrNull(health.source);
+    result.runtime = objectOrNull(health.runtime);
     const config = result.configuration;
     result.modelId = typeof config?.model_id === "string" ? config.model_id : null;
     const provenance = objectOrNull(config?.download_provenance);
-    result.checkpointRevision = typeof provenance?.revision === "string" ? provenance.revision : null;
+    result.checkpointRevision = typeof provenance?.revision === "string" ? provenance.revision
+      : typeof config?.checkpoint_revision === "string" ? config.checkpoint_revision : null;
   } catch (error: unknown) {
     result.error = error instanceof Error ? error.message : String(error);
   }

@@ -29,6 +29,11 @@ export function archiveRun(raw, { sourcePath, sha256, campaign = null, integrati
   const config = object(server.configuration) ? server.configuration : {};
   const benchmark = object(raw.benchmark) ? raw.benchmark : {};
   const notes = [];
+  const arrival = raw.runKind === 'isolated' || !v2 ? null : raw.config?.arrival ?? 'uniform';
+  if (![null, 'uniform', 'poisson'].includes(arrival)) throw new Error('Unsupported arrival distribution');
+  const arrivalSeed = arrival === 'poisson' ? raw.config?.arrivalSeed ?? raw.config?.seed : null;
+  if (arrival === 'poisson' && (!Number.isSafeInteger(arrivalSeed) || arrivalSeed < 0 || arrivalSeed > 0xffffffff)) throw new Error('Poisson arrival seed is missing or invalid');
+  if (arrival === 'poisson') notes.push('Poisson arrivals use a fixed request count and seeded exponential gaps. The nominal rate is an expectation; the realized request count divided by window duration varies. The window ends at the final scheduled arrival, before the final request can complete.');
   const modelId = text(server.modelId) ?? text(benchmark.modelId);
   if (!modelId) notes.push('Model identity is absent from the raw run.');
   if (v2) {
@@ -74,6 +79,8 @@ export function archiveRun(raw, { sourcePath, sha256, campaign = null, integrati
     maxOutputTokens: number(config.max_new_tokens) ?? number(benchmark.maxOutputTokens) ?? campaign?.maxNewTokens ?? null,
     batchSize: number(config.batch_size) ?? number(benchmark.batchSize),
     offeredRps: raw.runKind === 'isolated' ? null : number(raw.config?.requestsPerSecond),
+    arrival,
+    arrivalSeed,
     durationSeconds: number(raw.config?.durationSeconds),
     workloadId: text(raw.workload?.id),
     measuredOrderHash: text(raw.workload?.measuredOrderHash),
@@ -116,23 +123,33 @@ export function archiveReport(report, evidence, sourcePath, sha256) {
   if (report.schema !== 'measurement-report' || report.schemaVersion !== 1 || !text(report.campaignId) || !text(report.purpose) || !Array.isArray(report.runs)) throw new Error('Unsupported campaign report');
   const seen = new Set();
   const runKinds = new Set();
+  const arrivals = new Set();
   for (const run of report.runs) {
     const saved = evidence.find((entry) => entry.runId === run.runId && entry.campaign === report.campaignId && `sha256:${entry.requestsSha256}` === run.requestsSha256);
     if (!saved || seen.has(run.runId) || !isDeepStrictEqual(saved.rawSummary, run.summary)) throw new Error('Campaign report does not match the indexed raw run evidence');
     if (saved.evidence === 'integration' && report.purpose !== 'integration') throw new Error('Campaign report omits the integration-only purpose of its raw evidence');
     if (run.runKind != null && run.runKind !== saved.runKind) throw new Error('Campaign report run kind differs from raw evidence');
     if (['isolated', 'open-loop'].includes(saved.runKind)) runKinds.add(saved.runKind);
+    if (saved.runKind === 'open-loop') {
+      const arrival = saved.arrival ?? 'uniform';
+      if ((run.arrival ?? 'uniform') !== arrival) throw new Error('Campaign report arrival distribution differs from raw evidence');
+      if (arrival === 'poisson' && run.arrivalSeed !== saved.arrivalSeed) throw new Error('Campaign report arrival seed differs from raw evidence');
+      arrivals.add(arrival);
+    }
     seen.add(run.runId);
   }
   if (runKinds.size > 1) throw new Error('Campaign report mixes incompatible arrival modes');
   const runKind = [...runKinds][0] ?? null;
   if (report.runKind != null && report.runKind !== runKind) throw new Error('Campaign report arrival mode differs from raw evidence');
+  if (arrivals.size > 1) throw new Error('Campaign report mixes arrival distributions');
+  const arrival = [...arrivals][0] ?? null;
+  if (arrival !== null && (report.arrival ?? 'uniform') !== arrival) throw new Error('Campaign report arrival distribution differs from raw evidence');
   const brackets = report.capacityBrackets ?? [];
   const strings = (values) => Array.isArray(values) && values.every((value) => typeof value === 'string');
   const nullableNumber = (value) => value === null || number(value) !== null;
   if (!Array.isArray(brackets) || !brackets.every((bracket) => object(bracket) && typeof bracket.variant === 'string' && bracket.sustainableCapacityEstablished === false && ['screen-bracketed', 'unbounded-above', 'unbounded-below', 'inconclusive'].includes(bracket.status) && nullableNumber(bracket.highestAllPassRate) && nullableNumber(bracket.lowestAllFailRate) && Array.isArray(bracket.points) && strings(bracket.reasons) && bracket.points.every((point) => object(point) && number(point.offeredRps) !== null && Number.isSafeInteger(point.trialCount) && point.trialCount >= 0 && nullableNumber(point.expectedTrialCount) && typeof point.classification === 'string' && strings(point.reasons)))) throw new Error('Unsupported capacity-screen report');
   if (!strings(report.limitations ?? [])) throw new Error('Unsupported report limitations');
-  return { campaignId: report.campaignId, purpose: report.purpose, runKind, sourcePath, sha256, downloadPath: `/data/archive/${sha256}.json`, runCount: report.runs.length, capacityBrackets: brackets, limitations: report.limitations ?? [] };
+  return { campaignId: report.campaignId, purpose: report.purpose, runKind, arrival, sourcePath, sha256, downloadPath: `/data/archive/${sha256}.json`, runCount: report.runs.length, capacityBrackets: brackets, limitations: report.limitations ?? [] };
 }
 
 async function campaignContext(filename, repository) {

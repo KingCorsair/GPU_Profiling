@@ -244,3 +244,36 @@ test('isolated details show sequential timing without an arrival window or sched
   assert.doesNotMatch(html, /Scheduled to completion/);
   assert.ok(!comparisonWarnings(run, run).some((warning) => warning.includes('Offered load is unknown')));
 });
+
+test('Poisson archive preserves replay identity, nominal-rate labels, and comparison mismatches', () => {
+  const saved = { ...v2(), runKind: 'open-loop', config: { ...raw.config, arrival: 'poisson', seed: 123 } };
+  const run = archiveRun(saved, options);
+  assert.equal(run.arrival, 'poisson');
+  assert.equal(run.arrivalSeed, 123);
+  const explicit = archiveRun({ ...saved, config: { ...saved.config, arrivalSeed: 456 } }, options);
+  assert.equal(explicit.arrivalSeed, 456);
+  assert.equal(parseArchive({ ...archive(), runs: [run] }).runs.length, 1);
+  assert.match(renderToStaticMarkup(createElement(RunDetails, { run })), /Nominal arrival rate/);
+  assert.ok(run.notes.some((note: string) => note.includes('final scheduled arrival')));
+  assert.ok(comparisonWarnings(run, explicit).some((note) => note.includes('seeds differ')));
+  const uniform = archiveRun({ ...saved, config: { ...saved.config, arrival: 'uniform' } }, options);
+  assert.ok(comparisonWarnings(run, uniform).includes('Arrival distributions differ.'));
+  assert.throws(() => archiveRun({ ...saved, config: { arrival: 'poisson' } }, options), /seed/);
+  assert.throws(() => parseArchive({ ...archive(), runs: [{ ...run, arrivalSeed: null }] }));
+});
+
+test('campaign archive rejects changed arrival distributions and seeds', () => {
+  const hash = 'b'.repeat(64);
+  const run = archiveRun({ ...v2(), runKind: 'open-loop', config: { ...raw.config, arrival: 'poisson', seed: 123 } }, options);
+  const evidence = [{ ...run, campaign: 'poisson-test', requestsSha256: hash, rawSummary: raw.summary }];
+  const report = { schema: 'measurement-report', schemaVersion: 1, campaignId: 'poisson-test', purpose: 'integration', runKind: 'open-loop', arrival: 'poisson',
+    runs: [{ runId: run.runId, requestsSha256: `sha256:${hash}`, summary: raw.summary, arrival: 'poisson', arrivalSeed: 123 }], limitations: [] };
+  const saved = archiveReport(report, evidence, '', hash);
+  assert.equal(saved.arrival, 'poisson');
+  const html = renderToStaticMarkup(createElement(CampaignReports, { reports: [saved] }));
+  assert.match(html, /nominal expectations/);
+  assert.match(html, /final scheduled arrival/);
+  assert.throws(() => archiveReport({ ...report, arrival: 'uniform' }, evidence, '', hash), /distribution differs/);
+  assert.throws(() => archiveReport({ ...report, runs: [{ ...report.runs[0], arrival: 'uniform' }] }, evidence, '', hash), /distribution differs/);
+  assert.throws(() => archiveReport({ ...report, runs: [{ ...report.runs[0], arrivalSeed: 124 }] }, evidence, '', hash), /seed differs/);
+});

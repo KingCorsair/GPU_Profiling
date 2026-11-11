@@ -1,0 +1,7 @@
+trialId,variant,runKind,offeredRps,successes,failures,windowThroughputRps,drainThroughputRps,p50Ms,p95Ms,p99Ms,drainMs
+"r1-p1-v0","baseline-A","open-loop",1,90,0,1,1,523.1634380000032,"","",0
+"r1-p1-v1","baseline-B","open-loop",1,90,0,1,1,526.0718020000058,"","",0
+"r1-p2-v1","baseline-B","open-loop",1,90,0,1,1,558.5166909999971,"","",0
+"r1-p2-v0","baseline-A","open-loop",1,90,0,1,1,526.3697810000012,"","",0
+"r1-p3-v0","baseline-A","open-loop",1,90,0,1,1,515.5659619999933,"","",0
+"r1-p3-v1","baseline-B","open-loop",1,90,0,1,1,516.9694089999975,"","",0

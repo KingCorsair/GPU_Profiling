@@ -1,0 +1,78 @@
+{
+  "schema": "final-benchmark-session-verification",
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-10-01T22:00:48.563444+00:00",
+  "campaigns": [
+    {
+      "campaignId": "llava-oct01-primary",
+      "completedTrials": 20,
+      "expectedTrials": 20,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-isolated",
+      "completedTrials": 10,
+      "expectedTrials": 10,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-http-overhead",
+      "completedTrials": 10,
+      "expectedTrials": 10,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-long",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-mixed",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    },
+    {
+      "campaignId": "llava-oct01-workload-short",
+      "completedTrials": 4,
+      "expectedTrials": 4,
+      "failedRequests": 0,
+      "allRunChecksPass": true,
+      "lockAbsent": true
+    }
+  ],
+  "sourceChecks": [
+    {
+      "checkout": "/workspace/rithvik-measure-20261001",
+      "gitCommit": "356df7d66f7cf4c7524c93d7c9d373e2b920fbfc",
+      "gitDirty": false
+    },
+    {
+      "checkout": "/workspace/rithvik-measure-observations-20261001",
+      "gitCommit": "e90148c647c62eb8dbc1a856f5cd96e44bd6f202",
+      "gitDirty": false
+    }
+  ],
+  "idleChecks": {
+    "checkedAtUtc": "2026-10-01T22:00:48.563421+00:00",
+    "gpuComputeProcesses": [],
+    "ownedProcesses": [],
+    "closedEndpoints": [
+      "http://127.0.0.1:8765/infer"
+    ]
+  },
+  "sharedPodStopped": false,
+  "diagnosticProvenance": "/workspace/rithvik-results/supplemental-model-diagnostics/provenance.json",
+  "scope": "Final read-only checks after the prescribed trials and diagnostics preservation; no source, specification or environment changes and no pod stop."
+}

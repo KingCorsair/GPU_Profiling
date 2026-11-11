@@ -15,7 +15,7 @@ import server as server_module
 
 
 def make_client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(app=server_module.app, base_url="http://testserver")
+    return httpx.AsyncClient(transport=httpx.ASGITransport(app=server_module.app), base_url="http://testserver")
 
 
 # --------------------------------------------------------------- percentiles

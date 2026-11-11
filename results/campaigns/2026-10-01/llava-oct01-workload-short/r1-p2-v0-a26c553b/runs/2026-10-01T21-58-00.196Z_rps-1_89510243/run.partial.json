@@ -1,0 +1,251 @@
+{
+  "schema": "loadgen-run-partial",
+  "schemaVersion": 2,
+  "runId": "2026-10-01T21-58-00.196Z_rps-1_89510243",
+  "runKind": "open-loop",
+  "status": "running",
+  "config": {
+    "endpoint": "http://127.0.0.1:8765/infer",
+    "requestsPerSecond": 1,
+    "durationSeconds": 90,
+    "measuredRequests": 90,
+    "timeoutMs": 120000,
+    "datasetPath": "/workspace/rithvik-measure-observations-20261001/csnbs/measure/workloads/oct01/short.json",
+    "warmupRequests": 10,
+    "seed": 466,
+    "settleMs": 1000,
+    "runKind": "open-loop",
+    "outputDir": "/workspace/rithvik-results/llava-oct01-workload-short/r1-p2-v0-a26c553b/runs",
+    "runDeadlineMs": null
+  },
+  "workload": {
+    "id": "sha256:1b1f85df6d4654c64a1afb73055d0801f5ec6dcc43b6b2a9becec98463ae768f",
+    "recordCount": 90,
+    "totalImageByteLength": 5530510,
+    "orderSeed": 466,
+    "measuredOrderHash": "sha256:3458285001d415f73fdc8d138cfec95132ba5cb1a9a3c5923594af7b187a70a6",
+    "measuredCategoryCounts": {
+      "coarse_description": 15,
+      "fine_attributes": 15,
+      "counting": 15,
+      "object_presence": 15,
+      "spatial_reasoning": 15,
+      "ocr": 15
+    },
+    "measuredQuestionIds": [
+      "mme_scene/Places365_val_00000106.jpg",
+      "mme_color/000000563758.jpg",
+      "mme_count/000000434479.jpg",
+      "mme_existence/000000007108.jpg",
+      "mme_position/000000477955.jpg",
+      "textvqa_34633",
+      "mme_scene/Places365_val_00000164.jpg",
+      "mme_color/000000370208.jpg",
+      "mme_count/000000372819.jpg",
+      "mme_existence/000000050145.jpg",
+      "mme_position/000000014038.jpg",
+      "textvqa_34628",
+      "mme_scene/Places365_val_00000072.jpg",
+      "mme_color/000000057597.jpg",
+      "mme_count/000000290081.jpg",
+      "gqa_n207708_55",
+      "mme_position/000000472046.jpg",
+      "textvqa_34632",
+      "mme_scene/Places365_val_00000108.jpg",
+      "mme_color/000000492362.jpg",
+      "mme_count/000000006040.jpg",
+      "mme_existence/000000061418.jpg",
+      "gqa_n578564_13",
+      "textvqa_34620",
+      "mme_scene/Places365_val_00000011.jpg",
+      "mme_color/000000047112.jpg",
+      "mme_count/000000357816.jpg",
+      "mme_existence/000000015746.jpg",
+      "mme_position/000000458410.jpg",
+      "textvqa_34608",
+      "mme_scene/Places365_val_00000089.jpg",
+      "mme_color/000000053994.jpg",
+      "mme_count/000000438304.jpg",
+      "mme_existence/000000541952.jpg",
+      "mme_position/000000007281.jpg",
+      "textvqa_34623",
+      "mme_scene/Places365_val_00000144.jpg",
+      "mme_color/000000047121.jpg",
+      "mme_count/000000410612.jpg",
+      "mme_existence/000000537812.jpg",
+      "mme_position/000000048504.jpg",
+      "textvqa_34618",
+      "mme_scene/Places365_val_00000162.jpg",
+      "mme_color/000000008277.jpg",
+      "mme_count/000000430286.jpg",
+      "mme_existence/000000572956.jpg",
+      "mme_position/000000211825.jpg",
+      "textvqa_34616",
+      "mme_scene/Places365_val_00000052.jpg",
+      "mme_color/000000377723.jpg",
+      "mme_count/000000289059.jpg",
+      "mme_existence/000000424521.jpg",
+      "gqa_n414992_6",
+      "textvqa_34622",
+      "mme_scene/Places365_val_00000193.jpg",
+      "gqa_n235859_1",
+      "mme_count/000000044279.jpg",
+      "gqa_n309148_109",
+      "mme_position/000000426241.jpg",
+      "textvqa_34637",
+      "mme_scene/Places365_val_00000127.jpg",
+      "mme_color/000000492992.jpg",
+      "mme_count/000000427034.jpg",
+      "mme_existence/000000009590.jpg",
+      "mme_position/000000395701.jpg",
+      "textvqa_34613",
+      "mme_scene/Places365_val_00000009.jpg",
+      "mme_color/000000006723.jpg",
+      "mme_count/000000335954.jpg",
+      "mme_existence/000000007816.jpg",
+      "mme_position/000000056127.jpg",
+      "textvqa_34643",
+      "mme_scene/Places365_val_00000165.jpg",
+      "mme_color/000000012120.jpg",
+      "mme_count/000000556000.jpg",
+      "gqa_n473688_116",
+      "mme_position/000000204871.jpg",
+      "textvqa_34638",
+      "mme_scene/Places365_val_00000022.jpg",
+      "mme_color/000000014831.jpg",
+      "mme_count/000000195918.jpg",
+      "mme_existence/000000037751.jpg",
+      "mme_position/000000395801.jpg",
+      "textvqa_34614",
+      "mme_scene/Places365_val_00000163.jpg",
+      "mme_color/000000512929.jpg",
+      "mme_count/000000565045.jpg",
+      "mme_existence/000000494427.jpg",
+      "mme_position/000000062808.jpg",
+      "textvqa_34610"
+    ],
+    "completeDatasetCycles": 1
+  },
+  "source": {
+    "gitCommit": "e90148c647c62eb8dbc1a856f5cd96e44bd6f202",
+    "gitDirty": false
+  },
+  "server": {
+    "healthUrl": "http://127.0.0.1:8765/health",
+    "service": "csnbs-llava-server",
+    "pid": 24260,
+    "modelId": "liuhaotian/llava-v1.5-7b",
+    "checkpointRevision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+    "configuration": {
+      "model_id": "liuhaotian/llava-v1.5-7b",
+      "checkpoint": "/workspace/rithvik-measure-models/llava-v1.5-7b",
+      "download_provenance": {
+        "model_id": "liuhaotian/llava-v1.5-7b",
+        "revision": "4481d270cc22fd5c4d1bb5df129622006ccd9234",
+        "verified_at_utc": "2026-10-01T19:47:35.124931+00:00",
+        "verification": "Each file checked against pinned Hub LFS SHA256 or Git blob SHA1",
+        "files": [
+          {
+            "file": ".gitattributes",
+            "bytes": 1519,
+            "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+          },
+          {
+            "file": "README.md",
+            "bytes": 1397,
+            "sha256": "a3101de0395b4517cee96f040d4feae45a99bde2fcfb2af54060bf54f3353b47"
+          },
+          {
+            "file": "config.json",
+            "bytes": 1161,
+            "sha256": "f112de882e31171a105f0d3f69d9e6e8700a40149f0944f4b507d3a41789e492"
+          },
+          {
+            "file": "generation_config.json",
+            "bytes": 124,
+            "sha256": "e453057ea6a89d902d7326b3addbe312a7a6c8faabf777a521c9f2d563f79b8d"
+          },
+          {
+            "file": "mm_projector.bin",
+            "bytes": 41961085,
+            "sha256": "be33a3b477e091832a3c8a9fabf5769c43b4cb2c161fc8c464b7bb214f16143a"
+          },
+          {
+            "file": "pytorch_model-00001-of-00002.bin",
+            "bytes": 9976634558,
+            "sha256": "492fdfa63cf314097d99da81a3586d54a97adc1471a0ae0535f5caa269b86314"
+          },
+          {
+            "file": "pytorch_model-00002-of-00002.bin",
+            "bytes": 3542276251,
+            "sha256": "c0eb94eb3fa578a4c63567f2eca6b0acf6a44a891c257aca0df88ffa891de72e"
+          },
+          {
+            "file": "pytorch_model.bin.index.json",
+            "bytes": 27068,
+            "sha256": "487578d3f7ec21c057596d0f9dc71084acc349eb8f13bd8b5af86c26460f2d31"
+          },
+          {
+            "file": "special_tokens_map.json",
+            "bytes": 438,
+            "sha256": "719833ff26ac897a3ec8ed946028a135de2a351470af59b4008744ab1f0ee9b7"
+          },
+          {
+            "file": "tokenizer.model",
+            "bytes": 499723,
+            "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+          },
+          {
+            "file": "tokenizer_config.json",
+            "bytes": 749,
+            "sha256": "cf01145c6de57f061991ff871e85d0402c38481f968daea8874c431cd0c7740f"
+          }
+        ]
+      },
+      "implementation": "vispruner-vendored-blocking-v1",
+      "visual_token_num": 576,
+      "important_ratio": 0.5,
+      "max_new_tokens": 64,
+      "do_sample": false,
+      "use_cache": true,
+      "eos_policy": "natural",
+      "prompt_template": "llava_v1",
+      "batch_size": 1,
+      "dtype": "torch.float16",
+      "instrumentation": "handler-stage-token-observations-v2",
+      "queue_observation": "unavailable-blocking-handler"
+    },
+    "error": null,
+    "mode": "model",
+    "modelLoaded": true,
+    "hardware": {
+      "gpuModels": [
+        "NVIDIA A40"
+      ],
+      "devices": [
+        {
+          "name": "NVIDIA A40",
+          "uuid": "GPU-de4f53e9-e41b-315f-2f08-b2d46d37523a",
+          "driver_version": "595.91.07",
+          "memory_total_mib": "46068"
+        }
+      ],
+      "source": "server-nvidia-smi",
+      "error": null
+    },
+    "source": {
+      "gitCommit": "e90148c647c62eb8dbc1a856f5cd96e44bd6f202",
+      "gitDirty": false,
+      "containerImage": null
+    },
+    "runtime": {
+      "python": "3.12.13",
+      "torch": "2.2.2",
+      "transformers": "4.37.2",
+      "fastapi": "0.141.1",
+      "uvicorn": "0.52.1"
+    }
+  },
+  "recordedAtUtc": "2026-10-01T21:58:00.199Z",
+  "note": "No final manifest means interrupted/incomplete; never infer missing outcomes as success."
+}

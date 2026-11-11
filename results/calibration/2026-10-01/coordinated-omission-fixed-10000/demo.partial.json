@@ -1,0 +1,481 @@
+{
+  "protocol": {
+    "schema": "coordinated-omission-protocol",
+    "schemaVersion": 1,
+    "recordedBeforeCollectionUtc": "2026-10-01T20:03:13.553Z",
+    "synthetic": true,
+    "reportableGpuResult": false,
+    "requestedServiceDelayMs": 2,
+    "measuredRequestsPerCondition": 10000,
+    "warmupRequestsPerCondition": 10,
+    "seed": 465,
+    "conditions": [
+      {
+        "id": "open-loop-r750",
+        "mode": "open-loop",
+        "targetRps": 750
+      },
+      {
+        "id": "open-loop-r250",
+        "mode": "open-loop",
+        "targetRps": 250
+      },
+      {
+        "id": "closed-loop-r750",
+        "mode": "closed-loop",
+        "targetRps": 750
+      },
+      {
+        "id": "closed-loop-r250",
+        "mode": "closed-loop",
+        "targetRps": 250
+      }
+    ],
+    "primaryComparison": "Sent-to-complete p95 alongside delivered arrival rate and reference-horizon delivery counts",
+    "fixedBudget": true,
+    "independentReplicatesPerCondition": 1,
+    "requestTimeoutMs": 60000,
+    "source": {
+      "gitCommit": "eca05f541d2a9a07529f55f6ff4149b43c2552af",
+      "gitDirty": true,
+      "demoSha256": "sha256:9d9cd68d2d5fcb92606146e229a4e8f4e385b27e9c01bc621558dbbc61aa49dd",
+      "canonicalLoadgenSha256": "sha256:0586ed9de34a3c42d30169c2ef151a59ba3a066eb4e84072c573e90fac5882e9",
+      "node": "v24.13.0",
+      "platform": "darwin"
+    },
+    "limitations": [
+      "Synthetic CPU serial service; no model, GPU speedup, production capacity, or accuracy conclusion.",
+      "Requested timer delay is not exact service time. Actual queue and service durations are recorded separately.",
+      "One trial per condition; correlated requests are descriptive samples, not independent experimental replications.",
+      "Closed-loop sends every predeclared request eventually but suppresses arrivals during the reference N/RPS horizon.",
+      "10,000 observations allow descriptive tail calculation; they do not guarantee precise or stationary tails.",
+      "Client and server use separate processes on the same host; host scheduling and transport remain part of results."
+    ]
+  },
+  "trials": [
+    {
+      "id": "open-loop-r750",
+      "mode": "open-loop",
+      "targetRps": 750,
+      "schema": "coordinated-omission-trial",
+      "schemaVersion": 1,
+      "status": "complete",
+      "stopReason": null,
+      "summary": {
+        "totalRequests": 10000,
+        "dispatchedRequests": 10000,
+        "successfulRequests": 10000,
+        "failedRequests": 0,
+        "timedOutRequests": 0,
+        "cancelledRequests": 0,
+        "achievedArrivalRateRps": 749.9409292140496,
+        "completionRateRps": 422.80493849307254,
+        "successfulThroughputRps": 422.80493849307254,
+        "successfulThroughputIncludingDrainRps": 422.80493849307254,
+        "measurementWindowSeconds": 13.333333333333334,
+        "completedWithinWindow": 5843,
+        "successfulWithinWindow": 5843,
+        "successfulThroughputWithinWindowRps": 438.22499999999997,
+        "outstandingAtWindowEnd": 4157,
+        "drainMs": 10318.235249666664,
+        "successfulRequestLatencyMs": {
+          "sampleCount": 10000,
+          "p50": 4772.814209,
+          "p95": 9768.202040999999,
+          "p99": 10209.803290999998,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "dispatchLatenessMs": {
+          "sampleCount": 10000,
+          "p50": 0.7808329999998023,
+          "p95": 1.562791666666726,
+          "p99": 13.13970800000061,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "plannedToCompleteMs": {
+          "sampleCount": 10000,
+          "p50": 4773.2379586666675,
+          "p95": 9769.100374666665,
+          "p99": 10212.225374666665,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverServiceMs": {
+          "sampleCount": 10000,
+          "p50": 2.431416999999783,
+          "p95": 3.0257499999970605,
+          "p99": 3.1481669999993755,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverQueueMs": {
+          "sampleCount": 10000,
+          "p50": 4769.977999999999,
+          "p95": 9765.175541,
+          "p99": 10205.744167,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "unattributedClientMs": {
+          "sampleCount": 10000,
+          "p50": 4770.618917,
+          "p95": 9765.525415999999,
+          "p99": 10207.180208,
+          "p95Reason": null,
+          "p99Reason": null
+        }
+      },
+      "service": {
+        "pid": 31128,
+        "service": "synthetic-serial-queue",
+        "requestedServiceDelayMs": 2,
+        "outstanding": 0,
+        "maximumOutstanding": 4157,
+        "measuredReceived": 10000,
+        "warmupReceived": 10
+      },
+      "clock": "performance.now",
+      "timing": {
+        "measuredStartMs": 165.149958,
+        "observationEndMs": 13498.483291333334,
+        "finishedMs": 23816.779625,
+        "observationWindowSeconds": 13.333333333333334,
+        "actualElapsedIncludingDrainSeconds": 23.651629666999998,
+        "referencePlannedEndMs": 13498.483291333334,
+        "referenceHorizonSeconds": 13.333333333333334
+      },
+      "referenceHorizon": {
+        "prescribedRequests": 10000,
+        "deliveredRequests": 10000,
+        "successfulCompletions": 5843
+      },
+      "requests": {
+        "file": "requests.jsonl",
+        "count": 10010,
+        "sha256": "sha256:a35e9862f397137fe4fa6edbcc173e3287f279afff059206e8e2f70cfe48d570"
+      },
+      "note": "Prescribed open-loop window is fixed at N/RPS; final drain is reported separately.",
+      "directory": "open-loop-r750"
+    },
+    {
+      "id": "open-loop-r250",
+      "mode": "open-loop",
+      "targetRps": 250,
+      "schema": "coordinated-omission-trial",
+      "schemaVersion": 1,
+      "status": "complete",
+      "stopReason": null,
+      "summary": {
+        "totalRequests": 10000,
+        "dispatchedRequests": 10000,
+        "successfulRequests": 10000,
+        "failedRequests": 0,
+        "timedOutRequests": 0,
+        "cancelledRequests": 0,
+        "achievedArrivalRateRps": 249.99984008411067,
+        "completionRateRps": 250,
+        "successfulThroughputRps": 250,
+        "successfulThroughputIncludingDrainRps": 250,
+        "measurementWindowSeconds": 40,
+        "completedWithinWindow": 10000,
+        "successfulWithinWindow": 10000,
+        "successfulThroughputWithinWindowRps": 250,
+        "outstandingAtWindowEnd": 0,
+        "drainMs": 0,
+        "successfulRequestLatencyMs": {
+          "sampleCount": 10000,
+          "p50": 3.108041999999841,
+          "p95": 3.849291999998968,
+          "p99": 43.68274999999994,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "dispatchLatenessMs": {
+          "sampleCount": 10000,
+          "p50": 0.6598750000048312,
+          "p95": 1.3644170000043232,
+          "p99": 5.889875000000757,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "plannedToCompleteMs": {
+          "sampleCount": 10000,
+          "p50": 3.7463750000024447,
+          "p95": 5.121459000001778,
+          "p99": 71.0092500000028,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverServiceMs": {
+          "sampleCount": 10000,
+          "p50": 2.547082999997656,
+          "p95": 2.6151669999999285,
+          "p99": 2.8036670000001322,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverQueueMs": {
+          "sampleCount": 10000,
+          "p50": 0.005707999996957369,
+          "p95": 0.015709000000015294,
+          "p99": 37.61212499999965,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "unattributedClientMs": {
+          "sampleCount": 10000,
+          "p50": 0.591459000002942,
+          "p95": 1.2807499999998981,
+          "p99": 41.85187499999665,
+          "p95Reason": null,
+          "p99Reason": null
+        }
+      },
+      "service": {
+        "pid": 31204,
+        "service": "synthetic-serial-queue",
+        "requestedServiceDelayMs": 2,
+        "outstanding": 0,
+        "maximumOutstanding": 38,
+        "measuredReceived": 10000,
+        "warmupReceived": 10
+      },
+      "clock": "performance.now",
+      "timing": {
+        "measuredStartMs": 23995.405666,
+        "observationEndMs": 63995.405666,
+        "finishedMs": 63996.532458,
+        "observationWindowSeconds": 40,
+        "actualElapsedIncludingDrainSeconds": 40.001126792,
+        "referencePlannedEndMs": 63995.405666,
+        "referenceHorizonSeconds": 40
+      },
+      "referenceHorizon": {
+        "prescribedRequests": 10000,
+        "deliveredRequests": 10000,
+        "successfulCompletions": 10000
+      },
+      "requests": {
+        "file": "requests.jsonl",
+        "count": 10010,
+        "sha256": "sha256:1ec6ec1a4f74e050e52c2dd9f83fa58678d12222deeaa02df9b12a56ab1fb41b"
+      },
+      "note": "Prescribed open-loop window is fixed at N/RPS; final drain is reported separately.",
+      "directory": "open-loop-r250"
+    },
+    {
+      "id": "closed-loop-r750",
+      "mode": "closed-loop",
+      "targetRps": 750,
+      "schema": "coordinated-omission-trial",
+      "schemaVersion": 1,
+      "status": "complete",
+      "stopReason": null,
+      "summary": {
+        "totalRequests": 10000,
+        "dispatchedRequests": 10000,
+        "successfulRequests": 10000,
+        "failedRequests": 0,
+        "timedOutRequests": 0,
+        "cancelledRequests": 0,
+        "achievedArrivalRateRps": 334.3751563758348,
+        "completionRateRps": 334.3746754488345,
+        "successfulThroughputRps": 334.3746754488345,
+        "successfulThroughputIncludingDrainRps": 334.3746754488345,
+        "measurementWindowSeconds": 29.906571084000003,
+        "completedWithinWindow": 10000,
+        "successfulWithinWindow": 10000,
+        "successfulThroughputWithinWindowRps": 334.3746754488345,
+        "outstandingAtWindowEnd": 0,
+        "drainMs": 0,
+        "successfulRequestLatencyMs": {
+          "sampleCount": 10000,
+          "p50": 2.930000000007567,
+          "p95": 3.358957999997074,
+          "p99": 3.806250000001455,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "dispatchLatenessMs": {
+          "sampleCount": 10000,
+          "p50": 8379.933750666663,
+          "p95": 15740.340500666658,
+          "p99": 16409.400042333335,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "plannedToCompleteMs": {
+          "sampleCount": 10000,
+          "p50": 8382.982416666666,
+          "p95": 15743.351125666668,
+          "p99": 16413.087417333343,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverServiceMs": {
+          "sampleCount": 10000,
+          "p50": 2.5443339999983436,
+          "p95": 2.5935840000001917,
+          "p99": 2.7279579999994894,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverQueueMs": {
+          "sampleCount": 10000,
+          "p50": 0.0037909999991825316,
+          "p95": 0.008874999999534339,
+          "p99": 0.015041000002383953,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "unattributedClientMs": {
+          "sampleCount": 10000,
+          "p50": 0.4190830000097776,
+          "p95": 0.78329200000735,
+          "p99": 1.1748739999934514,
+          "p95Reason": null,
+          "p99Reason": null
+        }
+      },
+      "service": {
+        "pid": 31279,
+        "service": "synthetic-serial-queue",
+        "requestedServiceDelayMs": 2,
+        "outstanding": 0,
+        "maximumOutstanding": 1,
+        "measuredReceived": 10000,
+        "warmupReceived": 10
+      },
+      "clock": "performance.now",
+      "timing": {
+        "measuredStartMs": 64147.265666,
+        "observationEndMs": 94053.83675,
+        "finishedMs": 94053.83675,
+        "observationWindowSeconds": 29.906571084000003,
+        "actualElapsedIncludingDrainSeconds": 29.906571084000003,
+        "referencePlannedEndMs": 77480.59899933334,
+        "referenceHorizonSeconds": 13.333333333333334
+      },
+      "referenceHorizon": {
+        "prescribedRequests": 10000,
+        "deliveredRequests": 4442,
+        "successfulCompletions": 4441
+      },
+      "requests": {
+        "file": "requests.jsonl",
+        "count": 10010,
+        "sha256": "sha256:cc13a1ad6d1d2e0e74a7075623ed6317a81ab3f2abf2a40de36c35b9f1132d67"
+      },
+      "note": "Actual observation window extends until all responses; it is not the nominal N/RPS horizon. Missed reference arrivals appear as dispatch lateness. Low HTTP latency coexists with reduced delivered load.",
+      "directory": "closed-loop-r750"
+    },
+    {
+      "id": "closed-loop-r250",
+      "mode": "closed-loop",
+      "targetRps": 250,
+      "schema": "coordinated-omission-trial",
+      "schemaVersion": 1,
+      "status": "complete",
+      "stopReason": null,
+      "summary": {
+        "totalRequests": 10000,
+        "dispatchedRequests": 10000,
+        "successfulRequests": 10000,
+        "failedRequests": 0,
+        "timedOutRequests": 0,
+        "cancelledRequests": 0,
+        "achievedArrivalRateRps": 249.9977844293261,
+        "completionRateRps": 250.00368651686088,
+        "successfulThroughputRps": 250.00368651686088,
+        "successfulThroughputIncludingDrainRps": 250.00368651686088,
+        "measurementWindowSeconds": 39.99941016599999,
+        "completedWithinWindow": 10000,
+        "successfulWithinWindow": 10000,
+        "successfulThroughputWithinWindowRps": 250.00368651686088,
+        "outstandingAtWindowEnd": 0,
+        "drainMs": 0,
+        "successfulRequestLatencyMs": {
+          "sampleCount": 10000,
+          "p50": 3.0434169999934966,
+          "p95": 3.539167000009911,
+          "p99": 4.049250000010943,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "dispatchLatenessMs": {
+          "sampleCount": 10000,
+          "p50": 0.7386249999981374,
+          "p95": 1.4149579999939306,
+          "p99": 34.79520799999591,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "plannedToCompleteMs": {
+          "sampleCount": 10000,
+          "p50": 3.7642909999995027,
+          "p95": 5.002207999990787,
+          "p99": 38.783207999993465,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverServiceMs": {
+          "sampleCount": 10000,
+          "p50": 2.5469169999996666,
+          "p95": 2.598582999999053,
+          "p99": 2.7525840000016615,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "serverQueueMs": {
+          "sampleCount": 10000,
+          "p50": 0.004625000001396984,
+          "p95": 0.009457999999540334,
+          "p99": 0.017625000000407454,
+          "p95Reason": null,
+          "p99Reason": null
+        },
+        "unattributedClientMs": {
+          "sampleCount": 10000,
+          "p50": 0.5294170000015583,
+          "p95": 0.9605420000079903,
+          "p99": 1.4356240000015532,
+          "p95Reason": null,
+          "p99Reason": null
+        }
+      },
+      "service": {
+        "pid": 31466,
+        "service": "synthetic-serial-queue",
+        "requestedServiceDelayMs": 2,
+        "outstanding": 0,
+        "maximumOutstanding": 1,
+        "measuredReceived": 10000,
+        "warmupReceived": 10
+      },
+      "clock": "performance.now",
+      "timing": {
+        "measuredStartMs": 94197.964,
+        "observationEndMs": 134197.374166,
+        "finishedMs": 134197.374166,
+        "observationWindowSeconds": 39.99941016599999,
+        "actualElapsedIncludingDrainSeconds": 39.99941016599999,
+        "referencePlannedEndMs": 134197.964,
+        "referenceHorizonSeconds": 40
+      },
+      "referenceHorizon": {
+        "prescribedRequests": 10000,
+        "deliveredRequests": 10000,
+        "successfulCompletions": 10000
+      },
+      "requests": {
+        "file": "requests.jsonl",
+        "count": 10010,
+        "sha256": "sha256:c4942217c0d7d89ab00a95f3213e586ab42354db3369abc537990545f03d05c3"
+      },
+      "note": "Actual observation window extends until all responses; it is not the nominal N/RPS horizon. Missed reference arrivals appear as dispatch lateness. Low HTTP latency coexists with reduced delivered load.",
+      "directory": "closed-loop-r250"
+    }
+  ]
+}
